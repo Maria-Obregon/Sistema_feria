@@ -17,7 +17,7 @@ class AuthTest extends TestCase
 
         $user = Usuario::create([
             'email'    => 'user@example.com',
-            'password' => 'password123', // Auto-hashed by casting
+            'password' => 'password123', // Se hashea automáticamente por el cast
             'rol_id'   => $rol->id,
             'activo'   => true,
         ]);
@@ -71,3 +71,4 @@ class AuthTest extends TestCase
                  ->assertJson(['message' => 'Credenciales inválidas']);
     }
 }
+

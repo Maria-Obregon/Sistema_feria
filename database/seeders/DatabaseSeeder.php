@@ -2,7 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use App\Models\Usuario;
+use App\Models\Rol;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -13,11 +14,20 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Catálogos base
+        $this->call(CoreCatalogSeeder::class);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // Asegura rol admin
+        $adminRol = Rol::firstOrCreate(['nombre' => 'admin']);
+
+        // Usuario admin por defecto para pruebas manuales
+        Usuario::firstOrCreate(
+            ['email' => 'admin@feria.test'],
+            [
+                'password' => 'password123', // se hashea por el cast
+                'rol_id'   => $adminRol->id,
+                'activo'   => true,
+            ]
+        );
     }
 }
