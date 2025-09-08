@@ -92,7 +92,9 @@ const handleLogin = async () => {
     loading.value = true;
     error.value = '';
     
+    console.log('Enviando datos de login:', form.value);
     const response = await axios.post('/api/login', form.value);
+    console.log('Respuesta del servidor:', response.data);
     
     // Si requiere 2FA
     if (response.data.requires_2fa) {
@@ -103,10 +105,32 @@ const handleLogin = async () => {
     
     // Login normal sin 2FA
     localStorage.setItem('token', response.data.token);
+    axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+    
+    console.log('Token guardado, obteniendo datos del usuario...');
     await authStore.fetchUser();
-    router.push('/dashboard');
+    
+    console.log('Usuario autenticado:', authStore.user);
+    
+    // Redirigir según el rol del usuario
+    const userRole = response.data.user.roles[0];
+    console.log('Rol del usuario:', userRole);
+    
+    if (userRole === 'admin') {
+      console.log('Redirigiendo al dashboard de admin...');
+      router.push('/admin');
+    } else if (userRole === 'juez') {
+      router.push('/dashboard');
+    } else if (userRole === 'coordinador_regional') {
+      router.push('/dashboard');
+    } else if (userRole === 'comite_institucional') {
+      router.push('/dashboard');
+    } else {
+      router.push('/dashboard');
+    }
     
   } catch (err) {
+    console.error('Error en login:', err);
     error.value = err.response?.data?.message || 'Error al iniciar sesión';
   } finally {
     loading.value = false;

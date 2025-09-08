@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\TwoFactorController;
+use App\Http\Controllers\InstitucionController;
 
 Route::post('/register', [AuthController::class,'register']);
 Route::post('/login',    [AuthController::class,'login']);
@@ -32,6 +33,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/dashboard', function () {
             return response()->json(['message' => 'Dashboard de Admin']);
         });
+        
+        // Gestión de instituciones
+        Route::apiResource('instituciones', InstitucionController::class);
+        Route::get('/circuitos', [InstitucionController::class, 'getCircuitos']);
+        Route::post('/instituciones/{institucion}/toggle-activo', [InstitucionController::class, 'toggleActivo']);
     });
 
     // Coordinador Regional

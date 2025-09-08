@@ -30,6 +30,12 @@ const routes = [
     meta: { requiresAuth: true, role: 'admin' }
   },
   {
+    path: '/admin/instituciones',
+    name: 'admin.instituciones',
+    component: () => import('../pages/admin/instituciones/InstitucionesIndex.vue'),
+    meta: { requiresAuth: true, role: 'admin' }
+  },
+  {
     path: '/juez/2fa',
     name: 'juez.2fa',
     component: () => import('../pages/juez/TwoFactorSettings.vue'),

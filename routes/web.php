@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::redirect('/', '/login');
-Route::get('/login', fn() => view('auth.login'))->name('login');
-Route::get('/dashboard', fn() => view('dashboard'))->name('dashboard');
+// Todas las rutas del frontend Vue se manejan por la SPA
+Route::get('/{any}', function () {
+    return view('app');
+})->where('any', '.*');

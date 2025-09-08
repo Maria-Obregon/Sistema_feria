@@ -84,8 +84,8 @@
       <!-- Acciones rápidas -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <router-link 
-          to="/admin/users" 
-          class="p-4 bg-white rounded-lg shadow hover:shadow-lg transition-shadow text-left block"
+          :to="{ name: 'admin.instituciones' }"
+          class="bg-white p-6 rounded-lg shadow-sm border hover:shadow-md transition-shadow"
         >
           <div class="flex items-center">
             <div class="p-3 bg-blue-100 rounded-lg">
@@ -100,7 +100,10 @@
           </div>
         </router-link>
 
-        <button class="p-4 bg-white rounded-lg shadow hover:shadow-lg transition-shadow text-left">
+        <router-link 
+          :to="{ name: 'admin.instituciones' }"
+          class="p-4 bg-white rounded-lg shadow hover:shadow-lg transition-shadow text-left block"
+        >
           <div class="flex items-center">
             <div class="p-3 bg-green-100 rounded-lg">
               <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -112,7 +115,7 @@
               <p class="text-lg font-semibold">Instituciones</p>
             </div>
           </div>
-        </button>
+        </router-link>
 
         <button class="p-4 bg-white rounded-lg shadow hover:shadow-lg transition-shadow text-left">
           <div class="flex items-center">
