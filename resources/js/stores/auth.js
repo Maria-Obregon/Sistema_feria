@@ -4,7 +4,7 @@ import axios from 'axios';
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null,
-    token: localStorage.getItem('auth_token'),
+    token: localStorage.getItem('token'),
     isAuthenticated: false,
     loading: false,
     error: null,
@@ -12,7 +12,7 @@ export const useAuthStore = defineStore('auth', {
 
   getters: {
     currentUser: (state) => state.user,
-    userRole: (state) => state.user?.rol?.nombre || null,
+    userRole: (state) => state.user?.roles?.[0]?.name || null,
     hasRole: (state) => (role) => {
       return state.user?.roles?.some(r => r.name === role) || false;
     },
@@ -28,6 +28,12 @@ export const useAuthStore = defineStore('auth', {
       
       try {
         const response = await axios.post('/api/login', credentials);
+        
+        // Si requiere 2FA, no guardamos el token aún
+        if (response.data.requires_2fa) {
+          return { success: true, requires_2fa: true, temp_token: response.data.temp_token };
+        }
+        
         const { token, user } = response.data;
         
         this.token = token;
@@ -35,7 +41,7 @@ export const useAuthStore = defineStore('auth', {
         this.isAuthenticated = true;
         
         // Guardar token
-        localStorage.setItem('auth_token', token);
+        localStorage.setItem('token', token);
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         
         return { success: true };
@@ -62,7 +68,7 @@ export const useAuthStore = defineStore('auth', {
       
       try {
         const response = await axios.get('/api/me');
-        this.user = response.data;
+        this.user = response.data.user;
         this.isAuthenticated = true;
       } catch (error) {
         this.clearAuth();
@@ -80,31 +86,8 @@ export const useAuthStore = defineStore('auth', {
       this.user = null;
       this.token = null;
       this.isAuthenticated = false;
-      localStorage.removeItem('auth_token');
+      localStorage.removeItem('token');
       delete axios.defaults.headers.common['Authorization'];
-    },
-
-    // Método para verificar 2FA (jueces)
-    async verify2FA(code) {
-      this.loading = true;
-      try {
-        const response = await axios.post('/api/verify-2fa', { code });
-        const { token, user } = response.data;
-        
-        this.token = token;
-        this.user = user;
-        this.isAuthenticated = true;
-        
-        localStorage.setItem('auth_token', token);
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        
-        return { success: true };
-      } catch (error) {
-        this.error = error.response?.data?.message || 'Código inválido';
-        return { success: false, error: this.error };
-      } finally {
-        this.loading = false;
-      }
     },
   },
 });
