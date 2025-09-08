@@ -4,8 +4,8 @@ namespace Database\Seeders;
 
 use App\Models\Usuario;
 use App\Models\Rol;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -14,20 +14,23 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Catálogos base
-        $this->call(CoreCatalogSeeder::class);
+        // Llamar a seeders en orden correcto
+        $this->call([
+            CoreCatalogSeeder::class,
+            RolesAndPermissionsSeeder::class,
+        ]);
 
-        // Asegura rol admin
-        $adminRol = Rol::firstOrCreate(['nombre' => 'admin']);
+        // Crear usuario admin por defecto
+        $admin = Usuario::create([
+            'nombre' => 'Administrador',
+            'email' => 'admin@feria.test',
+            'password' => Hash::make('password123'),
+            'activo' => true,
+        ]);
 
-        // Usuario admin por defecto para pruebas manuales
-        Usuario::firstOrCreate(
-            ['email' => 'admin@feria.test'],
-            [
-                'password' => 'password123', // se hashea por el cast
-                'rol_id'   => $adminRol->id,
-                'activo'   => true,
-            ]
-        );
+        // Asignar rol de admin
+        $admin->assignRole('admin');
+
+        $this->command->info('Usuario admin creado: admin@feria.test / password123');
     }
 }

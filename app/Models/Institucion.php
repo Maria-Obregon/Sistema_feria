@@ -1,0 +1,66 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Institucion extends Model
+{
+    use HasFactory;
+
+    protected $table = 'instituciones';
+
+    protected $fillable = [
+        'nombre',
+        'codigo_presupuestario',
+        'circuito_id',
+        'tipo',
+        'telefono',
+        'email',
+        'direccion',
+        'activo',
+        'limite_proyectos',
+        'limite_estudiantes',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'activo' => 'boolean',
+            'limite_proyectos' => 'integer',
+            'limite_estudiantes' => 'integer',
+        ];
+    }
+
+    public function circuito()
+    {
+        return $this->belongsTo(Circuito::class);
+    }
+
+    public function usuarios()
+    {
+        return $this->hasMany(Usuario::class);
+    }
+
+    public function proyectos()
+    {
+        return $this->hasMany(Proyecto::class);
+    }
+
+    public function estudiantes()
+    {
+        return $this->hasMany(Estudiante::class);
+    }
+
+    // Validación de límites
+    public function puedeAgregarProyecto(): bool
+    {
+        return $this->proyectos()->count() < ($this->limite_proyectos ?? 50);
+    }
+
+    public function puedeAgregarEstudiante(): bool
+    {
+        return $this->estudiantes()->count() < ($this->limite_estudiantes ?? 200);
+    }
+}
