@@ -7,6 +7,92 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Sistema Feria — Guía de instalación y uso
+
+Aplicación en Laravel 12 para gestionar ferias de ciencia (modelos en español: `usuario`, `rol`, `institucion`, `circuito`, `feria`, `proyecto`, `juez`, `estudiante`, etc.).
+
+- Frontend con Vite + Tailwind 4.
+- Autenticación de API con Laravel Sanctum (`/api/register`, `/api/login`, `/api/me`, `/api/logout`).
+
+### Requisitos
+
+- PHP >= 8.2 y Composer
+- Node.js >= 20 y npm
+- SQLite3 (recomendado para desarrollo)
+
+### Instalación
+
+1) Instalar dependencias PHP y JS
+
+```bash
+composer install
+npm install
+```
+
+2) Configurar variables de entorno y clave de la app
+
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+3) Configurar SQLite en `.env`
+
+```dotenv
+DB_CONNECTION=sqlite
+DB_DATABASE=database/database.sqlite
+```
+
+4) Crear el archivo de base de datos y ejecutar migraciones con seeders
+
+```bash
+mkdir -p database && touch database/database.sqlite
+php artisan migrate --seed
+```
+
+El seeder crea un usuario administrador por defecto: `admin@feria.test / password123`.
+
+5) (Opcional) Construir assets de Vite si no se usa servidor de desarrollo
+
+```bash
+npm run build
+```
+
+### Ejecución en desarrollo
+
+- Opción recomendada (todo en un solo comando):
+
+```bash
+composer dev
+```
+
+Este script levanta: servidor (`php artisan serve`), cola (`queue:listen`), logs (`pail`) y Vite (`npm run dev`).
+
+- Opción manual (en terminales separadas):
+
+```bash
+php artisan serve
+npm run dev
+```
+
+Ingresar a http://localhost:8000
+
+### Pruebas
+
+```bash
+php artisan test
+```
+
+
+### Endpoints de autenticación (API)
+
+- POST `/api/register`
+- POST `/api/login`
+- GET `/api/me` (requiere token Bearer)
+- POST `/api/logout` (requiere token Bearer)
+
+
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
