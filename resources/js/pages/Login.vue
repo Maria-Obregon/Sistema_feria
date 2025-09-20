@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen flex items-center justify-center bg-gray-50">
     <!-- Formulario de login normal -->
-    <div v-if="!showTwoFactor" class="max-w-md w-full space-y-8">
+    <div class="max-w-md w-full space-y-8">
       <div>
         <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
           Sistema de Feria Científica
@@ -56,97 +56,55 @@
         </div>
       </form>
     </div>
-
-    <!-- Verificación 2FA -->
-    <TwoFactorVerification
-      v-if="showTwoFactor"
-      :temp-token="tempToken"
-      @verification-success="handleTwoFactorSuccess"
-      @back-to-login="backToLogin"
-    />
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { useAuthStore } from '../stores/auth';
-import TwoFactorVerification from '../components/TwoFactorVerification.vue';
-import axios from 'axios';
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
+import axios from 'axios'
 
-const router = useRouter();
-const authStore = useAuthStore();
+const router = useRouter()
+const auth = useAuthStore()
 
-const form = ref({
-  email: '',
-  password: '',
-});
+const form = ref({ email: '', password: '' })
+const loading = ref(false)
+const error = ref('')
 
-const loading = ref(false);
-const error = ref('');
-const showTwoFactor = ref(false);
-const tempToken = ref('');
+const roleRoute = (role) => {
+  switch (role) {
+    case 'admin':                return { name: 'admin.dashboard' }
+    case 'comite_institucional': return { name: 'inst.dashboard' }
+    case 'juez':                 return { name: 'juez.dashboard' }
+    case 'estudiante':           return { name: 'est.dashboard' }
+    default:                     return { name: 'dashboard' }
+  }
+}
 
 const handleLogin = async () => {
   try {
-    loading.value = true;
-    error.value = '';
-    
-    console.log('Enviando datos de login:', form.value);
-    const response = await axios.post('/api/login', form.value);
-    console.log('Respuesta del servidor:', response.data);
-    
-    // Si requiere 2FA
-    if (response.data.requires_2fa) {
-      showTwoFactor.value = true;
-      tempToken.value = response.data.temp_token;
-      return;
-    }
-    
-    // Login normal sin 2FA
-    localStorage.setItem('token', response.data.token);
-    axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
-    
-    console.log('Token guardado, obteniendo datos del usuario...');
-    await authStore.fetchUser();
-    
-    console.log('Usuario autenticado:', authStore.user);
-    
-    // Redirigir según el rol del usuario
-    const userRole = response.data.user.roles[0];
-    console.log('Rol del usuario:', userRole);
-    
-    if (userRole === 'admin') {
-      console.log('Redirigiendo al dashboard de admin...');
-      router.push('/admin');
-    } else if (userRole === 'juez') {
-      router.push('/dashboard');
-    } else if (userRole === 'coordinador_regional') {
-      router.push('/dashboard');
-    } else if (userRole === 'comite_institucional') {
-      router.push('/dashboard');
-    } else {
-      router.push('/dashboard');
-    }
-    
-  } catch (err) {
-    console.error('Error en login:', err);
-    error.value = err.response?.data?.message || 'Error al iniciar sesión';
+    loading.value = true
+    error.value = ''
+
+    const { data } = await axios.post('/api/login', form.value)
+
+    // Guardar token y rol
+    localStorage.setItem('token', data.token)
+    axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`
+
+    auth.user = data.user
+    const role = Array.isArray(data.user?.roles)
+      ? (typeof data.user.roles[0] === 'string' ? data.user.roles[0] : data.user.roles[0]?.name)
+      : null
+    if (role) localStorage.setItem('role', role)
+
+    // Navega a su dashboard
+    await router.push(roleRoute(role))
+  } catch (e) {
+    error.value = e.response?.data?.message || 'Error al iniciar sesión'
   } finally {
-    loading.value = false;
+    loading.value = false
   }
-};
-
-const handleTwoFactorSuccess = async (data) => {
-  // El token ya fue guardado en el componente TwoFactorVerification
-  await authStore.fetchUser();
-  router.push('/dashboard');
-};
-
-const backToLogin = () => {
-  showTwoFactor.value = false;
-  tempToken.value = '';
-  form.value.password = '';
-  error.value = '';
-};
+}
 </script>

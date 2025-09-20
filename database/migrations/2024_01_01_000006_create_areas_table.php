@@ -11,12 +11,9 @@ return new class extends Migration
         Schema::create('areas', function (Blueprint $table) {
             $table->id();
             $table->string('nombre', 100);
-            $table->string('codigo', 10)->unique();
-            $table->text('descripcion')->nullable();
             $table->boolean('activo')->default(true);
             $table->timestamps();
-            
-            $table->index('codigo');
+     
             $table->index('activo');
         });
     }

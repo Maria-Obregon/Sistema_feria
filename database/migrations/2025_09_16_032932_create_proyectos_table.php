@@ -20,6 +20,8 @@ return new class extends Migration
             $table->json('palabras_clave')->nullable();
             $table->string('archivo_proyecto')->nullable(); // PDF máximo 10MB
             $table->string('archivo_presentacion')->nullable(); // Imágenes máximo 5MB
+            $table->foreignId('modalidad_id')->constrained('modalidades')->restrictOnDelete();
+            $table->string('codigo', 30)->unique();
             $table->timestamps();
             
             $table->index(['institucion_id', 'etapa_actual', 'estado']);

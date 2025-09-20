@@ -17,6 +17,7 @@ return new class extends Migration
             $table->enum('genero', ['M', 'F', 'Otro']);
             $table->string('telefono', 20)->nullable();
             $table->string('email', 100)->nullable();
+            $table->boolean('lider')->default(false);
             $table->foreignId('institucion_id')->constrained('instituciones')->onDelete('restrict');
             $table->foreignId('usuario_id')->nullable()->constrained('usuarios')->onDelete('set null');
             $table->string('nivel', 50); // Primaria, Secundaria, etc.
@@ -35,3 +36,4 @@ return new class extends Migration
         Schema::dropIfExists('estudiantes');
     }
 };
+

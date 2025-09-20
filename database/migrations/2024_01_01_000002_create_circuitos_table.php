@@ -11,8 +11,8 @@ return new class extends Migration
         Schema::create('circuitos', function (Blueprint $table) {
             $table->id();
             $table->string('nombre', 100);
-            $table->string('codigo', 10)->unique();
-            $table->foreignId('regional_id')->constrained('regionales')->onDelete('restrict');
+            $table->string('codigo', 20)->unique();
+            $table->foreignId('regional_id')->constrained('regionales')->restrictOnDelete();
             $table->boolean('activo')->default(true);
             $table->timestamps();
             

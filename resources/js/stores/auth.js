@@ -1,93 +1,86 @@
-import { defineStore } from 'pinia';
-import axios from 'axios';
+// stores/auth.js
+import { defineStore } from 'pinia'
+import axios from 'axios'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null,
     token: localStorage.getItem('token'),
-    isAuthenticated: false,
+    isAuthenticated: !!localStorage.getItem('token'),
     loading: false,
     error: null,
   }),
 
   getters: {
-    currentUser: (state) => state.user,
-    userRole: (state) => state.user?.roles?.[0]?.name || null,
+    // Devuelve 'admin', 'juez', etc. o null
+    primaryRole: (state) => {
+      const roles = state.user?.roles
+      if (!roles || roles.length === 0) return null
+      const first = roles[0]
+      return typeof first === 'string' ? first : first?.name ?? null
+    },
     hasRole: (state) => (role) => {
-      return state.user?.roles?.some(r => r.name === role) || false;
+      const roles = state.user?.roles ?? []
+      return roles.some(r => (typeof r === 'string' ? r : r?.name) === role)
     },
     hasPermission: (state) => (permission) => {
-      return state.user?.permissions?.some(p => p.name === permission) || false;
+      const perms = state.user?.permissions ?? []
+      return perms.some(p => (typeof p === 'string' ? p : p?.name) === permission)
     },
   },
 
   actions: {
     async login(credentials) {
-      this.loading = true;
-      this.error = null;
-      
+      this.loading = true
+      this.error = null
       try {
-        const response = await axios.post('/api/login', credentials);
-        
-        // Si requiere 2FA, no guardamos el token aún
-        if (response.data.requires_2fa) {
-          return { success: true, requires_2fa: true, temp_token: response.data.temp_token };
-        }
-        
-        const { token, user } = response.data;
-        
-        this.token = token;
-        this.user = user;
-        this.isAuthenticated = true;
-        
-        // Guardar token
-        localStorage.setItem('token', token);
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        
-        return { success: true };
-      } catch (error) {
-        this.error = error.response?.data?.message || 'Error al iniciar sesión';
-        return { success: false, error: this.error };
-      } finally {
-        this.loading = false;
-      }
-    },
+        const { data } = await axios.post('/api/login', credentials)
 
-    async logout() {
-      try {
-        await axios.post('/api/logout');
-      } catch (error) {
-        console.error('Error al cerrar sesión:', error);
+        this.token = data.token
+        this.user = data.user
+        this.isAuthenticated = true
+
+        localStorage.setItem('token', data.token)
+        // también guardamos el rol por resiliencia al refrescar
+        const role = Array.isArray(data.user?.roles) ? (typeof data.user.roles[0] === 'string' ? data.user.roles[0] : data.user.roles[0]?.name) : null
+        if (role) localStorage.setItem('role', role)
+
+        axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`
+        return { success: true }
+      } catch (e) {
+        this.error = e.response?.data?.message || 'Error al iniciar sesión'
+        return { success: false, error: this.error }
       } finally {
-        this.clearAuth();
+        this.loading = false
       }
     },
 
     async fetchUser() {
-      if (!this.token) return;
-      
-      try {
-        const response = await axios.get('/api/me');
-        this.user = response.data.user;
-        this.isAuthenticated = true;
-      } catch (error) {
-        this.clearAuth();
-      }
+      if (!this.token) return
+      const { data } = await axios.get('/api/me')
+      this.user = data.user
+      this.isAuthenticated = true
+    },
+
+    async logout() {
+      try { await axios.post('/api/logout') } catch {}
+      this.clearAuth()
     },
 
     checkAuth() {
       if (this.token) {
-        axios.defaults.headers.common['Authorization'] = `Bearer ${this.token}`;
-        this.fetchUser();
+        axios.defaults.headers.common['Authorization'] = `Bearer ${this.token}`
+        this.fetchUser().catch(() => this.clearAuth())
       }
     },
 
     clearAuth() {
-      this.user = null;
-      this.token = null;
-      this.isAuthenticated = false;
-      localStorage.removeItem('token');
-      delete axios.defaults.headers.common['Authorization'];
+      this.user = null
+      this.token = null
+      this.isAuthenticated = false
+      localStorage.removeItem('token')
+      localStorage.removeItem('role')
+      delete axios.defaults.headers.common['Authorization']
     },
   },
-});
+})

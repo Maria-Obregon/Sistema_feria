@@ -10,9 +10,9 @@ return new class extends Migration
     {
         Schema::create('proyecto_tutor', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('proyecto_id')->constrained('proyectos')->onDelete('cascade');
-            $table->foreignId('tutor_id')->constrained('usuarios')->onDelete('cascade');
-            $table->enum('tipo', ['principal', 'asistente']);
+           // $table->foreignId('tutor_id')->constrained('usuarios')->onDelete('cascade');
+  $table->foreignId('tutor_id')->constrained('tutores')->cascadeOnDelete();
+    $table->foreignId('proyecto_id')->constrained('proyectos')->cascadeOnDelete();
             $table->timestamps();
             
             $table->unique(['proyecto_id', 'tutor_id']);

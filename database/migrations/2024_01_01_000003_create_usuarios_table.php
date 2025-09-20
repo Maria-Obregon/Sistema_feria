@@ -20,13 +20,8 @@ return new class extends Migration
             // Multi-tenant fields
             $table->foreignId('regional_id')->nullable()->constrained('regionales');
             $table->foreignId('circuito_id')->nullable()->constrained('circuitos');
-            $table->foreignId('institucion_id')->nullable()->constrained('instituciones');
-            
-            // 2FA fields
-            $table->string('two_factor_secret')->nullable();
-            $table->text('two_factor_recovery_codes')->nullable();
-            $table->timestamp('two_factor_confirmed_at')->nullable();
-            
+         //   $table->foreignId('institucion_id')->nullable()->constrained('instituciones');
+             $table->unsignedBigInteger('institucion_id')->nullable();
             $table->boolean('activo')->default(true);
             $table->rememberToken();
             $table->timestamps();
