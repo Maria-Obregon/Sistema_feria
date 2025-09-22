@@ -2,4 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-body { font-family: theme('fontFamily.sans'); }
+@layer base {
+  body { @apply font-sans antialiased; }
+}
