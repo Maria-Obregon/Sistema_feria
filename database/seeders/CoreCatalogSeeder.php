@@ -16,13 +16,11 @@ class CoreCatalogSeeder extends Seeder
         // Crear Regionales
         $regional1 = Regional::create([
             'nombre' => 'Regional de San José',
-            'codigo' => 'RSJ',
             'activo' => true,
         ]);
 
         $regional2 = Regional::create([
             'nombre' => 'Regional de Alajuela',
-            'codigo' => 'RAL',
             'activo' => true,
         ]);
 
@@ -49,57 +47,60 @@ class CoreCatalogSeeder extends Seeder
         ]);
 
         // Crear Instituciones de ejemplo
-        Institucion::create([
-            'nombre' => 'Liceo de Costa Rica',
-            'codigo_presupuestario' => 'LCR-001',
-            'circuito_id' => $circuito1->id,
-            'tipo' => 'publica',
-            'telefono' => '2222-3333',
-            'email' => 'info@liceocr.ed.cr',
-            'direccion' => 'San José Centro',
-            'activo' => true,
+         Institucion::create([
+            'nombre'               => 'Liceo de Costa Rica',
+            'modalidad'            => 'Académica',               // <- requerido por tu migración
+            'codigo_presupuestario'=> 'LCR-001',
+            'direccionreg_id'      => $regional1->id,           // FK a regionales
+            'circuito_id'          => $circuito1->id,            // FK a circuitos
+            'tipo'                 => 'publica',
+            'telefono'             => '2222-3333',
+            'email'                => 'info@liceocr.ed.cr',      // tu migración usa 'email' (no 'correo')
+            'direccion'            => 'San José Centro',
+            'activo'               => true,
+            'limite_proyectos'     => 50,
+            'limite_estudiantes'   => 200,
         ]);
 
         Institucion::create([
-            'nombre' => 'Colegio Superior de Señoritas',
-            'codigo_presupuestario' => 'CSS-002',
-            'circuito_id' => $circuito1->id,
-            'tipo' => 'publica',
-            'telefono' => '2222-4444',
-            'email' => 'info@colegiosenoritas.ed.cr',
-            'direccion' => 'San José Centro',
-            'activo' => true,
+            'nombre'               => 'Colegio Superior de Señoritas',
+            'modalidad'            => 'Académica',
+            'codigo_presupuestario'=> 'CSS-002',
+            'direccionreg_id'      => $regional2->id,
+            'circuito_id'          => $circuito1->id,
+            'tipo'                 => 'publica',
+            'telefono'             => '2222-4444',
+            'email'                => 'info@colegiosenoritas.ed.cr',
+            'direccion'            => 'San José Centro',
+            'activo'               => true,
+            'limite_proyectos'     => 50,
+            'limite_estudiantes'   => 200,
         ]);
+
 
         // Crear Áreas científicas
-        Area::create(['nombre' => 'Biología', 'codigo' => 'BIO', 'descripcion' => 'Ciencias de la vida']);
-        Area::create(['nombre' => 'Física', 'codigo' => 'FIS', 'descripcion' => 'Ciencias físicas']);
-        Area::create(['nombre' => 'Química', 'codigo' => 'QUI', 'descripcion' => 'Ciencias químicas']);
-        Area::create(['nombre' => 'Matemática', 'codigo' => 'MAT', 'descripcion' => 'Ciencias matemáticas']);
-        Area::create(['nombre' => 'Informática', 'codigo' => 'INF', 'descripcion' => 'Ciencias de la computación']);
-        Area::create(['nombre' => 'Ciencias Sociales', 'codigo' => 'SOC', 'descripcion' => 'Estudios sociales']);
-        Area::create(['nombre' => 'Ingeniería', 'codigo' => 'ING', 'descripcion' => 'Ingeniería y tecnología']);
+        Area::create(['nombre' => 'Biología']);
+        Area::create(['nombre' => 'Física']);
+        Area::create(['nombre' => 'Química']);
+        Area::create(['nombre' => 'Matemática']);
+        Area::create(['nombre' => 'Informática']);
+        Area::create(['nombre' => 'Ciencias Sociales']);
+        Area::create(['nombre' => 'Ingeniería']);
 
         // Crear Categorías
         Categoria::create([
             'nombre' => 'Investigación Científica',
-            'codigo' => 'IC',
             'nivel' => 'ambos',
-            'descripcion' => 'Proyectos de investigación científica'
         ]);
 
         Categoria::create([
             'nombre' => 'Desarrollo Tecnológico',
-            'codigo' => 'DT',
             'nivel' => 'secundaria',
-            'descripcion' => 'Proyectos de desarrollo tecnológico e innovación'
         ]);
 
         Categoria::create([
             'nombre' => 'Demostración de Principios',
-            'codigo' => 'DP',
             'nivel' => 'primaria',
-            'descripcion' => 'Proyectos demostrativos para educación primaria'
         ]);
 
         $this->command->info('Catálogos base creados exitosamente');

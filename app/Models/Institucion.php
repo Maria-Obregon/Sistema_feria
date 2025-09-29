@@ -10,10 +10,10 @@ class Institucion extends Model
     use HasFactory;
 
     protected $table = 'instituciones';
-
+ 
     // Configurar nombres de timestamps en español
-    const CREATED_AT = 'creado_en';
-    const UPDATED_AT = 'actualizado_en';
+   const CREATED_AT = 'creado_en';
+const UPDATED_AT = 'actualizado_en';
 
     protected $fillable = [
         'nombre',

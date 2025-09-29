@@ -13,14 +13,15 @@ class Usuario extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
     protected $table = 'usuarios';
+
+    // MUY importante para Spatie + Sanctum
     protected $guard_name = 'sanctum';
 
     protected $fillable = [
         'nombre',
         'apellidos',
         'email',
-        'password',
-        'rol_id',
+        'password', 
         'activo',
         'regional_id',
         'circuito_id',
@@ -28,16 +29,11 @@ class Usuario extends Authenticatable
         'telefono',
         'identificacion',
         'tipo_identificacion',
-        'two_factor_secret',
-        'two_factor_recovery_codes',
-        'two_factor_confirmed_at',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
-        'two_factor_secret',
-        'two_factor_recovery_codes',
     ];
 
     protected function casts(): array
@@ -48,13 +44,6 @@ class Usuario extends Authenticatable
             'activo' => 'boolean',
         ];
     }
-
-    public function rol()
-    {
-        return $this->belongsTo(Rol::class);
-    }
-
-    // Relaciones multi-tenant
     public function regional()
     {
         return $this->belongsTo(Regional::class);
@@ -70,7 +59,6 @@ class Usuario extends Authenticatable
         return $this->belongsTo(Institucion::class);
     }
 
-    // Scope para multi-tenancy
     public function scopeForRegional($query, $regionalId)
     {
         return $query->where('regional_id', $regionalId);

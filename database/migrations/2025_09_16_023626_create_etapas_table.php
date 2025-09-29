@@ -11,7 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        //
+        Schema::create('etapas', function (Blueprint $table) {
+            $table->tinyIncrements('id'); // tinyint
+    $table->string('nombre', 100);
+    $table->timestamps();
+        });
     }
 
     /**
@@ -19,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('etapas');
     }
 };

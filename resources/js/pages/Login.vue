@@ -1,152 +1,129 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-50">
-    <!-- Formulario de login normal -->
-    <div v-if="!showTwoFactor" class="max-w-md w-full space-y-8">
-      <div>
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Sistema de Feria Científica
-        </h2>
-        <p class="mt-2 text-center text-sm text-gray-600">
-          Ingrese sus credenciales para continuar
+  <div class="min-h-screen flex items-center justify-center bg-gradient-to-b from-sky-100 to-white">
+    <div class="w-full max-w-[420px]">
+      <!-- Card -->
+      <div class="bg-white rounded-2xl shadow-xl ring-1 ring-black/5 p-8">
+        <!-- Logo -->
+        <div class="flex justify-center mb-6">
+          <img
+            src="/img/logo.webp"
+            alt="PRONAFECYT"
+            class="w-40 sm:w-48 h-auto object-contain"
+          />
+        </div>
+
+        <!-- Título -->
+        <h1 class="text-center text-2xl font-extrabold tracking-tight text-gray-900">Iniciar sesión</h1>
+        <p class="mt-1 text-center text-sm text-gray-500">
+          Sistema de Ferias de Ciencia y Tecnología
         </p>
-      </div>
-      
-      <form class="mt-8 space-y-6" @submit.prevent="handleLogin">
-        <div v-if="error" class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
+
+        <!-- Error -->
+        <div
+          v-if="error"
+          class="mt-6 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+        >
           {{ error }}
         </div>
-        
-        <div class="rounded-md shadow-sm -space-y-px">
+
+        <!-- Formulario -->
+        <form class="mt-6 space-y-4" @submit.prevent="handleLogin">
           <div>
-            <label for="email" class="sr-only">Correo electrónico</label>
+            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
             <input
               id="email"
               v-model="form.email"
-              name="email"
               type="email"
               autocomplete="email"
               required
-              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="Correo electrónico"
+              class="mt-1 block w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-gray-900 shadow-sm
+                     focus:border-sky-500 focus:ring-2 focus:ring-sky-200 outline-none"
+              placeholder="tucorreo@dominio.com"
             />
           </div>
+
           <div>
-            <label for="password" class="sr-only">Contraseña</label>
+            <label for="password" class="block text-sm font-medium text-gray-700">Contraseña</label>
             <input
               id="password"
               v-model="form.password"
-              name="password"
               type="password"
               autocomplete="current-password"
               required
-              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="Contraseña"
+              class="mt-1 block w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-gray-900 shadow-sm
+                     focus:border-sky-500 focus:ring-2 focus:ring-sky-200 outline-none"
+              placeholder="********"
             />
           </div>
-        </div>
 
-        <div>
           <button
             type="submit"
             :disabled="loading"
-            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+            class="mt-2 inline-flex w-full items-center justify-center rounded-lg bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white
+                   hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-400 disabled:opacity-60"
           >
-            {{ loading ? 'Iniciando sesión...' : 'Iniciar sesión' }}
+            <svg v-if="loading" class="-ml-1 mr-2 h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4A4 4 0 004 12z"/>
+            </svg>
+            {{ loading ? 'Ingresando...' : 'Login' }}
           </button>
-        </div>
-      </form>
-    </div>
+        </form>
+      </div>
 
-    <!-- Verificación 2FA -->
-    <TwoFactorVerification
-      v-if="showTwoFactor"
-      :temp-token="tempToken"
-      @verification-success="handleTwoFactorSuccess"
-      @back-to-login="backToLogin"
-    />
+      <!-- Footer -->
+      <p class="mt-4 text-center text-xs text-gray-400">
+        © {{ new Date().getFullYear() }} PRONAFECYT
+      </p>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { useAuthStore } from '../stores/auth';
-import TwoFactorVerification from '../components/TwoFactorVerification.vue';
-import axios from 'axios';
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
+import axios from 'axios'
 
-const router = useRouter();
-const authStore = useAuthStore();
+const router = useRouter()
+const auth = useAuthStore()
 
-const form = ref({
-  email: '',
-  password: '',
-});
+const form = ref({ email: '', password: '' })
+const loading = ref(false)
+const error = ref('')
 
-const loading = ref(false);
-const error = ref('');
-const showTwoFactor = ref(false);
-const tempToken = ref('');
+const roleRoute = (role) => {
+  switch (role) {
+    case 'admin':                return { name: 'admin.dashboard' }
+    case 'comite_institucional': return { name: 'inst.dashboard' }
+    case 'juez':                 return { name: 'juez.dashboard' }
+    case 'estudiante':           return { name: 'est.dashboard' }
+    default:                     return { name: 'dashboard' }
+  }
+}
 
 const handleLogin = async () => {
   try {
-    loading.value = true;
-    error.value = '';
-    
-    console.log('Enviando datos de login:', form.value);
-    const response = await axios.post('/api/login', form.value);
-    console.log('Respuesta del servidor:', response.data);
-    
-    // Si requiere 2FA
-    if (response.data.requires_2fa) {
-      showTwoFactor.value = true;
-      tempToken.value = response.data.temp_token;
-      return;
-    }
-    
-    // Login normal sin 2FA
-    localStorage.setItem('token', response.data.token);
-    axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
-    
-    console.log('Token guardado, obteniendo datos del usuario...');
-    await authStore.fetchUser();
-    
-    console.log('Usuario autenticado:', authStore.user);
-    
-    // Redirigir según el rol del usuario
-    const userRole = response.data.user.roles[0];
-    console.log('Rol del usuario:', userRole);
-    
-    if (userRole === 'admin') {
-      console.log('Redirigiendo al dashboard de admin...');
-      router.push('/admin');
-    } else if (userRole === 'juez') {
-      router.push('/dashboard');
-    } else if (userRole === 'coordinador_regional') {
-      router.push('/dashboard');
-    } else if (userRole === 'comite_institucional') {
-      router.push('/dashboard');
-    } else {
-      router.push('/dashboard');
-    }
-    
-  } catch (err) {
-    console.error('Error en login:', err);
-    error.value = err.response?.data?.message || 'Error al iniciar sesión';
+    loading.value = true
+    error.value = ''
+
+    const { data } = await axios.post('/api/login', form.value)
+
+    // Guardar token y rol
+    localStorage.setItem('token', data.token)
+    axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`
+
+    auth.user = data.user
+    const role = Array.isArray(data.user?.roles)
+      ? (typeof data.user.roles[0] === 'string' ? data.user.roles[0] : data.user.roles[0]?.name)
+      : null
+    if (role) localStorage.setItem('role', role)
+
+    await router.push(roleRoute(role))
+  } catch (e) {
+    error.value = e.response?.data?.message || 'Error al iniciar sesión'
   } finally {
-    loading.value = false;
+    loading.value = false
   }
-};
-
-const handleTwoFactorSuccess = async (data) => {
-  // El token ya fue guardado en el componente TwoFactorVerification
-  await authStore.fetchUser();
-  router.push('/dashboard');
-};
-
-const backToLogin = () => {
-  showTwoFactor.value = false;
-  tempToken.value = '';
-  form.value.password = '';
-  error.value = '';
-};
+}
 </script>

@@ -1,77 +1,104 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+
+// Controllers
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\TwoFactorController;
 use App\Http\Controllers\InstitucionController;
+use App\Http\Controllers\ProyectoController;
+use App\Http\Controllers\CalificacionController;
 
-Route::post('/register', [AuthController::class,'register']);
-Route::post('/login',    [AuthController::class,'login']);
+/*
+|--------------------------------------------------------------------------
+| Rutas públicas
+|--------------------------------------------------------------------------
+*/
+Route::post('/login',    [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register']); // opcional, si permites registro
 
-// Rutas 2FA
+/*
+|--------------------------------------------------------------------------
+| Rutas autenticadas (Sanctum)
+|--------------------------------------------------------------------------
+*/
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/2fa/verify', [AuthController::class, 'verify2FA']);
-    Route::post('/2fa/enable', [TwoFactorController::class, 'enable']);
-    Route::post('/2fa/confirm', [TwoFactorController::class, 'confirm']);
-    Route::post('/2fa/disable', [TwoFactorController::class, 'disable']);
-    Route::get('/2fa/status', [TwoFactorController::class, 'status']);
-    Route::post('/2fa/recovery-codes', [TwoFactorController::class, 'regenerateRecoveryCodes']);
-});
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/me', fn (\Illuminate\Http\Request $r) => $r->user()->load('rol'));
-    Route::post('/logout', [AuthController::class,'logout']);
+    // Perfil y sesión
+    Route::get('/me',     [AuthController::class, 'me']);
+    Route::post('/logout',[AuthController::class, 'logout']);
 
-    // Rutas protegidas por rol
-    // CRUD de usuarios (requiere permisos específicos)
-    Route::apiResource('users', UserController::class);
-    Route::post('/users/{id}/toggle-status', [UserController::class, 'toggleStatus']);
-    
-    // Admin
-    Route::middleware(['role:admin'])->prefix('admin')->group(function () {
-        Route::get('/dashboard', function () {
-            return response()->json(['message' => 'Dashboard de Admin']);
-        });
-        
-        // Gestión de instituciones
-        Route::apiResource('instituciones', InstitucionController::class);
-        Route::get('/circuitos', [InstitucionController::class, 'getCircuitos']);
-        Route::post('/instituciones/{institucion}/toggle-activo', [InstitucionController::class, 'toggleActivo']);
-    });
+    /*
+    |--------------------------------------------------------------------------
+    | INSTITUCIONES (por permisos)
+    |--------------------------------------------------------------------------
+    | Los permisos se crearon en tu seeder:
+    |   instituciones.ver / crear / editar / eliminar
+    */
+    Route::get   ('/instituciones',                   [InstitucionController::class, 'index'])
+        ->middleware('permission:instituciones.ver');
 
-    // Coordinador Regional
-    Route::middleware(['role:coordinador_regional'])->prefix('coordinador-regional')->group(function () {
-        Route::get('/dashboard', function () {
-            return response()->json(['message' => 'Dashboard de Coordinador Regional']);
-        });
-    });
+    Route::post  ('/instituciones',                   [InstitucionController::class, 'store'])
+        ->middleware('permission:instituciones.crear');
 
-    // Coordinador de Circuito
-    Route::middleware(['role:coordinador_circuito'])->prefix('coordinador-circuito')->group(function () {
-        Route::get('/dashboard', function () {
-            return response()->json(['message' => 'Dashboard de Coordinador de Circuito']);
-        });
-    });
+    Route::get   ('/instituciones/{institucion}',     [InstitucionController::class, 'show'])
+        ->middleware('permission:instituciones.ver');
 
-    // Comité Institucional
-    Route::middleware(['role:comite_institucional'])->prefix('comite')->group(function () {
-        Route::get('/dashboard', function () {
-            return response()->json(['message' => 'Dashboard de Comité Institucional']);
-        });
-    });
+    Route::put   ('/instituciones/{institucion}',     [InstitucionController::class, 'update'])
+        ->middleware('permission:instituciones.editar');
 
-    // Juez
-    Route::middleware(['role:juez'])->prefix('juez')->group(function () {
-        Route::get('/dashboard', function () {
-            return response()->json(['message' => 'Dashboard de Juez']);
-        });
-    });
+    Route::delete('/instituciones/{institucion}',     [InstitucionController::class, 'destroy'])
+        ->middleware('permission:instituciones.eliminar');
 
-    // Estudiante
-    Route::middleware(['role:estudiante'])->prefix('estudiante')->group(function () {
-        Route::get('/dashboard', function () {
-            return response()->json(['message' => 'Dashboard de Estudiante']);
-        });
-    });
+    Route::patch ('/instituciones/{institucion}/toggle', [InstitucionController::class, 'toggleActivo'])
+        ->middleware('permission:instituciones.editar');
+
+    // Circuitos para selects (deja libre a cualquier autenticado; si quieres, protégelo con instituciones.ver)
+    Route::get('/circuitos', [InstitucionController::class, 'getCircuitos']);
+
+    /*
+    |--------------------------------------------------------------------------
+    | USUARIOS (solo admin)
+    |--------------------------------------------------------------------------
+    */
+    Route::apiResource('usuarios', UserController::class)
+        ->middleware('role:admin');
+
+    /*
+    |--------------------------------------------------------------------------
+    | PROYECTOS (por permisos)
+    |--------------------------------------------------------------------------
+    | Permisos del seeder:
+    |   proyectos.ver / crear / editar / eliminar / calificar (si aplica)
+    */
+    Route::get   ('/proyectos',               [ProyectoController::class, 'index'])
+        ->middleware('permission:proyectos.ver');
+
+    Route::post  ('/proyectos',               [ProyectoController::class, 'store'])
+        ->middleware('permission:proyectos.crear');
+
+    Route::get   ('/proyectos/{proyecto}',    [ProyectoController::class, 'show'])
+        ->middleware('permission:proyectos.ver');
+
+    Route::put   ('/proyectos/{proyecto}',    [ProyectoController::class, 'update'])
+        ->middleware('permission:proyectos.editar');
+
+    Route::delete('/proyectos/{proyecto}',    [ProyectoController::class, 'destroy'])
+        ->middleware('permission:proyectos.eliminar');
+
+    /*
+    |--------------------------------------------------------------------------
+    | CALIFICACIONES (por permisos)
+    |--------------------------------------------------------------------------
+    | Permisos del seeder:
+    |   calificaciones.ver / crear / consolidar
+    */
+    Route::get ('/calificaciones',           [CalificacionController::class, 'index'])
+        ->middleware('permission:calificaciones.ver');
+
+    Route::post('/calificaciones',           [CalificacionController::class, 'store'])
+        ->middleware('permission:calificaciones.crear');
+
+    Route::post('/calificaciones/consolidar',[CalificacionController::class, 'consolidar'])
+        ->middleware('permission:calificaciones.consolidar');
 });

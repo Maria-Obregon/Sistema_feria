@@ -11,14 +11,11 @@ return new class extends Migration
         Schema::create('categorias', function (Blueprint $table) {
             $table->id();
             $table->string('nombre', 100);
-            $table->string('codigo', 10)->unique();
-            $table->enum('nivel', ['primaria', 'secundaria', 'ambos']);
-            $table->text('descripcion')->nullable();
+             $table->string('nivel');
             $table->boolean('activo')->default(true);
             $table->timestamps();
             
-            $table->index('codigo');
-            $table->index(['nivel', 'activo']);
+            $table->index(['activo']);
         });
     }
 
