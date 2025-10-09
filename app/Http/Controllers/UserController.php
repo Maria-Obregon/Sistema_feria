@@ -2,253 +2,229 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Usuario;
-use App\Models\Rol;
-use App\Models\Institucion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\NewUserCredentialsMail;
 
 class UserController extends Controller
 {
-    public function __construct()
-    {
-        // Los middleware se manejan en las rutas
-    }
-
-    /**
-     * Listar usuarios con filtros
-     */
     public function index(Request $request)
     {
-        $query = Usuario::with(['rol', 'institucion']);
+        $perPage = (int) $request->get('per_page', 15);
 
-        // Filtros
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('nombre', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('cedula', 'like', "%{$search}%");
+        $q = Usuario::query()
+            ->with(['roles:id,name','institucion:id,nombre']);
+
+        if ($s = $request->get('buscar')) {
+            $q->where(function ($w) use ($s) {
+                $w->where('nombre','like',"%{$s}%")
+                  ->orWhere('email','like',"%{$s}%");
             });
         }
 
-        if ($request->filled('rol_id')) {
-            $query->where('rol_id', $request->rol_id);
+        if ($rolName = $request->get('rol')) {
+            $q->whereHas('roles', fn ($r) => $r->where('name', $rolName));
         }
 
-        if ($request->filled('institucion_id')) {
-            $query->where('institucion_id', $request->institucion_id);
+        if ($inst = $request->get('institucion_id')) {
+            $q->where('institucion_id', $inst);
         }
 
-        // Multi-tenant: Solo usuarios de la misma regional/circuito
-        /** @var \App\Models\Usuario $currentUser */
-        $currentUser = $request->user();
-        if ($currentUser && $currentUser->regional_id) {
-            $query->where('regional_id', $currentUser->regional_id);
-        }
-        if ($currentUser && $currentUser->circuito_id) {
-            $query->where('circuito_id', $currentUser->circuito_id);
-        }
+        $q->orderBy('nombre');
 
-        $usuarios = $query->paginate(15);
-
-        return response()->json([
-            'usuarios' => $usuarios,
-            'roles' => Rol::all(['id', 'nombre']),
-            'instituciones' => Institucion::select('id', 'nombre')->get()
-        ]);
+        return response()->json($q->paginate($perPage));
     }
 
     /**
-     * Crear nuevo usuario
+     * Alta básica con:
+     * - password opcional -> si no viene, se genera
+     * - asignación de rol por name (role) o por id (rol_id)
+     * - envío de correo con credenciales
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'nombre' => 'required|string|max:255',
-            'email' => 'required|email|unique:usuarios,email',
-            'cedula' => 'required|string|max:20|unique:usuarios,cedula',
-            'telefono' => 'nullable|string|max:20',
-            'password' => 'required|string|min:8|confirmed',
-            'rol_id' => 'required|exists:roles,id',
-            'institucion_id' => 'nullable|exists:instituciones,id',
-            'regional_id' => 'nullable|exists:regionales,id',
-            'circuito_id' => 'nullable|exists:circuitos,id',
-            'activo' => 'boolean'
+        $data = $request->validate([
+            'nombre'         => ['required','string','max:255'],
+            'email'          => ['required','email','max:255','unique:usuarios,email'],
+            'password'       => ['nullable','string','min:8'], // OPCIONAL
+            'activo'         => ['boolean'],
+            'institucion_id' => ['nullable','exists:instituciones,id'],
+            'role'           => ['nullable','string'],
+            'rol_id'         => ['nullable','integer','exists:roles,id'],
         ]);
 
         DB::beginTransaction();
         try {
-            $validated['password'] = Hash::make($validated['password']);
-            $validated['activo'] = $validated['activo'] ?? true;
-            
-            // Heredar regional/circuito del usuario actual si no se especifica
-            /** @var \App\Models\Usuario $currentUser */
-            $currentUser = $request->user();
-            if ($currentUser && !isset($validated['regional_id']) && $currentUser->regional_id) {
-                $validated['regional_id'] = $currentUser->regional_id;
-            }
-            if ($currentUser && !isset($validated['circuito_id']) && $currentUser->circuito_id) {
-                $validated['circuito_id'] = $currentUser->circuito_id;
+            // genera si no viene
+            $plainPassword = $data['password'] ?? str()->password(10);
+
+            $user = Usuario::create([
+                'nombre'         => $data['nombre'],
+                'email'          => $data['email'],
+                'password'       => Hash::make($plainPassword),
+                'activo'         => $data['activo'] ?? true,
+                'institucion_id' => $data['institucion_id'] ?? null,
+            ]);
+
+            // asignar 1 rol si vino
+            if (!empty($data['role'])) {
+                $user->assignRole($data['role']); // por name
+            } elseif (!empty($data['rol_id'])) {
+                $role = Role::find($data['rol_id']);
+                if ($role) $user->assignRole($role->name);
             }
 
-            $usuario = Usuario::create($validated);
-            
-            // Asignar rol con Spatie
-            $rol = Rol::find($validated['rol_id']);
-            $usuario->syncRoles([$rol->nombre]);
+            // correo con credenciales
+            Mail::to($user->email)->send(new NewUserCredentialsMail($user, $plainPassword));
 
             DB::commit();
 
             return response()->json([
-                'message' => 'Usuario creado exitosamente',
-                'usuario' => $usuario->load(['rol', 'institucion'])
+                'message' => 'Usuario creado y credenciales enviadas',
+                'usuario' => $user->load('roles','institucion'),
             ], 201);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
             return response()->json([
                 'message' => 'Error al crear usuario',
-                'error' => $e->getMessage()
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }
 
-    /**
-     * Ver detalle de usuario
-     */
     public function show($id)
     {
-        $usuario = Usuario::with(['rol', 'institucion', 'regional', 'circuito'])
-            ->findOrFail($id);
-
-        // Verificar acceso multi-tenant
-        $this->checkMultiTenantAccess($usuario);
-
-        return response()->json($usuario);
+        $u = Usuario::with(['roles:id,name','institucion:id,nombre'])->findOrFail($id);
+        return response()->json($u);
     }
 
-    /**
-     * Actualizar usuario
-     */
     public function update(Request $request, $id)
     {
-        $usuario = Usuario::findOrFail($id);
-        
-        // Verificar acceso multi-tenant
-        $this->checkMultiTenantAccess($usuario);
+        $user = Usuario::findOrFail($id);
 
-        $validated = $request->validate([
-            'nombre' => 'sometimes|string|max:255',
-            'email' => ['sometimes', 'email', Rule::unique('usuarios')->ignore($usuario->id)],
-            'cedula' => ['sometimes', 'string', 'max:20', Rule::unique('usuarios')->ignore($usuario->id)],
-            'telefono' => 'nullable|string|max:20',
-            'password' => 'nullable|string|min:8|confirmed',
-            'rol_id' => 'sometimes|exists:roles,id',
-            'institucion_id' => 'nullable|exists:instituciones,id',
-            'activo' => 'boolean'
+        $data = $request->validate([
+            'nombre'         => ['sometimes','string','max:255'],
+            'email'          => ['sometimes','email','max:255', Rule::unique('usuarios','email')->ignore($user->id)],
+            'password'       => ['nullable','string','min:8'], // opcional
+            'activo'         => ['boolean'],
+            'institucion_id' => ['nullable','exists:instituciones,id'],
+            'role'           => ['nullable','string'],
+            'rol_id'         => ['nullable','integer','exists:roles,id'],
         ]);
 
         DB::beginTransaction();
         try {
-            if (isset($validated['password'])) {
-                $validated['password'] = Hash::make($validated['password']);
+            if (!empty($data['password'])) {
+                $data['password'] = Hash::make($data['password']);
             } else {
-                unset($validated['password']);
+                unset($data['password']);
             }
 
-            $usuario->update($validated);
+            $user->update($data);
 
-            // Actualizar rol si cambió
-            if (isset($validated['rol_id'])) {
-                $rol = Rol::find($validated['rol_id']);
-                $usuario->syncRoles([$rol->nombre]);
+            if (!empty($data['role'])) {
+                $user->syncRoles([$data['role']]);
+            } elseif (!empty($data['rol_id'])) {
+                $role = Role::find($data['rol_id']);
+                if ($role) $user->syncRoles([$role->name]);
             }
 
             DB::commit();
 
             return response()->json([
-                'message' => 'Usuario actualizado exitosamente',
-                'usuario' => $usuario->fresh()->load(['rol', 'institucion'])
+                'message' => 'Usuario actualizado',
+                'usuario' => $user->fresh()->load('roles','institucion'),
             ]);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
             return response()->json([
                 'message' => 'Error al actualizar usuario',
-                'error' => $e->getMessage()
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }
 
-    /**
-     * Eliminar usuario (soft delete)
-     */
     public function destroy($id)
     {
-        $usuario = Usuario::findOrFail($id);
-        
-        // Verificar acceso multi-tenant
-        $this->checkMultiTenantAccess($usuario);
+        $user = Usuario::findOrFail($id);
 
-        // No permitir auto-eliminación
-        /** @var \App\Models\Usuario $currentUser */
-        $currentUser = request()->user();
-        if ($currentUser && $usuario->id === $currentUser->id) {
-            return response()->json([
-                'message' => 'No puede eliminar su propio usuario'
-            ], 403);
+        if (auth()->id() === $user->id) {
+            return response()->json(['message' => 'No puede eliminar su propio usuario'], 403);
         }
 
-        $usuario->delete();
+        $user->delete();
 
-        return response()->json([
-            'message' => 'Usuario eliminado exitosamente'
-        ]);
+        return response()->json(['message' => 'Usuario eliminado']);
     }
 
-    /**
-     * Activar/Desactivar usuario
-     */
     public function toggleStatus($id)
     {
-        $usuario = Usuario::findOrFail($id);
-        
-        // Verificar acceso multi-tenant
-        $this->checkMultiTenantAccess($usuario);
-
-        $usuario->activo = !$usuario->activo;
-        $usuario->save();
+        $user = Usuario::findOrFail($id);
+        $user->activo = !$user->activo;
+        $user->save();
 
         return response()->json([
-            'message' => $usuario->activo ? 'Usuario activado' : 'Usuario desactivado',
-            'usuario' => $usuario
+            'message' => $user->activo ? 'Usuario activado' : 'Usuario desactivado',
+            'usuario' => $user,
         ]);
     }
 
-    /**
-     * Verificar acceso multi-tenant
-     */
-    private function checkMultiTenantAccess($usuario)
+    /** Opcional: mover aquí los roles disponibles (era de AdminController) */
+    public function rolesDisponibles()
     {
-        /** @var \App\Models\Usuario $currentUser */
-        $currentUser = request()->user();
-        
-        // Admins tienen acceso total
-        if ($currentUser->hasRole('admin')) {
-            return;
-        }
-
-        // Verificar misma regional/circuito
-        if ($currentUser->regional_id && $usuario->regional_id !== $currentUser->regional_id) {
-            abort(403, 'No tiene permisos para acceder a este usuario');
-        }
-        
-        if ($currentUser->circuito_id && $usuario->circuito_id !== $currentUser->circuito_id) {
-            abort(403, 'No tiene permisos para acceder a este usuario');
-        }
+        return response()->json(Role::where('guard_name','sanctum')->pluck('name'));
     }
+public function actualizarRoles(Request $request, Usuario $usuario)
+{
+    $defaultGuard = Config::get('auth.defaults.guard', null);
+
+    $request->validate([
+        'roles'   => ['required','array','min:1'],
+        'roles.*' => [
+            Rule::exists('roles','name')
+                ->when($defaultGuard, fn($q) => $q->where('guard_name', $defaultGuard))
+        ],
+    ]);
+
+    $usuario->syncRoles($request->input('roles'));
+
+    return response()->json([
+        'message' => 'Roles actualizados',
+        'usuario' => $usuario->fresh('roles'),
+    ]);
+}
+    /** Opcional: resetear contraseña desde UserController (con correo) */
+    public function resetPassword(Request $request, Usuario $usuario)
+{
+    $data = $request->validate([
+        'password' => ['nullable','string','min:8'], // si no viene, se genera
+    ]);
+
+    $plain = $data['password'] ?? str()->password(10);
+
+    $usuario->forceFill(['password' => Hash::make($plain)])->save();
+
+    // Enviar correo (si falla, que no tumbe la petición)
+    try {
+        Mail::to($usuario->email)->send(new NewUserCredentialsMail($usuario, $plain, true));
+    } catch (\Throwable $e) {
+        Log::warning('Fallo enviando credenciales: '.$e->getMessage());
+    }
+
+    // Respuesta: solo expón el password en local/testing
+    $resp = ['message' => 'Contraseña restablecida'];
+    if (app()->environment(['local','testing'])) {
+        $resp['password_plano']  = $plain;
+        $resp['auto_generada']   = ! $request->filled('password');
+    }
+
+    return response()->json($resp);
+}
 }

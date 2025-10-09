@@ -8,7 +8,7 @@
           </div>
           <div class="flex items-center space-x-4">
             <span class="text-sm text-gray-500">{{ user?.email }}</span>
-            <button 
+            <button
               @click="logout"
               class="text-sm text-red-600 hover:text-red-800"
             >
@@ -22,6 +22,7 @@
     <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
       <!-- Estadísticas -->
       <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <!-- Usuarios -->
         <div class="bg-white rounded-lg shadow p-6">
           <div class="flex items-center">
             <div class="p-3 bg-blue-100 rounded-full">
@@ -30,12 +31,13 @@
               </svg>
             </div>
             <div class="ml-4">
-              <p class="text-2xl font-semibold">150</p>
+              <p class="text-2xl font-semibold">{{ cargandoStats ? '…' : stats.usuarios }}</p>
               <p class="text-gray-500">Usuarios</p>
             </div>
           </div>
         </div>
-        
+
+        <!-- Proyectos -->
         <div class="bg-white rounded-lg shadow p-6">
           <div class="flex items-center">
             <div class="p-3 bg-green-100 rounded-full">
@@ -44,12 +46,13 @@
               </svg>
             </div>
             <div class="ml-4">
-              <p class="text-2xl font-semibold">45</p>
+              <p class="text-2xl font-semibold">{{ cargandoStats ? '…' : stats.proyectos }}</p>
               <p class="text-gray-500">Proyectos</p>
             </div>
           </div>
         </div>
 
+        <!-- Instituciones -->
         <div class="bg-white rounded-lg shadow p-6">
           <div class="flex items-center">
             <div class="p-3 bg-yellow-100 rounded-full">
@@ -58,12 +61,13 @@
               </svg>
             </div>
             <div class="ml-4">
-              <p class="text-2xl font-semibold">12</p>
+              <p class="text-2xl font-semibold">{{ cargandoStats ? '…' : stats.instituciones }}</p>
               <p class="text-gray-500">Instituciones</p>
             </div>
           </div>
         </div>
 
+        <!-- Ferias activas -->
         <div class="bg-white rounded-lg shadow p-6">
           <div class="flex items-center">
             <div class="p-3 bg-purple-100 rounded-full">
@@ -72,7 +76,7 @@
               </svg>
             </div>
             <div class="ml-4">
-              <p class="text-2xl font-semibold">3</p>
+              <p class="text-2xl font-semibold">{{ cargandoStats ? '…' : stats.ferias_activas }}</p>
               <p class="text-gray-500">Ferias Activas</p>
             </div>
           </div>
@@ -80,11 +84,11 @@
       </div>
 
       <h2 class="text-lg font-semibold mb-4">Acciones Rápidas</h2>
-      
+
       <!-- Acciones rápidas -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <router-link 
-          :to="{ name: 'admin.instituciones' }"
+        <router-link
+          :to="{ name: 'admin.users' }"
           class="bg-white p-6 rounded-lg shadow-sm border hover:shadow-md transition-shadow"
         >
           <div class="flex items-center">
@@ -100,7 +104,7 @@
           </div>
         </router-link>
 
-        <router-link 
+        <router-link
           :to="{ name: 'admin.instituciones' }"
           class="p-4 bg-white rounded-lg shadow hover:shadow-lg transition-shadow text-left block"
         >
@@ -158,8 +162,9 @@
             </div>
           </div>
         </button>
-
-        <button class="p-4 bg-white rounded-lg shadow hover:shadow-lg transition-shadow text-left">
+<router-link
+        :to="{ name: 'admin.config' }"
+       class="p-4 bg-white rounded-lg shadow hover:shadow-lg transition-shadow text-left">
           <div class="flex items-center">
             <div class="p-3 bg-indigo-100 rounded-lg">
               <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -172,7 +177,7 @@
               <p class="text-lg font-semibold">Sistema</p>
             </div>
           </div>
-        </button>
+          </router-link>
       </div>
     </main>
   </div>
@@ -181,15 +186,34 @@
 <script setup>
 import { useAuthStore } from '../../stores/auth'
 import { useRouter } from 'vue-router'
-import { computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { adminApi } from '@/services/api'
 
 const authStore = useAuthStore()
 const router = useRouter()
 
 const user = computed(() => authStore.user)
+const logout = async () => { await authStore.logout(); router.push('/login') }
 
-const logout = async () => {
-  await authStore.logout()
-  router.push('/login')
-}
+// --- estado para estadísticas
+const cargandoStats = ref(false)
+const stats = ref({ usuarios: 0, proyectos: 0, instituciones: 0, ferias_activas: 0 })
+
+onMounted(async () => {
+  try {
+    cargandoStats.value = true
+    const { data } = await adminApi.stats()
+    stats.value = {
+      usuarios: Number(data?.usuarios ?? 0),
+      proyectos: Number(data?.proyectos ?? 0),
+      instituciones: Number(data?.instituciones ?? 0),
+      ferias_activas: Number(data?.ferias_activas ?? 0),
+    }
+  } catch (e) {
+    // si hay error, mantenemos 0 y podrías mostrar un toast
+    console.error('Error obteniendo stats', e)
+  } finally {
+    cargandoStats.value = false
+  }
+})
 </script>
