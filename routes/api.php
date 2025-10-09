@@ -1,104 +1,79 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
-// Controllers
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\InstitucionController;
-use App\Http\Controllers\ProyectoController;
-use App\Http\Controllers\CalificacionController;
+use App\Http\Controllers\AdminController;
 
-/*
-|--------------------------------------------------------------------------
-| Rutas públicas
-|--------------------------------------------------------------------------
-*/
 Route::post('/login',    [AuthController::class, 'login']);
-Route::post('/register', [AuthController::class, 'register']); // opcional, si permites registro
+Route::post('/register', [AuthController::class, 'register']);
 
-/*
-|--------------------------------------------------------------------------
-| Rutas autenticadas (Sanctum)
-|--------------------------------------------------------------------------
-*/
 Route::middleware('auth:sanctum')->group(function () {
 
-    // Perfil y sesión
-    Route::get('/me',     [AuthController::class, 'me']);
-    Route::post('/logout',[AuthController::class, 'logout']);
+    // Perfil
+    Route::get('/me',      [AuthController::class, 'me']);
+    Route::post('/logout', [AuthController::class, 'logout']);
 
-    /*
-    |--------------------------------------------------------------------------
-    | INSTITUCIONES (por permisos)
-    |--------------------------------------------------------------------------
-    | Los permisos se crearon en tu seeder:
-    |   instituciones.ver / crear / editar / eliminar
-    */
-    Route::get   ('/instituciones',                   [InstitucionController::class, 'index'])
-        ->middleware('permission:instituciones.ver');
+    // -----------------------------
+    // Utilidades institucionales (rutas fijas primero)
+    // -----------------------------
+    Route::get('/instituciones/catalogos', [InstitucionController::class, 'getCatalogos']);
+    Route::get('/circuitos',               [InstitucionController::class, 'getCircuitos']);
 
-    Route::post  ('/instituciones',                   [InstitucionController::class, 'store'])
-        ->middleware('permission:instituciones.crear');
+    // -----------------------------
+    // Instituciones (con permisos finos)
+    // -----------------------------
+    Route::get   ('/instituciones',               [InstitucionController::class, 'index'])->middleware('permission:instituciones.ver');
+    Route::post  ('/instituciones',               [InstitucionController::class, 'store'])->middleware('permission:instituciones.crear');
+    Route::get   ('/instituciones/{institucion}', [InstitucionController::class, 'show'])->middleware('permission:instituciones.ver');
+    Route::put   ('/instituciones/{institucion}', [InstitucionController::class, 'update'])->middleware('permission:instituciones.editar');
+    Route::delete('/instituciones/{institucion}', [InstitucionController::class, 'destroy'])->middleware('permission:instituciones.eliminar');
 
-    Route::get   ('/instituciones/{institucion}',     [InstitucionController::class, 'show'])
-        ->middleware('permission:instituciones.ver');
+    // -----------------------------
+    // Usuarios (CRUD principal)
+    // -----------------------------
+    Route::apiResource('usuarios', UserController::class)->middleware('role:admin');
 
-    Route::put   ('/instituciones/{institucion}',     [InstitucionController::class, 'update'])
-        ->middleware('permission:instituciones.editar');
+    // -----------------------------
+    // Admin
+    // -----------------------------
+    Route::middleware('role:admin')->prefix('admin')->group(function () {
+        // Dashboard / util
+        Route::get('/stats', [AdminController::class, 'stats']);
 
-    Route::delete('/instituciones/{institucion}',     [InstitucionController::class, 'destroy'])
-        ->middleware('permission:instituciones.eliminar');
+        // Roles
+        Route::get('/roles', [UserController::class, 'rolesDisponibles']);
 
-    Route::patch ('/instituciones/{institucion}/toggle', [InstitucionController::class, 'toggleActivo'])
-        ->middleware('permission:instituciones.editar');
+        // Usuarios extras
+        Route::put ('/usuarios/{usuario}/password', [UserController::class, 'resetPassword']);
+        Route::post('/usuarios/{usuario}/roles',    [UserController::class, 'actualizarRoles']);
+        Route::post('/usuarios',                    [UserController::class, 'store']);
 
-    // Circuitos para selects (deja libre a cualquier autenticado; si quieres, protégelo con instituciones.ver)
-    Route::get('/circuitos', [InstitucionController::class, 'getCircuitos']);
+        // Catálogos
+        Route::get   ('/modalidades',              [AdminController::class, 'listModalidades']);
+        Route::post  ('/modalidades',              [AdminController::class, 'createModalidad']);
+        Route::put   ('/modalidades/{modalidad}',  [AdminController::class, 'updateModalidad']);
+        Route::delete('/modalidades/{modalidad}',  [AdminController::class, 'destroyModalidad']);
 
-    /*
-    |--------------------------------------------------------------------------
-    | USUARIOS (solo admin)
-    |--------------------------------------------------------------------------
-    */
-    Route::apiResource('usuarios', UserController::class)
-        ->middleware('role:admin');
+        Route::get   ('/areas',                    [AdminController::class, 'listAreas']);
+        Route::post  ('/areas',                    [AdminController::class, 'createArea']);
+        Route::put   ('/areas/{area}',             [AdminController::class, 'updateArea']);
+        Route::delete('/areas/{area}',             [AdminController::class, 'destroyArea']);
 
-    /*
-    |--------------------------------------------------------------------------
-    | PROYECTOS (por permisos)
-    |--------------------------------------------------------------------------
-    | Permisos del seeder:
-    |   proyectos.ver / crear / editar / eliminar / calificar (si aplica)
-    */
-    Route::get   ('/proyectos',               [ProyectoController::class, 'index'])
-        ->middleware('permission:proyectos.ver');
+        Route::get   ('/categorias',               [AdminController::class, 'listCategorias']);
+        Route::post  ('/categorias',               [AdminController::class, 'createCategoria']);
+        Route::put   ('/categorias/{categoria}',   [AdminController::class, 'updateCategoria']);
+        Route::delete('/categorias/{categoria}',   [AdminController::class, 'destroyCategoria']);
 
-    Route::post  ('/proyectos',               [ProyectoController::class, 'store'])
-        ->middleware('permission:proyectos.crear');
+        Route::get   ('/tipos-institucion',        [AdminController::class, 'listTiposInstitucion']);
+        Route::post  ('/tipos-institucion',        [AdminController::class, 'createTipoInstitucion']);
+        Route::put   ('/tipos-institucion/{tipo}', [AdminController::class, 'updateTipoInstitucion']);
+        Route::delete('/tipos-institucion/{tipo}', [AdminController::class, 'destroyTipoInstitucion']);
 
-    Route::get   ('/proyectos/{proyecto}',    [ProyectoController::class, 'show'])
-        ->middleware('permission:proyectos.ver');
-
-    Route::put   ('/proyectos/{proyecto}',    [ProyectoController::class, 'update'])
-        ->middleware('permission:proyectos.editar');
-
-    Route::delete('/proyectos/{proyecto}',    [ProyectoController::class, 'destroy'])
-        ->middleware('permission:proyectos.eliminar');
-
-    /*
-    |--------------------------------------------------------------------------
-    | CALIFICACIONES (por permisos)
-    |--------------------------------------------------------------------------
-    | Permisos del seeder:
-    |   calificaciones.ver / crear / consolidar
-    */
-    Route::get ('/calificaciones',           [CalificacionController::class, 'index'])
-        ->middleware('permission:calificaciones.ver');
-
-    Route::post('/calificaciones',           [CalificacionController::class, 'store'])
-        ->middleware('permission:calificaciones.crear');
-
-    Route::post('/calificaciones/consolidar',[CalificacionController::class, 'consolidar'])
-        ->middleware('permission:calificaciones.consolidar');
+        Route::get   ('/niveles',                  [AdminController::class, 'listNiveles']);
+        Route::post  ('/niveles',                  [AdminController::class, 'createNivel']);
+        Route::put   ('/niveles/{nivel}',          [AdminController::class, 'updateNivel']);
+        Route::delete('/niveles/{nivel}',          [AdminController::class, 'destroyNivel']);
+    });
 });

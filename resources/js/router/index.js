@@ -11,6 +11,7 @@ const AdminDashboard        = () => import('../pages/admin/AdminDashboard.vue')
 const InstitucionDashboard  = () => import('../pages/instituciones/InstitucionesDashboard.vue')
 const JuezDashboard         = () => import('../pages/juez/JuezDashboard.vue')
 const EstudianteDashboard   = () => import('../pages/estudiantes/EstudiantesDashboard.vue')
+const AdminConfig = () => import('../pages/admin/AdminConfig.vue')
 
 // Mapa rol -> ruta por defecto
 const roleRoute = (role) => {
@@ -39,6 +40,7 @@ const routes = [
   { path: '/admin', name: 'admin.dashboard', component: AdminDashboard, meta: { requiresAuth: true, role: 'admin' } },
   { path: '/admin/users', name: 'admin.users', component: () => import('../pages/admin/Users.vue'), meta: { requiresAuth: true, role: 'admin' } },
   { path: '/admin/instituciones', name: 'admin.instituciones', component: () => import('../pages/admin/instituciones/InstitucionesIndex.vue'), meta: { requiresAuth: true, role: 'admin' } },
+{ path: '/admin/config', name: 'admin.config', component: AdminConfig, meta: { requiresAuth: true, role: 'admin' } },
 
   // institucion
 {path: '/institucion',name: 'inst.dashboard',component: () => import('../pages/instituciones/InstitucionesDashboard.vue'),meta: { requiresAuth: true, role: 'comite_institucional' },},

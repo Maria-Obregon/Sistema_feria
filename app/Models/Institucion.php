@@ -16,17 +16,20 @@ class Institucion extends Model
 const UPDATED_AT = 'actualizado_en';
 
     protected $fillable = [
-        'nombre',
-        'codigo_presupuestario',
-        'circuito_id',
-        'tipo',
-        'telefono',
-        'email',
-        'direccion',
-        'activo',
-        'limite_proyectos',
-        'limite_estudiantes',
-    ];
+    'nombre',
+    'modalidad',          // <-- FALTA
+    'codigo_presupuestario',
+    'direccionreg_id',    // <-- FALTA
+    'circuito_id',
+    'tipo',
+    'telefono',
+    'email',
+    'direccion',
+    'activo',
+    'limite_proyectos',
+    'limite_estudiantes',
+];
+
 
     protected function casts(): array
     {
@@ -41,6 +44,13 @@ const UPDATED_AT = 'actualizado_en';
     {
         return $this->belongsTo(Circuito::class);
     }
+
+    // app/Models/Institucion.php
+public function tipoInstitucion() { return $this->belongsTo(\App\Models\TipoInstitucion::class, 'tipo_institucion_id'); }
+public function modalidad()       { return $this->belongsTo(\App\Models\Modalidad::class, 'modalidad_id'); }
+
+    
+public function regional() { return $this->belongsTo(\App\Models\Regional::class, 'direccionreg_id'); }
 
     public function usuarios()
     {
