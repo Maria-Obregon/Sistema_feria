@@ -155,4 +155,82 @@ class JudgeAssignmentController extends Controller
 
         return $calificacionesCompletadas >= $totalCriterios;
     }
+
+    /**
+     * Estadísticas de asignaciones del juez autenticado
+     * GET /api/juez/stats
+     */
+    public function stats(): JsonResponse
+    {
+        $user = Auth::user();
+        
+        $juez = $user->juez;
+        
+        if (!$juez) {
+            return response()->json([
+                'message' => 'Usuario autenticado no tiene un perfil de juez asociado'
+            ], 403);
+        }
+
+        $asignaciones = AsignacionJuez::where('juez_id', $juez->id)
+            ->with(['grades.criterion', 'stage'])
+            ->get();
+
+        $completadas = 0;
+        $pendientes = 0;
+        
+        $porTipo = [
+            'escrita' => ['total' => 0, 'completadas' => 0, 'pendientes' => 0],
+            'oral' => ['total' => 0, 'completadas' => 0, 'pendientes' => 0],
+        ];
+
+        $porEtapa = [];
+
+        foreach ($asignaciones as $asignacion) {
+            $isComplete = $asignacion->isComplete();
+            
+            if ($isComplete) {
+                $completadas++;
+            } else {
+                $pendientes++;
+            }
+
+            if (isset($porTipo[$asignacion->tipo_eval])) {
+                $porTipo[$asignacion->tipo_eval]['total']++;
+                if ($isComplete) {
+                    $porTipo[$asignacion->tipo_eval]['completadas']++;
+                } else {
+                    $porTipo[$asignacion->tipo_eval]['pendientes']++;
+                }
+            }
+
+            $etapaId = $asignacion->etapa_id;
+            if (!isset($porEtapa[$etapaId])) {
+                $porEtapa[$etapaId] = [
+                    'etapaId' => $etapaId,
+                    'nombre' => $asignacion->stage ? $asignacion->stage->nombre : "Etapa {$etapaId}",
+                    'total' => 0,
+                    'completadas' => 0,
+                    'pendientes' => 0,
+                ];
+            }
+
+            $porEtapa[$etapaId]['total']++;
+            if ($isComplete) {
+                $porEtapa[$etapaId]['completadas']++;
+            } else {
+                $porEtapa[$etapaId]['pendientes']++;
+            }
+        }
+
+        return response()->json([
+            'totals' => [
+                'total' => $asignaciones->count(),
+                'completadas' => $completadas,
+                'pendientes' => $pendientes,
+            ],
+            'byType' => $porTipo,
+            'byStage' => array_values($porEtapa),
+        ]);
+    }
 }

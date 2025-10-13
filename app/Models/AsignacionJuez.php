@@ -51,4 +51,28 @@ class AsignacionJuez extends Model
     {
         return $this->hasMany(Calificacion::class, 'asignacion_juez_id');
     }
+
+    /**
+     * Verifica si la asignación está completa
+     * 
+     * @return bool
+     */
+    public function isComplete(): bool
+    {
+        $rubrica = Rubrica::where('tipo_eval', $this->tipo_eval)->first();
+        
+        if (!$rubrica) {
+            return false;
+        }
+
+        $criteriosIds = $rubrica->criterios()->pluck('id')->toArray();
+        
+        if (empty($criteriosIds)) {
+            return false;
+        }
+
+        $calificadosIds = $this->grades()->pluck('criterio_id')->toArray();
+        
+        return count(array_diff($criteriosIds, $calificadosIds)) === 0;
+    }
 }

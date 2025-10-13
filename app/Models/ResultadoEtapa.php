@@ -19,6 +19,7 @@ class ResultadoEtapa extends Model
         'nota_final',
         'ganador',
         'observaciones',
+        'cerrada',
     ];
 
     protected function casts(): array
@@ -28,6 +29,7 @@ class ResultadoEtapa extends Model
             'nota_exposicion' => 'decimal:2',
             'nota_final' => 'decimal:2',
             'ganador' => 'boolean',
+            'cerrada' => 'boolean',
         ];
     }
 

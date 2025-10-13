@@ -207,4 +207,37 @@ class GradeConsolidationServiceTest extends TestCase
         $isClosed = $this->service->isStageClosed(1, 1);
         $this->assertFalse($isClosed);
     }
+
+    public function test_isStageClosed_respeta_bandera_cerrada(): void
+    {
+        $proyecto = $this->crearProyecto();
+        $etapaId = 1;
+
+        $this->assertFalse($this->service->isStageClosed($proyecto->id, $etapaId));
+
+        ResultadoEtapa::create([
+            'proyecto_id' => $proyecto->id,
+            'etapa_id' => $etapaId,
+            'cerrada' => true,
+        ]);
+
+        $this->assertTrue($this->service->isStageClosed($proyecto->id, $etapaId));
+    }
+
+    public function test_closeStage_crea_o_actualiza_resultado_con_cerrada(): void
+    {
+        $proyecto = $this->crearProyecto();
+        $etapaId = 1;
+
+        $resultado = $this->service->closeStage($proyecto->id, $etapaId, true);
+
+        $this->assertTrue($resultado->cerrada);
+        $this->assertEquals($proyecto->id, $resultado->proyecto_id);
+        $this->assertEquals($etapaId, $resultado->etapa_id);
+
+        $resultado2 = $this->service->closeStage($proyecto->id, $etapaId, false);
+
+        $this->assertFalse($resultado2->cerrada);
+        $this->assertEquals($resultado->id, $resultado2->id);
+    }
 }

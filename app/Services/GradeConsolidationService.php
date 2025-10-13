@@ -213,6 +213,29 @@ class GradeConsolidationService
      */
     public function isStageClosed(int $proyectoId, int $etapaId): bool
     {
-        return false;
+        $resultado = ResultadoEtapa::where('proyecto_id', $proyectoId)
+            ->where('etapa_id', $etapaId)
+            ->first();
+
+        return $resultado && $resultado->cerrada;
+    }
+
+    /**
+     * @param int $proyectoId
+     * @param int $etapaId
+     * @param bool $state
+     * @return ResultadoEtapa
+     */
+    public function closeStage(int $proyectoId, int $etapaId, bool $state): ResultadoEtapa
+    {
+        return ResultadoEtapa::updateOrCreate(
+            [
+                'proyecto_id' => $proyectoId,
+                'etapa_id' => $etapaId,
+            ],
+            [
+                'cerrada' => $state,
+            ]
+        );
     }
 }

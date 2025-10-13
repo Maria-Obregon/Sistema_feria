@@ -106,6 +106,20 @@ Route::middleware('auth:sanctum')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
+    | ETAPAS - Cierre y consulta de resultados
+    |--------------------------------------------------------------------------
+    */
+    Route::post('/etapas/cerrar', [App\Http\Controllers\StageController::class, 'close'])
+        ->middleware('permission:calificaciones.consolidar');
+    
+    Route::post('/etapas/abrir', [App\Http\Controllers\StageController::class, 'open'])
+        ->middleware('permission:calificaciones.consolidar');
+    
+    Route::get('/etapas/resultado', [App\Http\Controllers\StageController::class, 'show'])
+        ->middleware('permission:calificaciones.ver');
+
+    /*
+    |--------------------------------------------------------------------------
     | RÚBRICAS Y CRITERIOS
     |--------------------------------------------------------------------------
     | Acceso a criterios de evaluación para construir formularios
@@ -124,6 +138,9 @@ Route::middleware('auth:sanctum')->group(function () {
             ->middleware('permission:proyectos.ver');
         
         Route::get('/juez/proyectos/{id}', [JudgeAssignmentController::class, 'showProject'])
+            ->middleware('permission:proyectos.ver');
+        
+        Route::get('/juez/stats', [JudgeAssignmentController::class, 'stats'])
             ->middleware('permission:proyectos.ver');
     });
 });
