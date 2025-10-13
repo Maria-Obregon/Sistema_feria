@@ -14,8 +14,10 @@ class AssignmentResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        // Determinar el estado de la asignación
-        $estado = $this->determineEstado();
+        $rubrica = $this->getRubrica();
+        $estado = $this->determineEstado($rubrica);
+        $lastGraded = $this->getLastGradedAt();
+        $criteriaTotal = $rubrica ? $rubrica->criterios()->count() : 0;
 
         return [
             'assignmentId' => $this->id,
@@ -25,21 +27,56 @@ class AssignmentResource extends JsonResource
             'etapaNombre' => $this->stage->nombre ?? null,
             'tipoEval' => $this->tipo_eval,
             'estado' => $estado,
+            'gradesCount' => $this->grades()->count(),
+            'lastGradedAt' => $lastGraded?->toIso8601String(),
+            'criteriaTotal' => $criteriaTotal,
             'asignadoEn' => $this->asignado_en?->format('Y-m-d H:i:s'),
         ];
     }
 
     /**
+     * Obtiene la rúbrica correspondiente al tipo de evaluación
+     */
+    private function getRubrica(): ?\App\Models\Rubrica
+    {
+        if (!$this->tipo_eval) {
+            return null;
+        }
+
+        return \App\Models\Rubrica::where('tipo_eval', $this->tipo_eval)->first();
+    }
+
+    /**
+     * Obtiene la fecha de la última calificación
+     */
+    private function getLastGradedAt(): ?\Carbon\Carbon
+    {
+        $lastGrade = $this->grades()
+            ->orderByDesc('updated_at')
+            ->orderByDesc('created_at')
+            ->first();
+
+        if (!$lastGrade) {
+            return null;
+        }
+
+        return $lastGrade->updated_at > $lastGrade->created_at 
+            ? $lastGrade->updated_at 
+            : $lastGrade->created_at;
+    }
+
+    /**
      * Determina si la asignación está pending o completed
      */
-    private function determineEstado(): string
+    private function determineEstado(?\App\Models\Rubrica $rubrica = null): string
     {
         if (!$this->tipo_eval) {
             return 'pending';
         }
 
-        // Obtener la rúbrica correspondiente
-        $rubrica = \App\Models\Rubrica::where('tipo_eval', $this->tipo_eval)->first();
+        if (!$rubrica) {
+            $rubrica = $this->getRubrica();
+        }
         
         if (!$rubrica) {
             return 'pending';
