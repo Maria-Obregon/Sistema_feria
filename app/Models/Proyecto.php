@@ -17,8 +17,10 @@ class Proyecto extends Model
         'area_id',
         'categoria_id',
         'institucion_id',
+        'modalidad_id',
         'etapa_actual',
         'estado',
+        'codigo',
         'palabras_clave',
         'archivo_proyecto',
         'archivo_presentacion',
@@ -61,6 +63,11 @@ class Proyecto extends Model
         return $this->hasMany(Calificacion::class);
     }
 
+    public function asignacionesJuez()
+    {
+        return $this->hasMany(AsignacionJuez::class);
+    }
+
     public function area()
     {
         return $this->belongsTo(Area::class);
@@ -69,5 +76,10 @@ class Proyecto extends Model
     public function categoria()
     {
         return $this->belongsTo(Categoria::class);
+    }
+
+    public function modalidad()
+    {
+        return $this->belongsTo(Modalidad::class);
     }
 }

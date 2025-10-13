@@ -59,6 +59,11 @@ class Usuario extends Authenticatable
         return $this->belongsTo(Institucion::class);
     }
 
+    public function juez()
+    {
+        return $this->hasOne(Juez::class, 'usuario_id');
+    }
+
     public function scopeForRegional($query, $regionalId)
     {
         return $query->where('regional_id', $regionalId);
