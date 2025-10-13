@@ -8,6 +8,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\InstitucionController;
 use App\Http\Controllers\ProyectoController;
 use App\Http\Controllers\CalificacionController;
+use App\Http\Controllers\JudgeAssignmentController;
+use App\Http\Controllers\RubricaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -101,4 +103,27 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/calificaciones/consolidar',[CalificacionController::class, 'consolidar'])
         ->middleware('permission:calificaciones.consolidar');
+
+    /*
+    |--------------------------------------------------------------------------
+    | RÚBRICAS Y CRITERIOS
+    |--------------------------------------------------------------------------
+    | Acceso a criterios de evaluación para construir formularios
+    */
+    Route::get('/rubricas/{tipo_eval}/criterios', [RubricaController::class, 'criteriosPorTipoEval']);
+
+    /*
+    |--------------------------------------------------------------------------
+    | JUECES - API de solo lectura
+    |--------------------------------------------------------------------------
+    | Rutas protegidas para jueces autenticados
+    | Permisos: proyectos.ver, calificaciones.ver
+    */
+    Route::middleware(['role:juez'])->group(function () {
+        Route::get('/juez/asignaciones', [JudgeAssignmentController::class, 'index'])
+            ->middleware('permission:proyectos.ver');
+        
+        Route::get('/juez/proyectos/{id}', [JudgeAssignmentController::class, 'showProject'])
+            ->middleware('permission:proyectos.ver');
+    });
 });
