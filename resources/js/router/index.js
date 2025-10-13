@@ -58,6 +58,7 @@ const routes = [
 //Juez
 {path: '/juez',name: 'juez.dashboard', component: () => import('../pages/juez/JuezDashboard.vue'),meta: { requiresAuth: true, role: 'juez' },},
 {path: '/juez/asignaciones',name: 'juez.asignaciones',component: () => import('../pages/juez/Asignaciones.vue'),meta: { requiresAuth: true, role: 'juez' },},
+{path: '/juez/mis-calificaciones',name: 'juez.misCalificaciones',component: () => import('../pages/juez/Asignaciones.vue'),meta: { requiresAuth: true, role: 'juez' },},
 {path: '/juez/calificaciones',name: 'juez.calificaciones',component: () => import('../pages/juez/Calificaciones.vue'),meta: { requiresAuth: true, role: 'juez' },},
 {path: '/dashboard', name: 'dashboard', component: Dashboard, meta: { requiresAuth: true } },
 {path: '/:pathMatch(.*)*', name: 'not-found', component: NotFound },
