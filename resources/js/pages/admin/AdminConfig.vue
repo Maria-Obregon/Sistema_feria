@@ -1,9 +1,24 @@
 <template>
   <div class="max-w-6xl mx-auto py-6 sm:px-6 lg:px-8">
-    <h1 class="text-2xl font-bold mb-6">Configuración del Sistema</h1>
+    <!-- Header SOLO con Volver + título -->
+    <div class="mb-6">
+      <div class="flex items-center gap-3">
+        <RouterLink
+          :to="{ name: 'admin.dashboard' }" 
+          class="inline-flex items-center gap-2 px-3 py-2 border rounded-md text-gray-700 hover:bg-gray-50"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+          Volver
+        </RouterLink>
 
-    <!-- Tabs -->
-    <div class="flex gap-2 mb-6">
+        <h1 class="text-2xl font-bold">Configuración del Sistema</h1>
+      </div>
+    </div>
+
+    <!-- Tabs EN SU PROPIO BLOQUE -->
+    <div class="flex flex-wrap gap-2 mb-6">
       <button
         v-for="t in tabs"
         :key="t.key"
@@ -17,85 +32,81 @@
       </button>
     </div>
 
-    <!-- Modalidades -->
-    <div v-if="activeTab === 'modalidades'">
-      <CatalogoCrud
-        titulo="Modalidades"
-        :items="modalidades"
-        :columns="[{key:'nombre',label:'Nombre'},{key:'activo',label:'Activo'}]"
-        :loading="loading.modalidades"
-        @crear="crearModalidad"
-        @actualizar="actualizarModalidad"
-        @eliminar="eliminarModalidad"
-        @recargar="cargarModalidades"
-      />
-    </div>
+    <!-- Contenido (asegura ancho completo) -->
+    <div class="w-full">
+      <div v-if="activeTab === 'modalidades'">
+        <CatalogoCrud
+          titulo="Modalidades"
+          :items="modalidades"
+          :columns="[{key:'nombre',label:'Nombre'},{key:'activo',label:'Activo'}]"
+          :loading="loading.modalidades"
+          @crear="crearModalidad"
+          @actualizar="actualizarModalidad"
+          @eliminar="eliminarModalidad"
+          @recargar="cargarModalidades"
+        />
+      </div>
 
-    <!-- Áreas -->
-    <div v-else-if="activeTab === 'areas'">
-      <CatalogoCrud
-        titulo="Áreas"
-        :items="areas"
-        :columns="[{key:'nombre',label:'Nombre'},{key:'activo',label:'Activo'}]"
-        :loading="loading.areas"
-        @crear="crearArea"
-        @actualizar="actualizarArea"
-        @eliminar="eliminarArea"
-        @recargar="cargarAreas"
-      />
-    </div>
+      <div v-else-if="activeTab === 'areas'">
+        <CatalogoCrud
+          titulo="Áreas"
+          :items="areas"
+          :columns="[{key:'nombre',label:'Nombre'},{key:'activo',label:'Activo'}]"
+          :loading="loading.areas"
+          @crear="crearArea"
+          @actualizar="actualizarArea"
+          @eliminar="eliminarArea"
+          @recargar="cargarAreas"
+        />
+      </div>
 
-    <!-- Categorías (nivel desde tabla 'niveles') -->
-    <div v-else-if="activeTab === 'categorias'">
-      <CatalogoCrud
-        titulo="Categorías"
-        :items="categorias"
-        :columns="[
-          {key:'nombre',label:'Nombre'},
-          {key:'nivel',label:'Nivel'}
-        ]"
-        :loading="loading.categorias"
-        :select-options="{ nivel: nivelOptions }"
-        :display-map="{ nivel: nivelLabelMap }"
-        @crear="crearCategoria"
-        @actualizar="actualizarCategoria"
-        @eliminar="eliminarCategoria"
-        @recargar="cargarCategorias"
-      />
-    </div>
+      <div v-else-if="activeTab === 'categorias'">
+        <CatalogoCrud
+          titulo="Categorías"
+          :items="categorias"
+          :columns="[
+            {key:'nombre',label:'Nombre'},
+            {key:'nivel',label:'Nivel'}
+          ]"
+          :loading="loading.categorias"
+          :select-options="{ nivel: nivelOptions }"
+          :display-map="{ nivel: nivelLabelMap }"
+          @crear="crearCategoria"
+          @actualizar="actualizarCategoria"
+          @eliminar="eliminarCategoria"
+          @recargar="cargarCategorias"
+        />
+      </div>
 
-    <!-- Tipos de Institución -->
-    <div v-else-if="activeTab === 'tipos'">
-      <CatalogoCrud
-        titulo="Tipos de Institución"
-        :items="tipos"
-        :columns="[{key:'nombre',label:'Nombre'},{key:'activo',label:'Activo'}]"
-        :loading="loading.tipos"
-        @crear="crearTipo"
-        @actualizar="actualizarTipo"
-        @eliminar="eliminarTipo"
-        @recargar="cargarTipos"
-      />
-    </div>
+      <div v-else-if="activeTab === 'tipos'">
+        <CatalogoCrud
+          titulo="Tipos de Institución"
+          :items="tipos"
+          :columns="[{key:'nombre',label:'Nombre'},{key:'activo',label:'Activo'}]"
+          :loading="loading.tipos"
+          @crear="crearTipo"
+          @actualizar="actualizarTipo"
+          @eliminar="eliminarTipo"
+          @recargar="cargarTipos"
+        />
+      </div>
 
-    <!-- Niveles (catálogo libre: nombre + activo) -->
-    <div v-else-if="activeTab === 'niveles'">
-      <CatalogoCrud
-        titulo="Niveles"
-        :items="niveles"
-        :columns="[
-          {key:'nombre',label:'Nombre'},
-          {key:'activo',label:'Activo'}
-        ]"
-        :loading="loading.niveles"
-        @crear="crearNivel"
-        @actualizar="actualizarNivel"
-        @eliminar="eliminarNivel"
-        @recargar="cargarNiveles"
-      />
+      <div v-else-if="activeTab === 'niveles'">
+        <CatalogoCrud
+          titulo="Niveles"
+          :items="niveles"
+          :columns="[{key:'nombre',label:'Nombre'},{key:'activo',label:'Activo'}]"
+          :loading="loading.niveles"
+          @crear="crearNivel"
+          @actualizar="actualizarNivel"
+          @eliminar="eliminarNivel"
+          @recargar="cargarNiveles"
+        />
+      </div>
     </div>
   </div>
 </template>
+
 
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue'

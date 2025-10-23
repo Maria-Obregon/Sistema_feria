@@ -1,22 +1,33 @@
 <template>
   <div class="p-6">
     <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900">Gestión de Usuarios</h1>
-        <p class="text-gray-600">Administra cuentas, roles y contraseñas</p>
-      </div>
-      <button
-        @click="abrirCrear"
-        class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
-      >
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-        </svg>
-        Nuevo Usuario
-      </button>
+<div class="flex justify-between items-center mb-6">
+  <div class="flex items-center gap-3">
+    <RouterLink
+      :to="{ name: 'admin.dashboard' }"        
+      class="inline-flex items-center gap-2 px-3 py-2 border rounded-lg text-gray-700 hover:bg-gray-50"
+    >
+      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+      Volver
+    </RouterLink>
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Gestión de Usuarios</h1>
+      <p class="text-gray-600">Administra cuentas, roles y contraseñas</p>
     </div>
+  </div>
 
+  <button
+    @click="abrirCrear"
+    class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+  >
+    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+    </svg>
+    Nuevo Usuario
+  </button>
+</div>
     <!-- Filtros -->
     <div class="bg-white rounded-lg shadow-sm border p-4 mb-6">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">

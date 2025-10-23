@@ -1,6 +1,15 @@
 <template>
-  <div class="min-h-screen bg-gray-100">
-    <nav class="bg-white shadow">
+  <div class="min-h-screen bg-gray-100 relative">
+    <!-- Fondo con Logo.webp (public/img/Logo.webp) -->
+    <div
+      aria-hidden="true"
+      class="pointer-events-none select-none absolute inset-0
+             bg-[url('/img/Logo.webp')] bg-no-repeat bg-center bg-contain
+             opacity-10"
+    ></div>
+
+    <!-- NAV (contenido por encima del fondo) -->
+    <nav class="relative z-10 bg-white shadow">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
           <div class="flex items-center">
@@ -19,7 +28,8 @@
       </div>
     </nav>
 
-    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <!-- MAIN (contenido por encima del fondo) -->
+    <main class="relative z-10 max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
       <!-- Estadísticas -->
       <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <!-- Usuarios -->
@@ -153,7 +163,7 @@
           <div class="flex items-center">
             <div class="p-3 bg-red-100 rounded-lg">
               <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2z"></path>
               </svg>
             </div>
             <div class="ml-4">
@@ -162,9 +172,11 @@
             </div>
           </div>
         </button>
-<router-link
-        :to="{ name: 'admin.config' }"
-       class="p-4 bg-white rounded-lg shadow hover:shadow-lg transition-shadow text-left">
+
+        <router-link
+          :to="{ name: 'admin.config' }"
+          class="p-4 bg-white rounded-lg shadow hover:shadow-lg transition-shadow text-left"
+        >
           <div class="flex items-center">
             <div class="p-3 bg-indigo-100 rounded-lg">
               <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -177,11 +189,12 @@
               <p class="text-lg font-semibold">Sistema</p>
             </div>
           </div>
-          </router-link>
+        </router-link>
       </div>
     </main>
   </div>
 </template>
+
 
 <script setup>
 import { useAuthStore } from '../../stores/auth'
