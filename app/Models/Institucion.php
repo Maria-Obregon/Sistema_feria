@@ -18,7 +18,9 @@ const UPDATED_AT = 'actualizado_en';
     protected $fillable = [
         'nombre',
         'codigo_presupuestario',
+        'direccionreg_id',        // ← ahora existe con este nombre
         'circuito_id',
+        'modalidad',
         'tipo',
         'telefono',
         'email',
@@ -26,6 +28,7 @@ const UPDATED_AT = 'actualizado_en';
         'activo',
         'limite_proyectos',
         'limite_estudiantes',
+        'modalidad',
     ];
 
     protected function casts(): array

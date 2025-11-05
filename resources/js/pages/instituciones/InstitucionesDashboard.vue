@@ -5,6 +5,7 @@
       <div class="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
         <nav class="flex gap-5">
           <RouterLink :to="{ name: 'inst.dashboard' }" class="text-sm text-gray-600 hover:text-gray-900">Inicio</RouterLink>
+          <RouterLink :to="{ name: 'inst.instituciones' }" class="text-sm text-gray-600 hover:text-gray-900">Instituciones</RouterLink>
           <RouterLink :to="{ name: 'inst.proyectos' }" class="text-sm text-gray-600 hover:text-gray-900">Proyectos</RouterLink>
           <RouterLink :to="{ name: 'inst.estudiantes' }" class="text-sm text-gray-600 hover:text-gray-900">Estudiantes</RouterLink>
           <RouterLink :to="{ name: 'inst.jueces' }" class="text-sm text-gray-600 hover:text-gray-900">Jueces</RouterLink>

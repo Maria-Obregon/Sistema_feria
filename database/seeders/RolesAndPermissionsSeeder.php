@@ -108,6 +108,8 @@ class RolesAndPermissionsSeeder extends Seeder
         // Comité Institucional
         $roleComite->givePermissionTo([
             'instituciones.ver',
+            'instituciones.crear',
+            'instituciones.editar',
             'proyectos.ver',
             'proyectos.crear',
             'proyectos.editar',
@@ -115,6 +117,10 @@ class RolesAndPermissionsSeeder extends Seeder
             'estudiantes.crear',
             'estudiantes.editar',
             'jueces.ver',
+            'jueces.crear',        // <- temporal
+            'jueces.editar',       // <- temporal
+            'jueces.eliminar',     // <- temporal
+            'jueces.asignar',      // <- temporal
             'ferias.ver',
             'calificaciones.ver',
             'reportes.ver',
