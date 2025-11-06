@@ -45,6 +45,13 @@ const UPDATED_AT = 'actualizado_en';
         return $this->belongsTo(Circuito::class);
     }
 
+    // app/Models/Institucion.php
+public function tipoInstitucion() { return $this->belongsTo(\App\Models\TipoInstitucion::class, 'tipo_institucion_id'); }
+public function modalidad()       { return $this->belongsTo(\App\Models\Modalidad::class, 'modalidad_id'); }
+
+    
+public function regional() { return $this->belongsTo(\App\Models\Regional::class, 'direccionreg_id'); }
+
     public function usuarios()
     {
         return $this->hasMany(Usuario::class);

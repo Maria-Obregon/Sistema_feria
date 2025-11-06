@@ -15,19 +15,9 @@ use App\Http\Controllers\FeriaController;
 use App\Http\Controllers\JuezController;
 use App\Http\Controllers\AsignacionJuezController;
 
-/*
-|--------------------------------------------------------------------------
-| Rutas públicas
-|--------------------------------------------------------------------------
-*/
 Route::post('/login',    [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']); // si lo permites
 
-/*
-|--------------------------------------------------------------------------
-| Rutas autenticadas (Sanctum)
-|--------------------------------------------------------------------------
-*/
 Route::middleware('auth:sanctum')->group(function () {
 
     // Perfil y sesión
@@ -47,20 +37,34 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get   ('/instituciones',                   [InstitucionController::class, 'index'])
         ->middleware('permission:instituciones.ver');
 
-    Route::post  ('/instituciones',                   [InstitucionController::class, 'store'])
-        ->middleware('permission:instituciones.crear');
+    // -----------------------------
+    // Instituciones (con permisos finos)
+    // -----------------------------
+    Route::get   ('/instituciones',               [InstitucionController::class, 'index'])->middleware('permission:instituciones.ver');
+    Route::post  ('/instituciones',               [InstitucionController::class, 'store'])->middleware('permission:instituciones.crear');
+    Route::get   ('/instituciones/{institucion}', [InstitucionController::class, 'show'])->middleware('permission:instituciones.ver');
+    Route::put   ('/instituciones/{institucion}', [InstitucionController::class, 'update'])->middleware('permission:instituciones.editar');
+    Route::delete('/instituciones/{institucion}', [InstitucionController::class, 'destroy'])->middleware('permission:instituciones.eliminar');
 
-    Route::get   ('/instituciones/{institucion}',     [InstitucionController::class, 'show'])
-        ->middleware('permission:instituciones.ver');
+    // -----------------------------
+    // Usuarios (CRUD principal)
+    // -----------------------------
+    Route::apiResource('usuarios', UserController::class)->middleware('role:admin');
 
-    Route::put   ('/instituciones/{institucion}',     [InstitucionController::class, 'update'])
-        ->middleware('permission:instituciones.editar');
+    // -----------------------------
+    // Admin
+    // -----------------------------
+    Route::middleware('role:admin')->prefix('admin')->group(function () {
+        // Dashboard / util
+        Route::get('/stats', [AdminController::class, 'stats']);
 
-    Route::delete('/instituciones/{institucion}',     [InstitucionController::class, 'destroy'])
-        ->middleware('permission:instituciones.eliminar');
+        // Roles
+        Route::get('/roles', [UserController::class, 'rolesDisponibles']);
 
-    Route::patch ('/instituciones/{institucion}/toggle', [InstitucionController::class, 'toggleActivo'])
-        ->middleware('permission:instituciones.editar');
+        // Usuarios extras
+        Route::put ('/usuarios/{usuario}/password', [UserController::class, 'resetPassword']);
+        Route::post('/usuarios/{usuario}/roles',    [UserController::class, 'actualizarRoles']);
+        Route::post('/usuarios',                    [UserController::class, 'store']);
 
     // Catálogos para selects
     Route::get('/catalogo/regionales', [InstitucionController::class, 'catalogoRegionales']);
@@ -101,14 +105,14 @@ Route::middleware('auth:sanctum')->group(function () {
     |----------------------------------------------------------------------
     */
     Route::get('/proyectos',  [ProyectoController::class, 'index'])->middleware('permission:proyectos.ver');
-Route::post('/proyectos', [ProyectoController::class, 'store'])->middleware('permission:proyectos.crear');
+    Route::post('/proyectos', [ProyectoController::class, 'store'])->middleware('permission:proyectos.crear');
 
-Route::get('/proyectos/form-data', [ProyectoController::class, 'formData'])
-    ->middleware('permission:proyectos.crear');
+    Route::get('/proyectos/form-data', [ProyectoController::class, 'formData'])
+        ->middleware('permission:proyectos.crear');
 
-Route::get('/proyectos/{proyecto}', [ProyectoController::class, 'show'])->middleware('permission:proyectos.ver');
-Route::put('/proyectos/{proyecto}', [ProyectoController::class, 'update'])->middleware('permission:proyectos.editar');
-Route::delete('/proyectos/{proyecto}', [ProyectoController::class, 'destroy'])->middleware('permission:proyectos.eliminar');
+    Route::get('/proyectos/{proyecto}', [ProyectoController::class, 'show'])->middleware('permission:proyectos.ver');
+    Route::put('/proyectos/{proyecto}', [ProyectoController::class, 'update'])->middleware('permission:proyectos.editar');
+    Route::delete('/proyectos/{proyecto}', [ProyectoController::class, 'destroy'])->middleware('permission:proyectos.eliminar');
 
     /*
     |----------------------------------------------------------------------
@@ -150,4 +154,5 @@ Route::delete('/proyectos/{proyecto}', [ProyectoController::class, 'destroy'])->
     Route::delete('/asignaciones-jueces/{id}', [AsignacionJuezController::class, 'unassign'])
         ->middleware('permission:jueces.asignar');
 
+});
 });

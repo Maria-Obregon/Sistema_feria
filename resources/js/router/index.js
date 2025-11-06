@@ -8,10 +8,12 @@ import Dashboard from '../pages/Dashboard.vue'
 import NotFound from '../pages/NotFound.vue'
 
 // Carga perezosa de dashboards
-const AdminDashboard       = () => import('../pages/admin/AdminDashboard.vue')
-const InstitucionDashboard = () => import('../pages/instituciones/InstitucionesDashboard.vue')
-const JuezDashboard        = () => import('../pages/juez/JuezDashboard.vue')
-const EstudianteDashboard  = () => import('../pages/estudiantes/EstudiantesDashboard.vue')
+// Carga perezosa de dashboards específicos
+const AdminDashboard        = () => import('../pages/admin/AdminDashboard.vue')
+const InstitucionDashboard  = () => import('../pages/instituciones/InstitucionesDashboard.vue')
+const JuezDashboard         = () => import('../pages/juez/JuezDashboard.vue')
+const EstudianteDashboard   = () => import('../pages/estudiantes/EstudiantesDashboard.vue')
+const AdminConfig = () => import('../pages/admin/AdminConfig.vue')
 
 // Helper: ruta por rol
 const roleRoute = (role) => {
@@ -50,10 +52,11 @@ const routes = [
   // =========================
   // Admin
   // =========================
-  { path: '/admin', name: 'admin.dashboard', component: AdminDashboard, meta: { requiresAuth: true, roles: ['admin'] } },
-  { path: '/admin/users', name: 'admin.users', component: () => import('../pages/admin/Users.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
-  // Admin puede ver también instituciones (comparten componente)
-  { path: '/admin/instituciones', name: 'admin.instituciones', component: () => import('../pages/admin/instituciones/InstitucionesIndex.vue'), meta: { requiresAuth: true, roles: ['admin'] } },
+  
+  { path: '/admin', name: 'admin.dashboard', component: AdminDashboard, meta: { requiresAuth: true, role: 'admin' } },
+  { path: '/admin/users', name: 'admin.users', component: () => import('../pages/admin/Users.vue'), meta: { requiresAuth: true, role: 'admin' } },
+  { path: '/admin/instituciones', name: 'admin.instituciones', component: () => import('../pages/admin/instituciones/InstitucionesIndex.vue'), meta: { requiresAuth: true, role: 'admin' } },
+{ path: '/admin/config', name: 'admin.config', component: AdminConfig, meta: { requiresAuth: true, role: 'admin' } },
 
   // =========================
   // Comité Institucional → Instituciones

@@ -19,8 +19,12 @@
     <!-- Contenido -->
     <main class="max-w-7xl mx-auto px-4 py-6 space-y-4">
       <div class="flex items-center gap-2">
-        <input v-model="buscar" @keyup.enter="load"
-               placeholder="Buscar por nombre o código…" class="border rounded px-3 py-2 w-full md:w-96" />
+        <input
+          v-model="buscar"
+          @keyup.enter="load"
+          placeholder="Buscar por nombre o código…"
+          class="border rounded px-3 py-2 w-full md:w-96"
+        />
         <button @click="load" class="px-3 py-2 rounded bg-slate-100">Buscar</button>
       </div>
 
@@ -151,18 +155,19 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { institucionesApi, institucionesComiteApi } from '@/services/api'
 
 const route = useRoute()
-const router = useRouter()
 const auth  = useAuthStore()
 
 // ¿Estamos en /comite/instituciones?
 const esComite = computed(() => route.name?.toString().startsWith('comite.'))
+
 // Elegimos API según contexto
 const api = computed(() => esComite.value ? institucionesComiteApi : institucionesApi)
+
 // Link “Inicio” según rol
 const homeTarget = computed(() => {
   const role = auth.primaryRole || localStorage.getItem('role')
@@ -173,6 +178,7 @@ const homeTarget = computed(() => {
   return { name: 'dashboard' }
 })
 
+// Estado listado
 const instituciones = ref([])
 const loading = ref(false)
 const buscar = ref('')
