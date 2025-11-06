@@ -40,101 +40,108 @@ class ProyectoController extends Controller
     }
 
     /**
+     * GET /api/proyectos/{proyecto}
+     * Devuelve un proyecto con sus relaciones.
+     */
+    public function show(Proyecto $proyecto)
+    {
+        $proyecto->load(['area','categoria','feria','estudiantes:id,cedula,nombre,apellidos']);
+        return response()->json($proyecto);
+    }
+
+    /**
      * POST /api/proyectos
-     * Crea proyecto y liga estudiantes.
+     * Crea proyecto y liga estudiantes (opcional).
      */
     public function store(Request $request)
-{
-    
-    $data = $request->validate([
-        'titulo'         => 'required|string|max:255',
-        'resumen'        => 'nullable|string',
-        'area_id'        => ['required', Rule::exists('areas', 'id')],
-        'categoria_id'   => ['required', Rule::exists('categorias', 'id')],
-        'institucion_id' => ['nullable', Rule::exists('instituciones', 'id')],
-        'feria_id'       => ['required', Rule::exists('ferias', 'id')],
-        // estudiantes ya es opcional
-        'estudiantes'    => 'nullable|array',
-        'estudiantes.*'  => ['integer', Rule::exists('estudiantes', 'id')],
-    ]);
-
-    $data['institucion_id'] = $data['institucion_id'] ?? optional($request->user())->institucion_id;
-    if (!$data['institucion_id']) {
-        return response()->json(['message' => 'institucion_id es requerido'], 422);
-    }
-
-    // Fuerza enteros por si llegan como string
-    $data['area_id']      = (int) $data['area_id'];
-    $data['categoria_id'] = (int) $data['categoria_id'];
-    $data['feria_id']     = (int) $data['feria_id'];
-
-    try {
-        // Contexto previo para logs
-        \Log::info('[PROYECTOS][STORE] Payload recibido', [
-            'request_all' => $request->all(),
-            'validated'   => $data,
-            'user_id'     => optional($request->user())->id,
+    {
+        $data = $request->validate([
+            'titulo'         => 'required|string|max:255',
+            'resumen'        => 'nullable|string',
+            'area_id'        => ['required', Rule::exists('areas', 'id')],
+            'categoria_id'   => ['required', Rule::exists('categorias', 'id')],
+            'institucion_id' => ['nullable', Rule::exists('instituciones', 'id')],
+            'feria_id'       => ['required', Rule::exists('ferias', 'id')],
+            // estudiantes ahora opcional
+            'estudiantes'    => 'nullable|array',
+            'estudiantes.*'  => ['integer', Rule::exists('estudiantes', 'id')],
         ]);
 
-        // Reglas de negocio
-        $inst = \App\Models\Institucion::findOrFail($data['institucion_id']);
-        if (!$inst->puedeAgregarProyecto()) {
-            return response()->json(['message' => 'Límite de proyectos alcanzado para la institución'], 422);
+        // Hereda institución del usuario si no viene en payload
+        $data['institucion_id'] = $data['institucion_id'] ?? optional($request->user())->institucion_id;
+        if (!$data['institucion_id']) {
+            return response()->json(['message' => 'institucion_id es requerido'], 422);
         }
 
-        $feria = \App\Models\Feria::findOrFail($data['feria_id']);
-        if (!empty($feria->institucion_id) && (int)$feria->institucion_id !== (int)$data['institucion_id']) {
-            return response()->json(['message' => 'La feria no pertenece a la institución seleccionada'], 422);
-        }
+        // Fuerza enteros por si llegan como string
+        $data['area_id']      = (int) $data['area_id'];
+        $data['categoria_id'] = (int) $data['categoria_id'];
+        $data['feria_id']     = (int) $data['feria_id'];
 
-        if (!empty($data['estudiantes'])) {
-            $mismatch = \App\Models\Estudiante::whereIn('id', $data['estudiantes'])
-                ->where('institucion_id', '!=', $data['institucion_id'])
-                ->exists();
-            if ($mismatch) {
-                return response()->json(['message' => 'Hay estudiantes que no pertenecen a esta institución'], 422);
+        try {
+            Log::info('[PROYECTOS][STORE] Payload recibido', [
+                'request_all' => $request->all(),
+                'validated'   => $data,
+                'user_id'     => optional($request->user())->id,
+            ]);
+
+            // Reglas de negocio
+            $inst = Institucion::findOrFail($data['institucion_id']);
+            if (!$inst->puedeAgregarProyecto()) {
+                return response()->json(['message' => 'Límite de proyectos alcanzado para la institución'], 422);
             }
+
+            $feria = Feria::findOrFail($data['feria_id']);
+            // coherencia (si la feria es institucional debe pertenecer a la misma institución)
+            if (!empty($feria->institucion_id) && (int)$feria->institucion_id !== (int)$data['institucion_id']) {
+                return response()->json(['message' => 'La feria no pertenece a la institución seleccionada'], 422);
+            }
+
+            if (!empty($data['estudiantes'])) {
+                $mismatch = Estudiante::whereIn('id', $data['estudiantes'])
+                    ->where('institucion_id', '!=', $data['institucion_id'])
+                    ->exists();
+                if ($mismatch) {
+                    return response()->json(['message' => 'Hay estudiantes que no pertenecen a esta institución'], 422);
+                }
+            }
+
+            DB::beginTransaction();
+
+            $proyecto = Proyecto::create([
+                'titulo'         => $data['titulo'],
+                'resumen'        => $data['resumen'] ?? null,
+                'area_id'        => $data['area_id'],
+                'categoria_id'   => $data['categoria_id'],
+                'institucion_id' => $data['institucion_id'],
+                'feria_id'       => $data['feria_id'],
+                'etapa_actual'   => 1,
+                'estado'         => 'inscrito',
+            ]);
+
+            if (!empty($data['estudiantes'])) {
+                $proyecto->estudiantes()->sync($data['estudiantes']);
+            }
+
+            DB::commit();
+
+            return response()->json(
+                $proyecto->load(['area','categoria','estudiantes:id,cedula,nombre,apellidos']),
+                201
+            );
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            $context = [
+                'request_all' => $request->all(),
+                'validated'   => $data,
+                'user_id'     => optional($request->user())->id,
+            ];
+            $payload = $this->formatAndLogException($e, $context);
+
+            return response()->json($payload, 500);
         }
-
-        DB::beginTransaction();
-
-        $proyecto = \App\Models\Proyecto::create([
-            'titulo'         => $data['titulo'],
-            'resumen'        => $data['resumen'] ?? null,
-            'area_id'        => $data['area_id'],
-            'categoria_id'   => $data['categoria_id'],
-            'institucion_id' => $data['institucion_id'],
-            'feria_id'       => $data['feria_id'],
-            'etapa_actual'   => 1,
-            'estado'         => 'inscrito',
-        ]);
-
-        if (!empty($data['estudiantes'])) {
-            $proyecto->estudiantes()->sync($data['estudiantes']);
-        }
-
-        DB::commit();
-
-        // \Log::debug('QueryLog', DB::getQueryLog()); // si habilitaste enableQueryLog()
-
-        return response()->json(
-            $proyecto->load(['area','categoria','estudiantes:id,cedula,nombre,apellidos']),
-            201
-        );
-    } catch (\Throwable $e) {
-        DB::rollBack();
-
-        // Devuelve detalle *y* lo deja en laravel.log
-        $context = [
-            'request_all' => $request->all(),
-            'validated'   => $data,
-            'user_id'     => optional($request->user())->id,
-        ];
-        $payload = $this->formatAndLogException($e, $context);
-
-        return response()->json($payload, 500);
     }
-}
 
     /**
      * GET /api/proyectos/form-data?institucion_id=...
@@ -149,7 +156,7 @@ class ProyectoController extends Controller
             foreach ($candidates as $c) {
                 if (Schema::hasColumn($table, $c)) return $c;
             }
-            return $fallback; // podría ser null si no hay candidatos
+            return $fallback; // puede ser null si no hay candidatos
         };
 
         // ===== ÁREAS =====
@@ -216,7 +223,6 @@ class ProyectoController extends Controller
                 ->where(function ($w) use ($institucionId) {
                     $w->where('institucion_id', $institucionId)
                       ->orWhereNull('institucion_id');
-                      // si tu esquema usa 0 en vez de NULL, agrega: ->orWhere('institucion_id', 0);
                 })
                 ->select([
                     'id',
@@ -246,6 +252,10 @@ class ProyectoController extends Controller
             'estudiantes' => $est,
         ]);
     }
+
+    /**
+     * Utilidad: formatea/loguea excepciones con detalles SQL cuando aplica.
+     */
     private function formatAndLogException(\Throwable $e, array $context = []): array
     {
         $base = [
@@ -262,18 +272,21 @@ class ProyectoController extends Controller
 
         Log::error('[PROYECTOS][STORE] Excepción', array_merge($base, $context));
 
-        // Respuesta detallada SOLO para depurar (no dejes esto en producción)
+        // Respuesta detallada SOLO para depuración
         return array_merge(['message' => 'Error al crear proyecto'], $base);
     }
 
+    /**
+     * GET /api/proyectos/debug-schema
+     * Inspección rápida de columnas.
+     */
     public function debugSchema()
     {
         return response()->json([
-            'proyectos_columns' => \Schema::getColumnListing('proyectos'),
-            'ferias_columns'    => \Schema::getColumnListing('ferias'),
-            'areas_columns'     => \Schema::getColumnListing('areas'),
-            'categorias_columns'=> \Schema::getColumnListing('categorias'),
+            'proyectos_columns'  => \Schema::getColumnListing('proyectos'),
+            'ferias_columns'     => \Schema::getColumnListing('ferias'),
+            'areas_columns'      => \Schema::getColumnListing('areas'),
+            'categorias_columns' => \Schema::getColumnListing('categorias'),
         ]);
     }
 }
-

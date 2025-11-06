@@ -8,7 +8,7 @@ use Illuminate\Validation\Rule;
 
 class JuezController extends Controller
 {
-    // GET /api/jueces?buscar=...&area_id=...&per_page=...
+    // GET /api/jueces?buscar=&area_id=&per_page=&con_proyectos=1
     public function index(Request $request)
 {
     $q = \App\Models\Juez::query()
@@ -26,14 +26,15 @@ class JuezController extends Controller
 
     if ($request->boolean('con_proyectos')) {
         $q->with(['asignaciones' => function($w){
-            $w->with(['proyecto:id,titulo,categoria_id','proyecto.categoria:id,nombre'])
-              ->orderBy('etapa_id');
+            $w->with([
+                'proyecto:id,titulo,categoria_id',
+                'proyecto.categoria:id,nombre'
+            ])->orderBy('etapa_id');
         }]);
     }
 
     $res = $q->paginate($request->integer('per_page', 15));
 
-    // Normalizamos a un arreglo plano `proyectos` para el front
     if ($request->boolean('con_proyectos')) {
         $res->getCollection()->transform(function ($juez) {
             $juez->proyectos = $juez->asignaciones->map(function ($a) {
@@ -93,7 +94,6 @@ class JuezController extends Controller
     // DELETE /api/jueces/{juez}
     public function destroy(Juez $juez)
     {
-        // evita borrar si tiene asignaciones
         if ($juez->asignaciones()->exists()) {
             return response()->json(['message' => 'No se puede eliminar: tiene asignaciones.'], 422);
         }

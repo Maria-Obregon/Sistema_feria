@@ -11,8 +11,14 @@ class AsignacionJuez extends Model
     protected $fillable = [
         'proyecto_id',
         'juez_id',
-        'etapa_id',     // catálogo de etapas (o tinyint)
+        'etapa_id',     // 1=Institucional, 2=Circuital, 3=Regional (ejemplo)
         'tipo_eval',    // escrito|exposicion|integral
+    ];
+
+    protected $casts = [
+        'proyecto_id' => 'integer',
+        'juez_id'     => 'integer',
+        'etapa_id'    => 'integer',
     ];
 
     public function proyecto()

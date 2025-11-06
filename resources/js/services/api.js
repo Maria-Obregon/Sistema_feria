@@ -92,19 +92,12 @@ export const proyectosApi = {
 }
 // ===== Jueces =====
 export const juecesApi = {
-  listar:   (params={}) => api.get('/jueces', { params }),
-  crear:    (payload)   => api.post('/jueces', payload),
-  actualizar:(id,p)     => api.put(`/jueces/${id}`, p),
-  eliminar: (id)        => api.delete(`/jueces/${id}`),
-
-  // asignación
-  asignarAProyecto: (proyectoId, payload) =>
-    api.post(`/proyectos/${proyectoId}/asignar-jueces`, payload),
-  asignacionesDeProyecto: (proyectoId) =>
-    api.get(`/proyectos/${proyectoId}/asignaciones-jueces`),
-  quitarAsignacion: (asigId) =>
-    api.delete(`/asignaciones-jueces/${asigId}`),
-}
+  listar:     (params = {})          => api.get('/jueces', { params }),
+  crear:      (payload)              => api.post('/jueces', payload),
+  obtener:    (id)                   => api.get(`/jueces/${id}`),
+  actualizar: (id, payload)          => api.put(`/jueces/${id}`, payload),
+  eliminar:   (id)                   => api.delete(`/jueces/${id}`),
+};
 
 export const registroApi = {
   registrarInstitucion: (payload) => api.post('/public/instituciones/registrar', payload),
@@ -131,3 +124,4 @@ export const docsApi = {
 
 
 export default api
+

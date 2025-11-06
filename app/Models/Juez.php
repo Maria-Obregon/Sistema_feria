@@ -34,15 +34,16 @@ class Juez extends Model
         return $this->hasMany(AsignacionJuez::class, 'juez_id');
     }
 
-    public function asignacionesJuez()
-{
-    return $this->hasMany(\App\Models\AsignacionJuez::class, 'proyecto_id');
-}
-
     public function proyectos()
     {
-        return $this->belongsToMany(\App\Models\Proyecto::class, 'asignaciones_jueces', 'juez_id', 'proyecto_id')
+        return $this->belongsToMany(Proyecto::class, 'asignaciones_jueces', 'juez_id', 'proyecto_id')
             ->withPivot(['etapa_id','tipo_eval'])
             ->withTimestamps();
-    }
+/*************  ✨ Windsurf Command ⭐  *************/
+    /**
+     * Devuelve los proyectos a los que est  asignado el juez actual.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+/*******  8b5ab102-ec9f-458f-9fd7-4f4d819843f6  *******/    }
 }
