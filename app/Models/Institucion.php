@@ -10,32 +10,31 @@ class Institucion extends Model
     use HasFactory;
 
     protected $table = 'instituciones';
- 
-    // Configurar nombres de timestamps en español
-   const CREATED_AT = 'creado_en';
-const UPDATED_AT = 'actualizado_en';
+
+    // Timestamps con nombres en español (si tu tabla los usa así)
+    const CREATED_AT = 'creado_en';
+    const UPDATED_AT = 'actualizado_en';
 
     protected $fillable = [
         'nombre',
         'codigo_presupuestario',
-        'direccionreg_id',        // ← ahora existe con este nombre
+        'regional_id',        // <- AHORA este es el nombre oficial
         'circuito_id',
-        'modalidad',
-        'tipo',
+        'modalidad',          // string: Primaria|Secundaria|Técnica
+        'tipo',               // publica|privada|subvencionada
         'telefono',
         'email',
         'direccion',
         'activo',
         'limite_proyectos',
         'limite_estudiantes',
-        'modalidad',
     ];
 
     protected function casts(): array
     {
         return [
-            'activo' => 'boolean',
-            'limite_proyectos' => 'integer',
+            'activo'             => 'boolean',
+            'limite_proyectos'   => 'integer',
             'limite_estudiantes' => 'integer',
         ];
     }
@@ -45,12 +44,10 @@ const UPDATED_AT = 'actualizado_en';
         return $this->belongsTo(Circuito::class);
     }
 
-    // app/Models/Institucion.php
-public function tipoInstitucion() { return $this->belongsTo(\App\Models\TipoInstitucion::class, 'tipo_institucion_id'); }
-public function modalidad()       { return $this->belongsTo(\App\Models\Modalidad::class, 'modalidad_id'); }
-
-    
-public function regional() { return $this->belongsTo(\App\Models\Regional::class, 'direccionreg_id'); }
+    public function regional()
+    {
+        return $this->belongsTo(Regional::class, 'regional_id');
+    }
 
     public function usuarios()
     {
@@ -67,7 +64,7 @@ public function regional() { return $this->belongsTo(\App\Models\Regional::class
         return $this->hasMany(Estudiante::class);
     }
 
-    // Validación de límites
+    // Reglas de negocio
     public function puedeAgregarProyecto(): bool
     {
         return $this->proyectos()->count() < ($this->limite_proyectos ?? 50);

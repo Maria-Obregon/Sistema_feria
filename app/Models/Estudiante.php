@@ -12,7 +12,7 @@ class Estudiante extends Model
     protected $table = 'estudiantes';
 
     protected $fillable = [
-        'usuario_id',        // <-- faltaba
+        'usuario_id',     
         'cedula',
         'nombre',
         'apellidos',
