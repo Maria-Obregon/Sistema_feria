@@ -4,82 +4,77 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Proyecto extends Model
 {
     use HasFactory;
 
     protected $table = 'proyectos';
-
-    protected $fillable = [
-        'titulo',
-        'resumen',
-        'area_id',
-        'categoria_id',
-        'institucion_id',
-        'modalidad_id',
-        'etapa_actual',
-        'estado',
-        'codigo',
-        'palabras_clave',
-        'archivo_proyecto',
-        'archivo_presentacion',
-    ];
-
+protected $fillable = [
+    'codigo',
+    'titulo',
+    'resumen',
+    'area_id',
+    'categoria_id',
+    'institucion_id',
+    'feria_id',
+    'modalidad_id',
+    'etapa_id',          // ⬅️ AÑADIR ESTO
+    'estado',
+    'palabras_clave',
+    'archivo_proyecto',
+    'archivo_presentacion',
+];
     protected function casts(): array
     {
-        return [
-            'palabras_clave' => 'array',
-        ];
+        return ['palabras_clave' => 'array'];
     }
 
-    // Validación de resumen (máximo 250 palabras)
+    // Recorta resumen a 250 palabras
     public function setResumenAttribute($value)
     {
-        $wordCount = str_word_count($value);
-        if ($wordCount > 250) {
-            throw new \Exception('El resumen no puede exceder las 250 palabras');
-        }
-        $this->attributes['resumen'] = $value;
+        $text = (string)($value ?? '');
+        $words = preg_split('/\s+/', trim($text), -1, PREG_SPLIT_NO_EMPTY);
+        if (count($words) > 250) $text = implode(' ', array_slice($words, 0, 250));
+        $this->attributes['resumen'] = $text;
     }
 
-    public function institucion()
+    // Autogenerar código
+    protected static function booted()
     {
-        return $this->belongsTo(Institucion::class);
+        static::creating(function (Proyecto $p) {
+            if (empty($p->codigo)) {
+                $p->codigo = self::nuevoCodigo();
+            }
+        });
     }
 
-    public function estudiantes()
+    public static function nuevoCodigo(): string
     {
-        return $this->belongsToMany(Estudiante::class, 'proyecto_estudiante');
+        do {
+            $codigo = 'PRJ-'.date('y').'-'.Str::upper(Str::random(7));
+        } while (self::where('codigo', $codigo)->exists());
+        return $codigo;
     }
 
-    public function tutores()
-    {
-        return $this->belongsToMany(Usuario::class, 'proyecto_tutor', 'proyecto_id', 'tutor_id');
-    }
-
-    public function calificaciones()
-    {
-        return $this->hasMany(Calificacion::class);
-    }
+    // Relaciones
+    public function institucion()  { return $this->belongsTo(Institucion::class); }
+    public function estudiantes()  { return $this->belongsToMany(Estudiante::class, 'proyecto_estudiante'); }
+    public function tutores()      { return $this->belongsToMany(Usuario::class, 'proyecto_tutor', 'proyecto_id', 'tutor_id'); }
+    public function calificaciones(){ return $this->hasMany(Calificacion::class); }
+    public function area()         { return $this->belongsTo(Area::class); }
+    public function categoria()    { return $this->belongsTo(Categoria::class); }
+    public function feria()        { return $this->belongsTo(Feria::class); }
+    public function modalidad()    { return $this->belongsTo(Modalidad::class); }
+    public function etapa()        { return $this->belongsTo(Etapa::class); }
 
     public function asignacionesJuez()
     {
-        return $this->hasMany(AsignacionJuez::class);
+        return $this->hasMany(\App\Models\AsignacionJuez::class);
     }
 
-    public function area()
-    {
-        return $this->belongsTo(Area::class);
-    }
-
-    public function categoria()
-    {
-        return $this->belongsTo(Categoria::class);
-    }
-
-    public function modalidad()
-    {
-        return $this->belongsTo(Modalidad::class);
-    }
+    /* Scopes opcionales */
+    public function scopeDeEtapa($q, $etapaId) { return $q->where('etapa_id', $etapaId); }
+    public function scopeDeModalidad($q, $modalidadId) { return $q->where('modalidad_id', $modalidadId); }
 }

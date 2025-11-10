@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\Regional;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\Regional;
 
 class RegionalFactory extends Factory
 {
@@ -12,9 +12,7 @@ class RegionalFactory extends Factory
     public function definition(): array
     {
         return [
-            'nombre' => fake()->unique()->state(),
-            'codigo' => fake()->unique()->numerify('##'),
-            'descripcion' => fake()->sentence(),
+            'nombre' => 'Regional ' . $this->faker->unique()->city(),
             'activo' => true,
         ];
     }

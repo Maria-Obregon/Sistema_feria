@@ -10,16 +10,18 @@ class Institucion extends Model
     use HasFactory;
 
     protected $table = 'instituciones';
- 
-    // Configurar nombres de timestamps en español
-   const CREATED_AT = 'creado_en';
-const UPDATED_AT = 'actualizado_en';
+
+    // Timestamps con nombres en español (si tu tabla los usa así)
+    const CREATED_AT = 'creado_en';
+    const UPDATED_AT = 'actualizado_en';
 
     protected $fillable = [
         'nombre',
         'codigo_presupuestario',
+        'regional_id',        // <- AHORA este es el nombre oficial
         'circuito_id',
-        'tipo',
+        'modalidad',          // string: Primaria|Secundaria|Técnica
+        'tipo',               // publica|privada|subvencionada
         'telefono',
         'email',
         'direccion',
@@ -31,8 +33,8 @@ const UPDATED_AT = 'actualizado_en';
     protected function casts(): array
     {
         return [
-            'activo' => 'boolean',
-            'limite_proyectos' => 'integer',
+            'activo'             => 'boolean',
+            'limite_proyectos'   => 'integer',
             'limite_estudiantes' => 'integer',
         ];
     }
@@ -40,6 +42,11 @@ const UPDATED_AT = 'actualizado_en';
     public function circuito()
     {
         return $this->belongsTo(Circuito::class);
+    }
+
+    public function regional()
+    {
+        return $this->belongsTo(Regional::class, 'regional_id');
     }
 
     public function usuarios()
@@ -57,7 +64,7 @@ const UPDATED_AT = 'actualizado_en';
         return $this->hasMany(Estudiante::class);
     }
 
-    // Validación de límites
+    // Reglas de negocio
     public function puedeAgregarProyecto(): bool
     {
         return $this->proyectos()->count() < ($this->limite_proyectos ?? 50);

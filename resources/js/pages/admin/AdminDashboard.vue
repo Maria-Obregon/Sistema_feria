@@ -1,6 +1,15 @@
 <template>
-  <div class="min-h-screen bg-gray-100">
-    <nav class="bg-white shadow">
+  <div class="min-h-screen bg-gray-100 relative">
+    <!-- Fondo con Logo.webp (public/img/Logo.webp) -->
+    <div
+      aria-hidden="true"
+      class="pointer-events-none select-none absolute inset-0
+             bg-[url('/img/Logo.webp')] bg-no-repeat bg-center bg-contain
+             opacity-10"
+    ></div>
+
+    <!-- NAV (contenido por encima del fondo) -->
+    <nav class="relative z-10 bg-white shadow">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
           <div class="flex items-center">
@@ -8,7 +17,7 @@
           </div>
           <div class="flex items-center space-x-4">
             <span class="text-sm text-gray-500">{{ user?.email }}</span>
-            <button 
+            <button
               @click="logout"
               class="text-sm text-red-600 hover:text-red-800"
             >
@@ -19,9 +28,11 @@
       </div>
     </nav>
 
-    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <!-- MAIN (contenido por encima del fondo) -->
+    <main class="relative z-10 max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
       <!-- Estadísticas -->
       <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <!-- Usuarios -->
         <div class="bg-white rounded-lg shadow p-6">
           <div class="flex items-center">
             <div class="p-3 bg-blue-100 rounded-full">
@@ -30,12 +41,13 @@
               </svg>
             </div>
             <div class="ml-4">
-              <p class="text-2xl font-semibold">150</p>
+              <p class="text-2xl font-semibold">{{ cargandoStats ? '…' : stats.usuarios }}</p>
               <p class="text-gray-500">Usuarios</p>
             </div>
           </div>
         </div>
-        
+
+        <!-- Proyectos -->
         <div class="bg-white rounded-lg shadow p-6">
           <div class="flex items-center">
             <div class="p-3 bg-green-100 rounded-full">
@@ -44,12 +56,13 @@
               </svg>
             </div>
             <div class="ml-4">
-              <p class="text-2xl font-semibold">45</p>
+              <p class="text-2xl font-semibold">{{ cargandoStats ? '…' : stats.proyectos }}</p>
               <p class="text-gray-500">Proyectos</p>
             </div>
           </div>
         </div>
 
+        <!-- Instituciones -->
         <div class="bg-white rounded-lg shadow p-6">
           <div class="flex items-center">
             <div class="p-3 bg-yellow-100 rounded-full">
@@ -58,12 +71,13 @@
               </svg>
             </div>
             <div class="ml-4">
-              <p class="text-2xl font-semibold">12</p>
+              <p class="text-2xl font-semibold">{{ cargandoStats ? '…' : stats.instituciones }}</p>
               <p class="text-gray-500">Instituciones</p>
             </div>
           </div>
         </div>
 
+        <!-- Ferias activas -->
         <div class="bg-white rounded-lg shadow p-6">
           <div class="flex items-center">
             <div class="p-3 bg-purple-100 rounded-full">
@@ -72,7 +86,7 @@
               </svg>
             </div>
             <div class="ml-4">
-              <p class="text-2xl font-semibold">3</p>
+              <p class="text-2xl font-semibold">{{ cargandoStats ? '…' : stats.ferias_activas }}</p>
               <p class="text-gray-500">Ferias Activas</p>
             </div>
           </div>
@@ -80,11 +94,11 @@
       </div>
 
       <h2 class="text-lg font-semibold mb-4">Acciones Rápidas</h2>
-      
+
       <!-- Acciones rápidas -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <router-link 
-          :to="{ name: 'admin.instituciones' }"
+        <router-link
+          :to="{ name: 'admin.users' }"
           class="bg-white p-6 rounded-lg shadow-sm border hover:shadow-md transition-shadow"
         >
           <div class="flex items-center">
@@ -100,7 +114,7 @@
           </div>
         </router-link>
 
-        <router-link 
+        <router-link
           :to="{ name: 'admin.instituciones' }"
           class="p-4 bg-white rounded-lg shadow hover:shadow-lg transition-shadow text-left block"
         >
@@ -131,7 +145,9 @@
           </div>
         </button>
 
-        <button class="p-4 bg-white rounded-lg shadow hover:shadow-lg transition-shadow text-left">
+         <router-link
+          :to="{ name: 'admin.proyectos' }"
+        class="p-4 bg-white rounded-lg shadow hover:shadow-lg transition-shadow text-left">
           <div class="flex items-center">
             <div class="p-3 bg-yellow-100 rounded-lg">
               <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -143,13 +159,13 @@
               <p class="text-lg font-semibold">Proyectos</p>
             </div>
           </div>
-        </button>
+                </router-link>
 
         <button class="p-4 bg-white rounded-lg shadow hover:shadow-lg transition-shadow text-left">
           <div class="flex items-center">
             <div class="p-3 bg-red-100 rounded-lg">
               <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2z"></path>
               </svg>
             </div>
             <div class="ml-4">
@@ -159,7 +175,10 @@
           </div>
         </button>
 
-        <button class="p-4 bg-white rounded-lg shadow hover:shadow-lg transition-shadow text-left">
+        <router-link
+          :to="{ name: 'admin.config' }"
+          class="p-4 bg-white rounded-lg shadow hover:shadow-lg transition-shadow text-left"
+        >
           <div class="flex items-center">
             <div class="p-3 bg-indigo-100 rounded-lg">
               <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -172,24 +191,44 @@
               <p class="text-lg font-semibold">Sistema</p>
             </div>
           </div>
-        </button>
+        </router-link>
       </div>
     </main>
   </div>
 </template>
 
+
 <script setup>
 import { useAuthStore } from '../../stores/auth'
 import { useRouter } from 'vue-router'
-import { computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { adminApi } from '@/services/api'
 
 const authStore = useAuthStore()
 const router = useRouter()
 
 const user = computed(() => authStore.user)
+const logout = async () => { await authStore.logout(); router.push('/login') }
 
-const logout = async () => {
-  await authStore.logout()
-  router.push('/login')
-}
+// --- estado para estadísticas
+const cargandoStats = ref(false)
+const stats = ref({ usuarios: 0, proyectos: 0, instituciones: 0, ferias_activas: 0 })
+
+onMounted(async () => {
+  try {
+    cargandoStats.value = true
+    const { data } = await adminApi.stats()
+    stats.value = {
+      usuarios: Number(data?.usuarios ?? 0),
+      proyectos: Number(data?.proyectos ?? 0),
+      instituciones: Number(data?.instituciones ?? 0),
+      ferias_activas: Number(data?.ferias_activas ?? 0),
+    }
+  } catch (e) {
+    // si hay error, mantenemos 0 y podrías mostrar un toast
+    console.error('Error obteniendo stats', e)
+  } finally {
+    cargandoStats.value = false
+  }
+})
 </script>

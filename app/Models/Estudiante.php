@@ -12,6 +12,7 @@ class Estudiante extends Model
     protected $table = 'estudiantes';
 
     protected $fillable = [
+        'usuario_id',     
         'cedula',
         'nombre',
         'apellidos',
@@ -33,6 +34,7 @@ class Estudiante extends Model
         ];
     }
 
+    // Relaciones
     public function institucion()
     {
         return $this->belongsTo(Institucion::class);
@@ -54,7 +56,7 @@ class Estudiante extends Model
         return $query->where('institucion_id', $institucionId);
     }
 
-    // Obtener edad
+    // Atributo calculado: edad
     public function getEdadAttribute()
     {
         return $this->fecha_nacimiento ? $this->fecha_nacimiento->age : null;

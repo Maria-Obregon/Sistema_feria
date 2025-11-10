@@ -15,7 +15,6 @@ return new class extends Migration
             $table->foreignId('area_id')->constrained('areas')->onDelete('restrict');
             $table->foreignId('categoria_id')->constrained('categorias')->onDelete('restrict');
             $table->foreignId('institucion_id')->constrained('instituciones')->onDelete('restrict');
-            $table->enum('etapa_actual', ['institucional', 'circuital', 'regional', 'nacional']);
             $table->enum('estado', ['inscrito', 'en_evaluacion', 'evaluado', 'promovido', 'no_promovido', 'descalificado']);
             $table->json('palabras_clave')->nullable();
             $table->string('archivo_proyecto')->nullable(); // PDF máximo 10MB
@@ -24,11 +23,11 @@ return new class extends Migration
             $table->string('codigo', 30)->unique();
             $table->timestamps();
             
-            $table->index(['institucion_id', 'etapa_actual', 'estado']);
             $table->index(['area_id', 'categoria_id']);
             $table->index('estado');
         });
     }
+    
 
     public function down(): void
     {

@@ -60,9 +60,9 @@ class HistoryUxTest extends TestCase
     {
         $etapa = Etapa::firstOrCreate(['id' => 1, 'nombre' => 'institucional']);
         $area = Area::first();
-        $categoria = Categoria::first();
-        $institucion = Institucion::first();
         $modalidad = Modalidad::firstOrCreate(['nombre' => 'Individual']);
+        $categoria = Categoria::firstOrCreate(['nombre' => 'Categoría Test', 'nivel_id' => null]);
+        $institucion = Institucion::first();
 
         $proyecto = Proyecto::create([
             'titulo' => 'Proyecto ' . ($completada ? 'Completado' : 'Pendiente'),
@@ -80,13 +80,13 @@ class HistoryUxTest extends TestCase
             'proyecto_id' => $proyecto->id,
             'juez_id' => $juez->id,
             'etapa_id' => $etapa->id,
-            'tipo_eval' => 'escrita',
+            'tipo_eval' => 'escrito',
         ]);
 
         if ($completada) {
             $rubrica = Rubrica::firstOrCreate([
                 'nombre' => 'Evaluación Escrita Test',
-                'tipo_eval' => 'escrita',
+                'tipo_eval' => 'escrito',
             ], [
                 'ponderacion' => 0.6,
             ]);

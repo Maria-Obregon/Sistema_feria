@@ -2,25 +2,32 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Modalidad extends Model
 {
-    use HasFactory;
-
     protected $table = 'modalidades';
 
-    protected $fillable = [
-        'nombre',
+    protected $fillable = ['nombre', 'activo', 'nivel_id'];
+
+    protected $casts = [
+        'activo' => 'boolean',
     ];
 
-    protected function casts(): array
+    /* Relaciones */
+    public function nivel()
     {
-        return [
-            'creado_en' => 'datetime',
-            'actualizado_en' => 'datetime',
-        ];
+        return $this->belongsTo(Nivel::class);
+    }
+
+    public function categorias()
+    {
+        return $this->belongsToMany(Categoria::class, 'categoria_modalidad');
+    }
+
+    public function etapas()
+    {
+        return $this->belongsToMany(Etapa::class, 'modalidad_etapa');
     }
 
     public function proyectos()

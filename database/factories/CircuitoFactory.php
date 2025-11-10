@@ -2,8 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Models\Circuito;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\Circuito;
+use App\Models\Regional;
 
 class CircuitoFactory extends Factory
 {
@@ -12,10 +13,10 @@ class CircuitoFactory extends Factory
     public function definition(): array
     {
         return [
-            'nombre' => fake()->unique()->city(),
-            'codigo' => fake()->unique()->numerify('###'),
-            'descripcion' => fake()->sentence(),
-            'activo' => true,
+            'nombre'      => 'Circuito ' . $this->faker->unique()->numerify('##-##'),
+            'codigo'      => $this->faker->unique()->bothify('CIR-####'),
+            'regional_id' => Regional::factory(),
+            'activo'      => true,
         ];
     }
 }

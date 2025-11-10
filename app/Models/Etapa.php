@@ -2,30 +2,19 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Etapa extends Model
 {
-    use HasFactory;
+    protected $fillable = ['nombre'];
 
-    protected $table = 'etapas';
+    // helpers
+    public const INSTITUCIONAL = 'Institucional';
+    public const CIRCUITAL     = 'Circuital';
+    public const REGIONAL      = 'Regional';
 
-    protected $fillable = [
-        'nombre',
-    ];
+    public function ferias()     { return $this->hasMany(Feria::class); }
+    public function modalidades(){ return $this->belongsToMany(Modalidad::class, 'modalidad_etapa'); }
+    public function proyectos()  { return $this->hasMany(Proyecto::class); } // si usás etapa_id en proyectos
 
-    protected function casts(): array
-    {
-        return [
-            'creado_en' => 'datetime',
-            'actualizado_en' => 'datetime',
-        ];
-    }
-
-    // Relación uno a muchos con asignaciones de jueces
-    public function asignaciones()
-    {
-        return $this->hasMany(AsignacionJuez::class, 'etapa_id');
-    }
 }

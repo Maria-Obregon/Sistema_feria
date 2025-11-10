@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('etapas', function (Blueprint $table) {
-            $table->tinyIncrements('id'); // tinyint
-    $table->string('nombre', 100);
-    $table->timestamps();
+       Schema::create('etapas', function (Blueprint $table) {
+                $table->tinyIncrements('id');
+                $table->string('nombre', 30)->unique(); // Institucional, Circuital, Regional
+                $table->timestamps();
         });
     }
 

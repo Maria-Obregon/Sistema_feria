@@ -190,7 +190,7 @@ class StageCloseTest extends TestCase
     private function seedBasicData(): void
     {
         $this->seed(\Database\Seeders\CoreCatalogSeeder::class);
-        Etapa::firstOrCreate(['id' => 1], ['nombre' => 'institucional']);
+        Etapa::firstOrCreate(['nombre' => 'institucional'], ['id' => 1]);
         Modalidad::firstOrCreate(['nombre' => 'Individual']);
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
     }
@@ -238,9 +238,9 @@ class StageCloseTest extends TestCase
     private function createProyecto(): Proyecto
     {
         $area = Area::first();
-        $categoria = Categoria::first();
+        $categoria = Categoria::firstOrCreate(['nombre' => 'Categoría Test', 'nivel_id' => null]);
         $institucion = Institucion::first();
-        $modalidad = Modalidad::first();
+        $modalidad = Modalidad::firstOrCreate(['nombre' => 'Individual']);
 
         return Proyecto::create([
             'titulo' => 'Proyecto Test Cierre',
@@ -261,7 +261,7 @@ class StageCloseTest extends TestCase
             'proyecto_id' => $proyecto->id,
             'juez_id' => $juez->id,
             'etapa_id' => $etapa->id,
-            'tipo_eval' => 'escrita',
+            'tipo_eval' => 'escrito',
             'asignado_en' => now(),
         ]);
     }
@@ -269,7 +269,7 @@ class StageCloseTest extends TestCase
     private function createCriterioEscrita(): Criterio
     {
         $rubrica = Rubrica::firstOrCreate(
-            ['tipo_eval' => 'escrita'],
+            ['tipo_eval' => 'escrito'],
             [
                 'nombre' => 'Evaluación Escrita',
                 'ponderacion' => 0.6,

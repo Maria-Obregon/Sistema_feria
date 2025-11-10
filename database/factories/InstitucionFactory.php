@@ -3,6 +3,8 @@
 namespace Database\Factories;
 
 use App\Models\Institucion;
+use App\Models\Regional;
+use App\Models\Circuito;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class InstitucionFactory extends Factory
@@ -12,13 +14,16 @@ class InstitucionFactory extends Factory
     public function definition(): array
     {
         return [
-            'nombre' => fake()->company(),
-            'codigo_presupuestario' => fake()->unique()->numerify('######'),
-            'tipo' => fake()->randomElement(['publica', 'privada', 'subvencionada']),
-            'telefono' => fake()->phoneNumber(),
-            'correo' => fake()->companyEmail(),
-            'direccion' => fake()->address(),
-            'activo' => true,
+            'nombre'                 => 'Colegio '.$this->faker->company(),
+            'regional_id'            => Regional::factory(),
+            'circuito_id'            => Circuito::factory(),
+            // Campos NOT NULL en tu esquema:
+            'modalidad'              => $this->faker->randomElement(['Académica','Técnica','Artística']),
+            'codigo_presupuestario'  => $this->faker->unique()->numerify('##########'), // 10 dígitos (ajusta si tu migración define longitud/formato)
+            // Otros que sueles tener:
+            'activo'                 => true,
+            'codigo' => $this->faker->unique()->bothify('COLEG-####'),
+
         ];
     }
 }

@@ -1,21 +1,34 @@
 <template>
   <div class="p-6">
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900">Gestión de Instituciones</h1>
-        <p class="text-gray-600">Administra las instituciones del sistema</p>
-      </div>
-      <button
-        @click="abrirModal"
-        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
-      >
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-        </svg>
-        Nueva Institución
-      </button>
+<!-- Header -->
+<div class="flex justify-between items-center mb-6">
+  <div class="flex items-center gap-3">
+    <RouterLink
+      :to="{ name: 'admin.dashboard' }"
+      class="inline-flex items-center gap-2 px-3 py-2 border rounded-lg text-gray-700 hover:bg-gray-50"
+    >
+      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+      Volver
+    </RouterLink>
+
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Gestión de Instituciones</h1>
+      <p class="text-gray-600">Administra las instituciones del sistema</p>
     </div>
+  </div>
+
+  <button
+    @click="abrirModal"
+    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+  >
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+    </svg>
+    Nueva Institución
+  </button>
+</div>
 
     <!-- Filtros -->
     <div class="bg-white rounded-lg shadow-sm border p-4 mb-6">
@@ -89,27 +102,13 @@
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Institución
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Código
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Tipo
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Circuito
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Límites
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Estado
-              </th>
-              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Acciones
-              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Institución</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Circuito</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Límites</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
@@ -145,8 +144,8 @@
                 <button
                   @click="toggleActivo(institucion)"
                   class="inline-flex px-2 py-1 text-xs font-semibold rounded-full cursor-pointer"
-                  :class="institucion.activo 
-                    ? 'bg-green-100 text-green-800 hover:bg-green-200' 
+                  :class="institucion.activo
+                    ? 'bg-green-100 text-green-800 hover:bg-green-200'
                     : 'bg-red-100 text-red-800 hover:bg-red-200'"
                 >
                   {{ institucion.activo ? 'Activa' : 'Inactiva' }}
@@ -154,32 +153,20 @@
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <div class="flex justify-end gap-2">
-                  <button
-                    @click="verDetalles(institucion)"
-                    class="text-blue-600 hover:text-blue-900"
-                    title="Ver detalles"
-                  >
+                  <button @click="verDetalles(institucion)" class="text-blue-600 hover:text-blue-900" title="Ver detalles">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                     </svg>
                   </button>
-                  <button
-                    @click="editarInstitucion(institucion)"
-                    class="text-indigo-600 hover:text-indigo-900"
-                    title="Editar"
-                  >
+                  <button @click="editarInstitucion(institucion)" class="text-indigo-600 hover:text-indigo-900" title="Editar">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                     </svg>
                   </button>
-                  <button
-                    @click="confirmarEliminar(institucion)"
-                    class="text-red-600 hover:text-red-900"
-                    title="Eliminar"
-                  >
+                  <button @click="confirmarEliminar(institucion)" class="text-red-600 hover:text-red-900" title="Eliminar">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1 1v3M4 7h16"></path>
                     </svg>
                   </button>
                 </div>
@@ -270,15 +257,14 @@
           </svg>
         </button>
       </div>
-      
+
       <div class="p-6">
         <form @submit.prevent="guardarInstitucion" class="space-y-6">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
             <!-- Nombre -->
             <div class="md:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">
-                Nombre de la Institución *
-              </label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Nombre de la Institución *</label>
               <input
                 v-model="formulario.nombre"
                 type="text"
@@ -292,9 +278,7 @@
 
             <!-- Código Presupuestario -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
-                Código Presupuestario *
-              </label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Código Presupuestario *</label>
               <input
                 v-model="formulario.codigo_presupuestario"
                 type="text"
@@ -306,30 +290,55 @@
               <p v-if="errores.codigo_presupuestario" class="mt-1 text-sm text-red-600">{{ errores.codigo_presupuestario[0] }}</p>
             </div>
 
+            <!-- Modalidad (NUEVO) -->
+            <div>
+  <label class="block text-sm font-medium text-gray-700 mb-1">Modalidad *</label>
+  <select
+    v-model="formulario.modalidad"
+    required
+    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+    :class="{ 'border-red-500': errores.modalidad }"
+    :disabled="cargandoCatalogos"
+  >
+    <option value="">Seleccionar modalidad</option>
+    <option
+      v-for="m in modalidadesDB"
+      :key="'db-mod-' + m.id"
+      :value="m.nombre"
+    >
+      {{ m.nombre }}
+    </option>
+  </select>
+  <p v-if="errores.modalidad" class="mt-1 text-sm text-red-600">{{ errores.modalidad[0] }}</p>
+</div>
+
+
             <!-- Tipo -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
-                Tipo *
-              </label>
-              <select
-                v-model="formulario.tipo"
-                required
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                :class="{ 'border-red-500': errores.tipo }"
-              >
-                <option value="">Seleccionar tipo</option>
-                <option value="publica">Pública</option>
-                <option value="privada">Privada</option>
-                <option value="subvencionada">Subvencionada</option>
-              </select>
-              <p v-if="errores.tipo" class="mt-1 text-sm text-red-600">{{ errores.tipo[0] }}</p>
-            </div>
+  <label class="block text-sm font-medium text-gray-700 mb-1">Tipo *</label>
+  <select
+    v-model="formulario.tipo"
+    required
+    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+    :class="{ 'border-red-500': errores.tipo }"
+    :disabled="cargandoCatalogos"
+  >
+    <option value="">Seleccionar tipo</option>
+    <option
+      v-for="t in tiposInstitucionDB"
+      :key="'db-tipo-' + t.id"
+      :value="t.nombre"
+    >
+      {{ t.nombre }}
+    </option>
+  </select>
+  <p v-if="errores.tipo" class="mt-1 text-sm text-red-600">{{ errores.tipo[0] }}</p>
+</div>
+
 
             <!-- Circuito -->
             <div class="md:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">
-                Circuito *
-              </label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Circuito *</label>
               <select
                 v-model="formulario.circuito_id"
                 required
@@ -346,9 +355,7 @@
 
             <!-- Teléfono -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
-                Teléfono
-              </label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
               <input
                 v-model="formulario.telefono"
                 type="tel"
@@ -361,9 +368,7 @@
 
             <!-- Email -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
-                Email
-              </label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
               <input
                 v-model="formulario.email"
                 type="email"
@@ -376,9 +381,7 @@
 
             <!-- Dirección -->
             <div class="md:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">
-                Dirección
-              </label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
               <textarea
                 v-model="formulario.direccion"
                 rows="3"
@@ -390,14 +393,11 @@
 
             <!-- Límites -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
-                Límite de Proyectos
-              </label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Límite de Proyectos</label>
               <input
                 v-model.number="formulario.limite_proyectos"
                 type="number"
-                min="1"
-                max="50"
+                min="1" max="50"
                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 :class="{ 'border-red-500': errores.limite_proyectos }"
               />
@@ -406,14 +406,11 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
-                Límite de Estudiantes
-              </label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Límite de Estudiantes</label>
               <input
                 v-model.number="formulario.limite_estudiantes"
                 type="number"
-                min="1"
-                max="200"
+                min="1" max="200"
                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 :class="{ 'border-red-500': errores.limite_estudiantes }"
               />
@@ -459,6 +456,7 @@
                 </span>
               </button>
             </div>
+
           </div>
         </form>
       </div>
@@ -484,6 +482,7 @@
   </div>
 </template>
 
+
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useToast } from '@/composables/useToast'
@@ -495,7 +494,15 @@ const { mostrarToast } = useToast()
 
 // Estado
 const cargando = ref(false)
-const instituciones = ref({})
+const instituciones = ref({
+  data: [],
+  current_page: 1,
+  last_page: 1,
+  total: 0,
+  from: 0,
+  to: 0,
+})
+
 const circuitos = ref([])
 const filtros = ref({
   buscar: '',
@@ -516,6 +523,7 @@ const guardando = ref(false)
 const errores = ref({})
 const formulario = ref({
   nombre: '',
+  modalidad: '',              // <-- NUEVO (se mantiene como texto)
   codigo_presupuestario: '',
   circuito_id: '',
   tipo: '',
@@ -559,23 +567,57 @@ const cargarInstituciones = async (pagina = 1) => {
     const params = {
       page: pagina,
       per_page: 15,
-      ...filtros.value
+      buscar: filtros.value.buscar || undefined,
+      tipo: filtros.value.tipo || undefined,
+      circuito_id: filtros.value.circuito_id || undefined,
+      activo: filtros.value.activo || undefined,
     }
-    
-    // Limpiar parámetros vacíos
-    Object.keys(params).forEach(key => {
-      if (params[key] === '' || params[key] === null || params[key] === undefined) {
-        delete params[key]
+
+    const { data } = await institucionesApi.listar(params)
+
+    // Normalización robusta (soporta arreglo plano o paginador Laravel)
+    if (Array.isArray(data)) {
+      instituciones.value = {
+        data,
+        current_page: 1,
+        last_page: 1,
+        total: data.length,
+        from: data.length ? 1 : 0,
+        to: data.length
       }
-    })
-    
-    const response = await institucionesApi.listar(params)
-    instituciones.value = response.data
-  } catch (error) {
-    console.error('Error al cargar instituciones:', error)
+    } else if (Array.isArray(data?.data)) {
+      instituciones.value = data
+    } else if (Array.isArray(data?.data?.data)) {
+      instituciones.value = data.data
+    } else {
+      console.warn('Formato inesperado en /instituciones:', data)
+      instituciones.value = { data: [], current_page: 1, last_page: 1, total: 0, from: 0, to: 0 }
+    }
+  } catch (e) {
+    console.error('Error al cargar instituciones:', e)
     mostrarToast('Error al cargar las instituciones', 'error')
   } finally {
     cargando.value = false
+  }
+}
+
+/* =========================
+   Catálogos desde BD (AGREGADO)
+   ========================= */
+const modalidadesDB = ref([])        // [{ id, nombre }]
+const tiposInstitucionDB = ref([])   // [{ id, nombre }]
+const cargandoCatalogos = ref(false)
+
+const cargarCatalogos = async () => {
+  cargandoCatalogos.value = true
+  try {
+    const { data } = await institucionesApi.obtenerCatalogos()
+    modalidadesDB.value      = data?.modalidades ?? []
+    tiposInstitucionDB.value = data?.tipos_institucion ?? []
+  } catch (e) {
+    // opcional: console.warn(e)
+  } finally {
+    cargandoCatalogos.value = false
   }
 }
 
@@ -602,12 +644,14 @@ const cambiarPagina = (pagina) => {
 const abrirModal = () => {
   resetearFormulario()
   institucionSeleccionada.value = null
+  cargarCatalogos() // <-- AGREGADO
   mostrarModal.value = true
 }
 
 const editarInstitucion = (institucion) => {
   institucionSeleccionada.value = { ...institucion }
   cargarDatosFormulario(institucion)
+  cargarCatalogos() // <-- AGREGADO
   mostrarModal.value = true
 }
 
@@ -620,6 +664,7 @@ const cerrarModal = () => {
 const resetearFormulario = () => {
   formulario.value = {
     nombre: '',
+    modalidad: '',                // <-- AGREGADO: resetea modalidad también
     codigo_presupuestario: '',
     circuito_id: '',
     tipo: '',
@@ -638,6 +683,7 @@ const cargarDatosFormulario = (institucion) => {
     nombre: institucion.nombre || '',
     codigo_presupuestario: institucion.codigo_presupuestario || '',
     circuito_id: institucion.circuito_id || '',
+    modalidad: institucion.modalidad || '',
     tipo: institucion.tipo || '',
     telefono: institucion.telefono || '',
     email: institucion.email || '',
@@ -741,5 +787,6 @@ const manejarGuardado = () => {
 onMounted(() => {
   cargarInstituciones()
   cargarCircuitos()
+  cargarCatalogos() // <-- AGREGADO
 })
 </script>

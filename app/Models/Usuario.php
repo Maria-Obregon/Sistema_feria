@@ -27,8 +27,6 @@ class Usuario extends Authenticatable
         'circuito_id',
         'institucion_id',
         'telefono',
-        'identificacion',
-        'tipo_identificacion',
     ];
 
     protected $hidden = [

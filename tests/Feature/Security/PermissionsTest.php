@@ -118,6 +118,7 @@ class PermissionsTest extends TestCase
     {
         Etapa::create(['id' => 1, 'nombre' => 'institucional']);
         Modalidad::firstOrCreate(['nombre' => 'Individual']);
+        Categoria::firstOrCreate(['nombre' => 'Categoría Test', 'nivel_id' => null]);
 
         $usuario = $this->crearUsuarioJuezSinPermisos();
 
