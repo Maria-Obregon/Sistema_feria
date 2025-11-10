@@ -11,23 +11,21 @@ class Proyecto extends Model
     use HasFactory;
 
     protected $table = 'proyectos';
-
-    protected $fillable = [
-        'codigo', // <-- añade esto
-        'titulo',
-        'resumen',
-        'area_id',
-        'categoria_id',
-        'institucion_id',
-        'feria_id',
-        'etapa_actual',
-        'estado',
-        'palabras_clave',
-        'archivo_proyecto',
-        'archivo_presentacion',
-        'modalidad_id',
-    ];
-
+protected $fillable = [
+    'codigo',
+    'titulo',
+    'resumen',
+    'area_id',
+    'categoria_id',
+    'institucion_id',
+    'feria_id',
+    'modalidad_id',
+    'etapa_id',          // ⬅️ AÑADIR ESTO
+    'estado',
+    'palabras_clave',
+    'archivo_proyecto',
+    'archivo_presentacion',
+];
     protected function casts(): array
     {
         return ['palabras_clave' => 'array'];
@@ -42,12 +40,11 @@ class Proyecto extends Model
         $this->attributes['resumen'] = $text;
     }
 
-    // ==== AUTOGENERAR CÓDIGO ANTES DEL INSERT ====
+    // Autogenerar código
     protected static function booted()
     {
         static::creating(function (Proyecto $p) {
             if (empty($p->codigo)) {
-                // Ej: PRJ-25-ABC1234 (<= 30 chars)
                 $p->codigo = self::nuevoCodigo();
             }
         });
@@ -62,16 +59,22 @@ class Proyecto extends Model
     }
 
     // Relaciones
-    public function institucion() { return $this->belongsTo(Institucion::class); }
-    public function estudiantes() { return $this->belongsToMany(Estudiante::class, 'proyecto_estudiante'); }
-    public function tutores()     { return $this->belongsToMany(Usuario::class, 'proyecto_tutor', 'proyecto_id', 'tutor_id'); }
+    public function institucion()  { return $this->belongsTo(Institucion::class); }
+    public function estudiantes()  { return $this->belongsToMany(Estudiante::class, 'proyecto_estudiante'); }
+    public function tutores()      { return $this->belongsToMany(Usuario::class, 'proyecto_tutor', 'proyecto_id', 'tutor_id'); }
     public function calificaciones(){ return $this->hasMany(Calificacion::class); }
-    public function area()        { return $this->belongsTo(Area::class); }
-    public function categoria()   { return $this->belongsTo(Categoria::class); }
-    public function feria()       { return $this->belongsTo(Feria::class); }
+    public function area()         { return $this->belongsTo(Area::class); }
+    public function categoria()    { return $this->belongsTo(Categoria::class); }
+    public function feria()        { return $this->belongsTo(Feria::class); }
+    public function modalidad()    { return $this->belongsTo(Modalidad::class); }
+    public function etapa()        { return $this->belongsTo(Etapa::class); }
 
     public function asignacionesJuez()
-{
-    return $this->hasMany(\App\Models\AsignacionJuez::class);
-}
+    {
+        return $this->hasMany(\App\Models\AsignacionJuez::class);
+    }
+
+    /* Scopes opcionales */
+    public function scopeDeEtapa($q, $etapaId) { return $q->where('etapa_id', $etapaId); }
+    public function scopeDeModalidad($q, $modalidadId) { return $q->where('modalidad_id', $modalidadId); }
 }

@@ -15,95 +15,66 @@ class CoreCatalogSeeder extends Seeder
     {
         // Crear Regionales
         $regional1 = Regional::create([
-            'nombre' => 'Regional de San José',
-            'activo' => true,
-        ]);
-
-        $regional2 = Regional::create([
-            'nombre' => 'Regional de Alajuela',
+            'nombre' => 'Regional de la Zona Norte-Norte',
             'activo' => true,
         ]);
 
         // Crear Circuitos
         $circuito1 = Circuito::create([
-            'nombre' => 'Circuito 01 - San José Centro',
-            'codigo' => 'C01-SJ',
+            'nombre' => 'Circuito Escolar 01 - Upala',
+            'codigo' => 'C01-NN',
             'regional_id' => $regional1->id,
             'activo' => true,
         ]);
 
         $circuito2 = Circuito::create([
-            'nombre' => 'Circuito 02 - Desamparados',
-            'codigo' => 'C02-SJ',
+            'nombre' => 'Circuito Escolar 02 - Aguas Claras',
+            'codigo' => 'C02-NN',
             'regional_id' => $regional1->id,
             'activo' => true,
         ]);
 
-        $circuito3 = Circuito::create([
-            'nombre' => 'Circuito 01 - Alajuela Centro',
-            'codigo' => 'C01-AL',
-            'regional_id' => $regional2->id,
+         $circuito3 = Circuito::create([
+            'nombre' => 'Circuito Escolar 03 - San José de Upala',
+            'codigo' => 'C03-NN',
+            'regional_id' => $regional1->id,
+            'activo' => true,
+        ]);
+
+        $circuito4 = Circuito::create([
+            'nombre' => 'Circuito Escolar 04 - Canalete',
+            'codigo' => 'C04-NN',
+            'regional_id' => $regional1->id,
             'activo' => true,
         ]);
 
         // Crear Instituciones de ejemplo
          Institucion::create([
-            'nombre'               => 'Liceo de Costa Rica',
-            'modalidad'            => 'Académica',               // <- requerido por tu migración
+            'nombre'               => 'Liceo de San José de Upala',
+            'modalidad'            => 'Académica',             
             'codigo_presupuestario'=> 'LCR-001',
-            'direccionreg_id'      => $regional1->id,           // FK a regionales
-            'circuito_id'          => $circuito1->id,            // FK a circuitos
+            'regional_id'          => $regional1->id,           // FK a regionales
+            'circuito_id'          => $circuito3->id,            // FK a circuitos
             'tipo'                 => 'publica',
-            'telefono'             => '2222-3333',
-            'email'                => 'info@liceocr.ed.cr',      // tu migración usa 'email' (no 'correo')
-            'direccion'            => 'San José Centro',
+            'telefono'             => '2200-5177',
+            'email'                => 'lic.sanjosedeupala@mep.go.cr', 
+            'direccion'            => '75metros Noreste de la entrada Las Camelias, Barrio La Unión, San Jose de Upala',
             'activo'               => true,
             'limite_proyectos'     => 50,
             'limite_estudiantes'   => 200,
         ]);
-
-        Institucion::create([
-            'nombre'               => 'Colegio Superior de Señoritas',
-            'modalidad'            => 'Académica',
-            'codigo_presupuestario'=> 'CSS-002',
-            'direccionreg_id'      => $regional2->id,
-            'circuito_id'          => $circuito1->id,
-            'tipo'                 => 'publica',
-            'telefono'             => '2222-4444',
-            'email'                => 'info@colegiosenoritas.ed.cr',
-            'direccion'            => 'San José Centro',
-            'activo'               => true,
-            'limite_proyectos'     => 50,
-            'limite_estudiantes'   => 200,
-        ]);
-
 
         // Crear Áreas científicas
         Area::create(['nombre' => 'Biología']);
-        Area::create(['nombre' => 'Física']);
+        Area::create(['nombre' => 'Ciencias Ambientales']);
+        Area::create(['nombre' => 'Ciencias de la Computación']);
+        Area::create(['nombre' => 'Ciencias de la Tierra y del Espacio']);
+        Area::create(['nombre' => 'Ciencias Sociales y Humanidades']);
+        Area::create(['nombre' => 'Física y Matemática']);
+        Area::create(['nombre' => 'Ingeniería y Tecnología']);
         Area::create(['nombre' => 'Química']);
-        Area::create(['nombre' => 'Matemática']);
-        Area::create(['nombre' => 'Informática']);
-        Area::create(['nombre' => 'Ciencias Sociales']);
-        Area::create(['nombre' => 'Ingeniería']);
+        Area::create(['nombre' => 'Salud y Medicina']);
 
-        // Crear Categorías
-        Categoria::create([
-            'nombre' => 'Investigación Científica',
-            'nivel' => 'ambos',
-        ]);
-
-        Categoria::create([
-            'nombre' => 'Desarrollo Tecnológico',
-            'nivel' => 'secundaria',
-        ]);
-
-        Categoria::create([
-            'nombre' => 'Demostración de Principios',
-            'nivel' => 'primaria',
-        ]);
-
-        $this->command->info('Catálogos base creados exitosamente');
     }
 }
 

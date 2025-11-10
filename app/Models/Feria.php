@@ -10,4 +10,5 @@ class Feria extends Model
   public function circuito(){ return $this->belongsTo(Circuito::class); }
   public function regional(){ return $this->belongsTo(Regional::class); }
   public function proyectos(){ return $this->hasMany(Proyecto::class); }
+  public function etapa() { return $this->belongsTo(Etapa::class); }
 }

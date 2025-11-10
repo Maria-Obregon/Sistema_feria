@@ -11,7 +11,7 @@ class JuezController extends Controller
     // GET /api/jueces?buscar=&area_id=&per_page=&con_proyectos=1
     public function index(Request $request)
 {
-    $q = \App\Models\Juez::query()
+    $q = Juez::query()
         ->when($request->filled('buscar'), function($qq) use ($request) {
             $b = $request->get('buscar');
             $qq->where(function($w) use ($b) {

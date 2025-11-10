@@ -56,6 +56,7 @@ const routes = [
   { path: '/admin', name: 'admin.dashboard', component: AdminDashboard, meta: { requiresAuth: true, role: 'admin' } },
   { path: '/admin/users', name: 'admin.users', component: () => import('../pages/admin/Users.vue'), meta: { requiresAuth: true, role: 'admin' } },
   { path: '/admin/instituciones', name: 'admin.instituciones', component: () => import('../pages/admin/instituciones/InstitucionesIndex.vue'), meta: { requiresAuth: true, role: 'admin' } },
+  { path: '/admin/proyectos', name: 'admin.proyectos', component: () => import('../pages/admin/AdminProyectos.vue'), meta: { requiresAuth: true, role: 'admin' } },
 { path: '/admin/config', name: 'admin.config', component: AdminConfig, meta: { requiresAuth: true, role: 'admin' } },
 
   // =========================

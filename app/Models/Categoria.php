@@ -17,4 +17,7 @@ class Categoria extends Model
     {
         return $this->hasMany(Proyecto::class);
     }
+    public function modalidades() {
+    return $this->belongsToMany(\App\Models\Modalidad::class, 'categoria_modalidad');
+}
 }

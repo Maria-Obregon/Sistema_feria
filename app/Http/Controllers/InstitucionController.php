@@ -6,6 +6,8 @@ use App\Models\Institucion;
 use App\Models\Circuito;
 use App\Models\Regional;
 use App\Models\Usuario;
+use App\Models\Modalidad;
+use App\Models\TipoInstitucion;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
@@ -13,122 +15,164 @@ use Illuminate\Support\Str;
 
 class InstitucionController extends Controller
 {
-    /**
-     * GET /api/instituciones
-     */
+    /** ========== Helpers ========== */
+    /** Colapsa espacios y trimea (evita falsos duplicados de código) */
+    private function normaliza(?string $v): ?string
+    {
+        if ($v === null) return null;
+        return trim(preg_replace('/\s+/', ' ', $v));
+    }
+
+    /** Resuelve modalidad/tipo desde IDs a texto sin romper el esquema actual */
+    private function hidrataCatalogosEnTexto(array &$data): void
+    {
+        if (!empty($data['modalidad_id'])) {
+            $data['modalidad'] = Modalidad::whereKey($data['modalidad_id'])->value('nombre');
+        }
+        if (!empty($data['tipo_institucion_id'])) {
+            $data['tipo'] = TipoInstitucion::whereKey($data['tipo_institucion_id'])->value('nombre');
+        }
+    }
+
+    /** Valida que exista modalidad y tipo (por id o por texto ya resuelto) */
+    private function requireModalidadTipo(array $data)
+    {
+        if (empty($data['modalidad'])) {
+            abort(response()->json(['message' => 'La modalidad es requerida'], 422));
+        }
+        if (empty($data['tipo'])) {
+            abort(response()->json(['message' => 'El tipo de institución es requerido'], 422));
+        }
+    }
+
+    /** Ajusta regional/direccionreg en base al circuito (o valida coherencia si regional_id viene) */
+    private function resolverRegional(array &$data): void
+    {
+        $circuito = Circuito::select('id', 'regional_id')->findOrFail($data['circuito_id']);
+
+        // Si vino regional_id, validar coherencia
+        if (!empty($data['regional_id']) && (int)$data['regional_id'] !== (int)$circuito->regional_id) {
+            abort(response()->json(['message' => 'El circuito seleccionado no pertenece a la Dirección Regional indicada.'], 422));
+        }
+
+        // Derivar/forzar regional desde el circuito
+        $data['regional_id'] = $circuito->regional_id;
+
+        // Compatibilidad con esquemas que usan direccionreg_id
+        $data['direccionreg_id'] = $circuito->regional_id;
+    }
+
+    /** ========== Listado ========== */
+    // GET /api/instituciones
     public function index(Request $request)
     {
-        $q = Institucion::with(['circuito.regional', 'regional']);
+        $q = Institucion::with(['circuito.regional', 'regional'])
+            ->when($request->filled('buscar'), function ($qq) use ($request) {
+                $buscar = $this->normaliza($request->get('buscar'));
+                $qq->where(function ($s) use ($buscar) {
+                    $s->where('nombre', 'like', "%{$buscar}%")
+                      ->orWhere('codigo_presupuestario', 'like', "%{$buscar}%");
+                });
+            })
+            ->when($request->filled('tipo'), fn($qq) => $qq->where('tipo', $request->tipo))
+            ->when($request->filled('circuito_id'), fn($qq) => $qq->where('circuito_id', $request->circuito_id))
+            ->when($request->has('activo') && $request->get('activo') !== null, function ($qq) use ($request) {
+                $qq->where('activo', filter_var($request->get('activo'), FILTER_VALIDATE_BOOLEAN));
+            })
+            ->orderBy('nombre');
 
-        if ($request->filled('buscar')) {
-            $buscar = trim(preg_replace('/\s+/', ' ', $request->get('buscar')));
-
-            $q->where(function ($qq) use ($buscar) {
-                $qq->where('nombre', 'like', "%{$buscar}%")
-                   ->orWhere('codigo_presupuestario', 'like', "%{$buscar}%");
-            });
-        }
-
-        if ($request->filled('tipo'))        $q->where('tipo', $request->get('tipo'));
-        if ($request->filled('circuito_id')) $q->where('circuito_id', $request->get('circuito_id'));
-        if ($request->has('activo') && $request->get('activo') !== null) {
-            $q->where('activo', filter_var($request->get('activo'), FILTER_VALIDATE_BOOLEAN));
-        }
-
-        $data = $q->orderBy('nombre')->paginate($request->integer('per_page', 15));
-        return response()->json($data);
+        return response()->json($q->paginate($request->integer('per_page', 15)));
     }
 
-    /**
-     * Normaliza el código (trim + colapsa espacios)
-     */
-    private function normalizaCodigo(?string $codigo): ?string
-    {
-        if ($codigo === null) return null;
-        return trim(preg_replace('/\s+/', ' ', $codigo));
-    }
-
-    /**
-     * POST /api/instituciones
-     */
+    /** ========== Crear ========== */
+    // POST /api/instituciones
     public function store(Request $request)
     {
-        // Normalización del código (evita falsos duplicados por espacios)
+        // Normalizar código (acepta codigo o codigo_presupuestario)
         if ($request->has('codigo_presupuestario') || $request->has('codigo')) {
             $codigo = $request->input('codigo_presupuestario', $request->input('codigo'));
-            $request->merge(['codigo_presupuestario' => $this->normalizaCodigo($codigo)]);
+            $request->merge(['codigo_presupuestario' => $this->normaliza($codigo)]);
         }
 
-        $datos = $request->validate([
+        $data = $request->validate([
             'nombre'                => 'required|string|max:200',
             'codigo_presupuestario' => 'required|string|max:20|unique:instituciones,codigo_presupuestario',
-            'regional_id'           => 'required|exists:regionales,id',
             'circuito_id'           => 'required|exists:circuitos,id',
-            'modalidad'             => ['required', Rule::in(['Primaria','Secundaria','Técnica'])],
-            'tipo'                  => ['required', Rule::in(['publica','privada','subvencionada'])],
+            // regional_id es opcional; si viene se valida coherencia; si no, se deriva del circuito
+            'regional_id'           => 'nullable|exists:regionales,id',
+
+            // Catálogos: acepta ID o texto. Si vienen IDs, se mapeará a texto.
+            'modalidad'             => 'nullable|string|max:100',
+            'tipo'                  => 'nullable|string|max:100',
+            'modalidad_id'          => 'nullable|exists:modalidades,id',
+            'tipo_institucion_id'   => 'nullable|exists:tipos_institucion,id',
+
             'telefono'              => 'nullable|string|max:20',
             'email'                 => 'nullable|email|max:100',
             'direccion'             => 'nullable|string',
             'limite_proyectos'      => 'nullable|integer|min:1|max:50',
             'limite_estudiantes'    => 'nullable|integer|min:1|max:200',
-            'activo'                => 'nullable|boolean',
+            'activo'                => 'boolean',
 
+            // Opcional: emisión de credenciales al responsable del comité institucional
             'emitir_credenciales'   => 'sometimes|boolean',
             'responsable_nombre'    => 'nullable|string|max:255',
             'responsable_email'     => 'nullable|email|max:120|unique:usuarios,email',
             'responsable_telefono'  => 'nullable|string|max:20',
         ]);
 
-        // Coherencia circuito ↔ regional
-        $circuito = Circuito::select('id','regional_id')->findOrFail($datos['circuito_id']);
-        if ((int)$circuito->regional_id !== (int)$datos['regional_id']) {
-            return response()->json(['message' => 'El circuito seleccionado no pertenece a la Dirección Regional indicada.'], 422);
-        }
+        // Mapear modalidad/tipo desde IDs si vinieron
+        $this->hidrataCatalogosEnTexto($data);
+        // Requerir que exista modalidad y tipo (por id o por texto)
+        $this->requireModalidadTipo($data);
+        // Resolver/validar regional en base al circuito
+        $this->resolverRegional($data);
 
         // Defaults
-        $datos['limite_proyectos']   = $datos['limite_proyectos']   ?? 50;
-        $datos['limite_estudiantes'] = $datos['limite_estudiantes'] ?? 200;
-        $datos['activo']             = array_key_exists('activo', $datos) ? (bool)$datos['activo'] : true;
+        $data['limite_proyectos']   = $data['limite_proyectos']   ?? 50;
+        $data['limite_estudiantes'] = $data['limite_estudiantes'] ?? 200;
+        $data['activo']             = array_key_exists('activo', $data) ? (bool)$data['activo'] : true;
 
         DB::beginTransaction();
         try {
             $institucion = Institucion::create([
-                'nombre'                => $datos['nombre'],
-                'codigo_presupuestario' => $datos['codigo_presupuestario'],
-                'regional_id'           => $datos['regional_id'],
-                'circuito_id'           => $datos['circuito_id'],
-                'modalidad'             => $datos['modalidad'],
-                'tipo'                  => $datos['tipo'],
-                'telefono'              => $datos['telefono'] ?? null,
-                'email'                 => $datos['email'] ?? null,
-                'direccion'             => $datos['direccion'] ?? null,
-                'limite_proyectos'      => $datos['limite_proyectos'],
-                'limite_estudiantes'    => $datos['limite_estudiantes'],
-                'activo'                => $datos['activo'],
+                'nombre'                => $data['nombre'],
+                'codigo_presupuestario' => $data['codigo_presupuestario'],
+                'regional_id'           => $data['regional_id'],     // esquema nuevo
+                'direccionreg_id'       => $data['direccionreg_id'], // compat. esquema previo
+                'circuito_id'           => $data['circuito_id'],
+                'modalidad'             => $data['modalidad'],
+                'tipo'                  => $data['tipo'],
+                'telefono'              => $data['telefono'] ?? null,
+                'email'                 => $data['email'] ?? null,
+                'direccion'             => $data['direccion'] ?? null,
+                'limite_proyectos'      => $data['limite_proyectos'],
+                'limite_estudiantes'    => $data['limite_estudiantes'],
+                'activo'                => $data['activo'],
             ]);
 
             $institucion->load(['circuito.regional', 'regional']);
 
             $resp = [
-                'message'     => 'Institución creada exitosamente',
+                'mensaje'     => 'Institución creada',
                 'institucion' => $institucion,
             ];
 
-            // Credenciales (opcional)
+            // Emisión opcional de credenciales de comité institucional
             if ($request->boolean('emitir_credenciales') && $request->filled('responsable_email')) {
                 $plain = Str::upper(Str::random(10));
-
                 $usuario = Usuario::create([
-                    'nombre'         => $datos['responsable_nombre'] ?? ($institucion->nombre . ' - Responsable'),
-                    'email'          => $datos['responsable_email'],
-                    'password'       => $plain,   // se hashea por cast en Usuario
+                    'nombre'         => $data['responsable_nombre'] ?? ($institucion->nombre.' - Responsable'),
+                    'email'          => $data['responsable_email'],
+                    'password'       => $plain, // asumiendo mutator/Hash en el modelo
                     'activo'         => true,
                     'institucion_id' => $institucion->id,
-                    'telefono'       => $datos['responsable_telefono'] ?? null,
+                    'telefono'       => $data['responsable_telefono'] ?? null,
                 ]);
-
-                $usuario->assignRole('comite_institucional');
-
+                // Rol para comité
+                if (method_exists($usuario, 'assignRole')) {
+                    $usuario->assignRole('comite_institucional');
+                }
                 $resp['credenciales'] = [
                     'usuario'  => $usuario->email,
                     'password' => $plain,
@@ -147,127 +191,127 @@ class InstitucionController extends Controller
         }
     }
 
-    /**
-     * GET /api/instituciones/{institucion}
-     */
+    /** ========== Mostrar ========== */
+    // GET /api/instituciones/{institucion}
     public function show(Institucion $institucion)
     {
         $institucion->load(['circuito.regional', 'regional', 'usuarios', 'proyectos', 'estudiantes']);
 
         $estadisticas = [
-            'total_usuarios'      => $institucion->usuarios()->count(),
-            'total_proyectos'     => $institucion->proyectos()->count(),
-            'total_estudiantes'   => $institucion->estudiantes()->count(),
-            'proyectos_por_etapa' => $institucion->proyectos()
-                ->selectRaw('etapa_actual, COUNT(*) AS total')
+            'total_usuarios'       => $institucion->usuarios()->count(),
+            'total_proyectos'      => $institucion->proyectos()->count(),
+            'total_estudiantes'    => $institucion->estudiantes()->count(),
+            'proyectos_por_etapa'  => $institucion->proyectos()
+                ->selectRaw('etapa_actual, COUNT(*) as total')
                 ->groupBy('etapa_actual')
-                ->pluck('total', 'etapa_actual'),
-            'proyectos_por_estado'=> $institucion->proyectos()
-                ->selectRaw('estado, COUNT(*) AS total')
+                ->pluck('total','etapa_actual'),
+            'proyectos_por_estado' => $institucion->proyectos()
+                ->selectRaw('estado, COUNT(*) as total')
                 ->groupBy('estado')
-                ->pluck('total', 'estado'),
+                ->pluck('total','estado'),
         ];
 
         return response()->json([
-            'institucion' => $institucion,
-            'estadisticas'=> $estadisticas,
+            'institucion'  => $institucion,
+            'estadisticas' => $estadisticas,
         ]);
     }
 
-    /**
-     * PUT /api/instituciones/{institucion}
-     */
+    /** ========== Actualizar ========== */
+    // PUT /api/instituciones/{institucion}
     public function update(Request $request, Institucion $institucion)
     {
-        // Normaliza el código entrante
         if ($request->has('codigo_presupuestario') || $request->has('codigo')) {
             $codigo = $request->input('codigo_presupuestario', $request->input('codigo'));
-            $request->merge(['codigo_presupuestario' => $this->normalizaCodigo($codigo)]);
+            $request->merge(['codigo_presupuestario' => $this->normaliza($codigo)]);
         }
 
-        $datos = $request->validate([
-            'nombre' => 'required|string|max:200',
-            'codigo_presupuestario' => [
-                'required','string','max:20',
-                Rule::unique('instituciones','codigo_presupuestario')->ignore($institucion->id),
-            ],
-            'regional_id'         => 'required|exists:regionales,id',
-            'circuito_id'         => 'required|exists:circuitos,id',
-            'modalidad'           => ['required', Rule::in(['Primaria','Secundaria','Técnica'])],
-            'tipo'                => ['required', Rule::in(['publica','privada','subvencionada'])],
-            'telefono'            => 'nullable|string|max:20',
-            'email'               => 'nullable|email|max:100',
-            'direccion'           => 'nullable|string',
-            'limite_proyectos'    => 'nullable|integer|min:1|max:50',
-            'limite_estudiantes'  => 'nullable|integer|min:1|max:200',
-            'activo'              => 'nullable|boolean',
+        $data = $request->validate([
+            'nombre'                => 'required|string|max:200',
+            'codigo_presupuestario' => ['required','string','max:20', Rule::unique('instituciones','codigo_presupuestario')->ignore($institucion->id)],
+            'circuito_id'           => 'required|exists:circuitos,id',
+            'regional_id'           => 'nullable|exists:regionales,id',
+
+            'modalidad'             => 'nullable|string|max:100',
+            'tipo'                  => 'nullable|string|max:100',
+            'modalidad_id'          => 'nullable|exists:modalidades,id',
+            'tipo_institucion_id'   => 'nullable|exists:tipos_institucion,id',
+
+            'telefono'              => 'nullable|string|max:20',
+            'email'                 => 'nullable|email|max:100',
+            'direccion'             => 'nullable|string',
+            'limite_proyectos'      => 'nullable|integer|min:1|max:50',
+            'limite_estudiantes'    => 'nullable|integer|min:1|max:200',
+            'activo'                => 'boolean',
         ]);
 
-        // Coherencia circuito ↔ regional
-        $circuito = Circuito::select('id','regional_id')->findOrFail($datos['circuito_id']);
-        if ((int)$circuito->regional_id !== (int)$datos['regional_id']) {
-            return response()->json(['message' => 'El circuito seleccionado no pertenece a la Dirección Regional indicada.'], 422);
-        }
+        $this->hidrataCatalogosEnTexto($data);
+        $this->requireModalidadTipo($data);
+        $this->resolverRegional($data);
 
         $institucion->update([
-            'nombre'                => $datos['nombre'],
-            'codigo_presupuestario' => $datos['codigo_presupuestario'],
-            'regional_id'           => $datos['regional_id'],
-            'circuito_id'           => $datos['circuito_id'],
-            'modalidad'             => $datos['modalidad'],
-            'tipo'                  => $datos['tipo'],
-            'telefono'              => $datos['telefono'] ?? null,
-            'email'                 => $datos['email'] ?? null,
-            'direccion'             => $datos['direccion'] ?? null,
-            'limite_proyectos'      => $datos['limite_proyectos'] ?? $institucion->limite_proyectos,
-            'limite_estudiantes'    => $datos['limite_estudiantes'] ?? $institucion->limite_estudiantes,
-            'activo'                => array_key_exists('activo', $datos) ? (bool)$datos['activo'] : $institucion->activo,
+            'nombre'                => $data['nombre'],
+            'codigo_presupuestario' => $data['codigo_presupuestario'],
+            'regional_id'           => $data['regional_id'],
+            'direccionreg_id'       => $data['direccionreg_id'],
+            'circuito_id'           => $data['circuito_id'],
+            'modalidad'             => $data['modalidad'],
+            'tipo'                  => $data['tipo'],
+            'telefono'              => $data['telefono'] ?? null,
+            'email'                 => $data['email'] ?? null,
+            'direccion'             => $data['direccion'] ?? null,
+            'limite_proyectos'      => $data['limite_proyectos'] ?? $institucion->limite_proyectos,
+            'limite_estudiantes'    => $data['limite_estudiantes'] ?? $institucion->limite_estudiantes,
+            'activo'                => array_key_exists('activo', $data) ? (bool)$data['activo'] : $institucion->activo,
         ]);
 
-        $institucion->load(['circuito.regional', 'regional']);
-
         return response()->json([
-            'message'     => 'Institución actualizada exitosamente',
-            'institucion' => $institucion,
+            'mensaje'     => 'Institución actualizada',
+            'institucion' => $institucion->fresh()->load(['circuito.regional','regional']),
         ]);
     }
 
-    /**
-     * DELETE /api/instituciones/{institucion}
-     */
+    /** ========== Eliminar ========== */
+    // DELETE /api/instituciones/{institucion}
     public function destroy(Institucion $institucion)
     {
         if ($institucion->proyectos()->exists() || $institucion->usuarios()->exists()) {
-            return response()->json([
-                'message' => 'No se puede eliminar: tiene proyectos o usuarios asociados.'
-            ], 422);
+            return response()->json(['message' => 'No se puede eliminar la institución porque tiene proyectos o usuarios asociados.'], 422);
         }
 
         $institucion->delete();
-        return response()->json(['message' => 'Institución eliminada exitosamente']);
+        return response()->json(['mensaje' => 'Institución eliminada exitosamente']);
     }
 
-    /**
-     * PATCH /api/instituciones/{institucion}/toggle
-     */
+    /** ========== Activar/Desactivar ========== */
+    // PATCH /api/instituciones/{institucion}/toggle
     public function toggleActivo(Institucion $institucion)
     {
         $institucion->update(['activo' => !$institucion->activo]);
 
         return response()->json([
-            'message' => $institucion->activo ? 'Institución activada' : 'Institución desactivada',
+            'mensaje' => $institucion->activo ? 'Institución activada' : 'Institución desactivada',
             'activo'  => $institucion->activo,
         ]);
     }
 
-    /**
-     * Catálogos
-     */
+    /** ========== Catálogos para formularios ========== */
+    // GET /api/instituciones/catalogos (modalidades y tipos activos, {id,nombre})
+    public function getCatalogos()
+    {
+        return response()->json([
+            'modalidades'       => Modalidad::where('activo', true)->orderBy('nombre')->get(['id','nombre']),
+            'tipos_institucion' => TipoInstitucion::where('activo', true)->orderBy('nombre')->get(['id','nombre']),
+        ]);
+    }
+
+    // GET /api/catalogos/regionales
     public function catalogoRegionales()
     {
         return Regional::select('id','nombre')->orderBy('nombre')->get();
     }
 
+    // GET /api/catalogos/circuitos?regional_id=
     public function catalogoCircuitos(Request $request)
     {
         $q = Circuito::select('id','nombre','regional_id')->orderBy('nombre');
@@ -277,6 +321,7 @@ class InstitucionController extends Controller
         return $q->get();
     }
 
+    // GET /api/instituciones/circuitos (activos con regional)
     public function getCircuitos()
     {
         return Circuito::with('regional')

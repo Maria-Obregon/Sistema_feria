@@ -145,7 +145,9 @@
           </div>
         </button>
 
-        <button class="p-4 bg-white rounded-lg shadow hover:shadow-lg transition-shadow text-left">
+         <router-link
+          :to="{ name: 'admin.proyectos' }"
+        class="p-4 bg-white rounded-lg shadow hover:shadow-lg transition-shadow text-left">
           <div class="flex items-center">
             <div class="p-3 bg-yellow-100 rounded-lg">
               <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -157,7 +159,7 @@
               <p class="text-lg font-semibold">Proyectos</p>
             </div>
           </div>
-        </button>
+                </router-link>
 
         <button class="p-4 bg-white rounded-lg shadow hover:shadow-lg transition-shadow text-left">
           <div class="flex items-center">

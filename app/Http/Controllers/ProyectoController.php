@@ -54,94 +54,181 @@ class ProyectoController extends Controller
      * Crea proyecto y liga estudiantes (opcional).
      */
     public function store(Request $request)
-    {
-        $data = $request->validate([
-            'titulo'         => 'required|string|max:255',
-            'resumen'        => 'nullable|string',
-            'area_id'        => ['required', Rule::exists('areas', 'id')],
-            'categoria_id'   => ['required', Rule::exists('categorias', 'id')],
-            'institucion_id' => ['nullable', Rule::exists('instituciones', 'id')],
-            'feria_id'       => ['required', Rule::exists('ferias', 'id')],
-            // estudiantes ahora opcional
-            'estudiantes'    => 'nullable|array',
-            'estudiantes.*'  => ['integer', Rule::exists('estudiantes', 'id')],
+{
+    $data = $request->validate([
+        'titulo'         => 'required|string|max:255',
+        'resumen'        => 'nullable|string',
+        'area_id'        => ['required', Rule::exists('areas', 'id')],
+
+        // Viene del formulario
+        'modalidad_id'   => ['required', Rule::exists('modalidades', 'id')],
+
+        // La categoría debe existir y ser elegible para esa modalidad (pivot categoria_modalidad)
+        'categoria_id'   => [
+            'required',
+            Rule::exists('categorias', 'id'),
+            Rule::exists('categoria_modalidad', 'categoria_id')
+                ->where(fn($q) => $q->where('modalidad_id', $request->input('modalidad_id')))
+        ],
+
+        'institucion_id' => ['nullable', Rule::exists('instituciones', 'id')],
+        'feria_id'       => ['required', Rule::exists('ferias', 'id')],
+
+        // estudiantes opcional
+        'estudiantes'    => 'nullable|array',
+        'estudiantes.*'  => ['integer', Rule::exists('estudiantes', 'id')],
+    ]);
+
+    // Hereda institución del usuario si no viene en payload
+    $data['institucion_id'] = $data['institucion_id'] ?? optional($request->user())->institucion_id;
+    if (!$data['institucion_id']) {
+        return response()->json(['message' => 'institucion_id es requerido'], 422);
+    }
+
+    // Normaliza tipos
+    $data['area_id']        = (int) $data['area_id'];
+    $data['modalidad_id']   = (int) $data['modalidad_id'];
+    $data['categoria_id']   = (int) $data['categoria_id'];
+    $data['feria_id']       = (int) $data['feria_id'];
+
+    try {
+        Log::info('[PROYECTOS][STORE] Payload recibido', [
+            'request_all' => $request->all(),
+            'validated'   => $data,
+            'user_id'     => optional($request->user())->id,
         ]);
 
-        // Hereda institución del usuario si no viene en payload
-        $data['institucion_id'] = $data['institucion_id'] ?? optional($request->user())->institucion_id;
-        if (!$data['institucion_id']) {
-            return response()->json(['message' => 'institucion_id es requerido'], 422);
+        // ===== Reglas de negocio previas =====
+        $inst = Institucion::findOrFail($data['institucion_id']);
+        if (method_exists($inst, 'puedeAgregarProyecto') && !$inst->puedeAgregarProyecto()) {
+            return response()->json(['message' => 'Límite de proyectos alcanzado para la institución'], 422);
         }
 
-        // Fuerza enteros por si llegan como string
-        $data['area_id']      = (int) $data['area_id'];
-        $data['categoria_id'] = (int) $data['categoria_id'];
-        $data['feria_id']     = (int) $data['feria_id'];
+        $feria = Feria::findOrFail($data['feria_id']);
 
-        try {
-            Log::info('[PROYECTOS][STORE] Payload recibido', [
-                'request_all' => $request->all(),
-                'validated'   => $data,
-                'user_id'     => optional($request->user())->id,
-            ]);
+        // Si la feria es institucional, debe pertenecer a la misma institución
+        if (!empty($feria->institucion_id) && (int)$feria->institucion_id !== (int)$data['institucion_id']) {
+            return response()->json(['message' => 'La feria no pertenece a la institución seleccionada'], 422);
+        }
 
-            // Reglas de negocio
-            $inst = Institucion::findOrFail($data['institucion_id']);
-            if (!$inst->puedeAgregarProyecto()) {
-                return response()->json(['message' => 'Límite de proyectos alcanzado para la institución'], 422);
+        // Estudiantes deben pertenecer a la misma institución
+        if (!empty($data['estudiantes'])) {
+            $mismatch = Estudiante::whereIn('id', $data['estudiantes'])
+                ->where('institucion_id', '!=', $data['institucion_id'])
+                ->exists();
+            if ($mismatch) {
+                return response()->json(['message' => 'Hay estudiantes que no pertenecen a esta institución'], 422);
+            }
+        }
+
+        // ===== Determinar ETAPA desde la feria =====
+        // Preferimos ferias.etapa_id -> relación etapa(); si no, usamos tipo_feria/tipo
+        $feria->loadMissing('etapa');
+        $etapaSlug = null;
+        $etapaId   = null;
+
+        if (\Schema::hasColumn('ferias', 'etapa_id') && !is_null($feria->etapa_id)) {
+            $etapaId   = (int) $feria->etapa_id;
+            $etapaSlug = strtolower(optional($feria->etapa)->nombre ?? '');
+        } else {
+            $etapaSlug = strtolower($feria->tipo_feria ?? $feria->tipo ?? 'institucional');
+        }
+
+        // Normaliza valores admitidos
+        $validSlugs = ['institucional', 'circuital', 'regional'];
+        if (!in_array($etapaSlug, $validSlugs, true)) {
+            return response()->json(['message' => "Etapa de la feria no reconocida: {$etapaSlug}"], 422);
+        }
+
+        // Si no tenemos etapa_id pero sí tabla etapas, buscamos el id por nombre
+        if (is_null($etapaId) && \Schema::hasTable('etapas') && \Schema::hasColumn('proyectos', 'etapa_id')) {
+            $etapaModel = \App\Models\Etapa::whereRaw('LOWER(nombre)=?', [$etapaSlug])->first();
+            $etapaId    = $etapaModel?->id;
+        }
+
+        // ===== Validar que la modalidad pueda participar en esa etapa (pivot modalidad_etapa) =====
+        if (\Schema::hasTable('modalidad_etapa')) {
+            // Si no tenemos etapa_id, intentamos resolverlo por nombre (de nuevo, por seguridad)
+            if (is_null($etapaId) && \Schema::hasTable('etapas')) {
+                $etapaModel = \App\Models\Etapa::whereRaw('LOWER(nombre)=?', [$etapaSlug])->first();
+                $etapaId    = $etapaModel?->id;
             }
 
-            $feria = Feria::findOrFail($data['feria_id']);
-            // coherencia (si la feria es institucional debe pertenecer a la misma institución)
-            if (!empty($feria->institucion_id) && (int)$feria->institucion_id !== (int)$data['institucion_id']) {
-                return response()->json(['message' => 'La feria no pertenece a la institución seleccionada'], 422);
-            }
-
-            if (!empty($data['estudiantes'])) {
-                $mismatch = Estudiante::whereIn('id', $data['estudiantes'])
-                    ->where('institucion_id', '!=', $data['institucion_id'])
+            if (!is_null($etapaId)) {
+                $permite = DB::table('modalidad_etapa')
+                    ->where('modalidad_id', $data['modalidad_id'])
+                    ->where('etapa_id', $etapaId)
                     ->exists();
-                if ($mismatch) {
-                    return response()->json(['message' => 'Hay estudiantes que no pertenecen a esta institución'], 422);
+
+                if (!$permite) {
+                    return response()->json([
+                        'message' => 'La modalidad seleccionada no puede participar en la etapa de esta feria.',
+                        'detalle' => [
+                            'modalidad_id' => $data['modalidad_id'],
+                            'feria_id'     => $data['feria_id'],
+                            'etapa_id'     => $etapaId,
+                            'etapa'        => $etapaSlug,
+                        ]
+                    ], 422);
                 }
             }
-
-            DB::beginTransaction();
-
-            $proyecto = Proyecto::create([
-                'titulo'         => $data['titulo'],
-                'resumen'        => $data['resumen'] ?? null,
-                'area_id'        => $data['area_id'],
-                'categoria_id'   => $data['categoria_id'],
-                'institucion_id' => $data['institucion_id'],
-                'feria_id'       => $data['feria_id'],
-                'etapa_actual'   => 1,
-                'estado'         => 'inscrito',
-            ]);
-
-            if (!empty($data['estudiantes'])) {
-                $proyecto->estudiantes()->sync($data['estudiantes']);
-            }
-
-            DB::commit();
-
-            return response()->json(
-                $proyecto->load(['area','categoria','estudiantes:id,cedula,nombre,apellidos']),
-                201
-            );
-        } catch (\Throwable $e) {
-            DB::rollBack();
-
-            $context = [
-                'request_all' => $request->all(),
-                'validated'   => $data,
-                'user_id'     => optional($request->user())->id,
-            ];
-            $payload = $this->formatAndLogException($e, $context);
-
-            return response()->json($payload, 500);
         }
+
+        // ===== Crear proyecto =====
+        DB::beginTransaction();
+
+        // Prepara atributos comunes
+        $attrs = [
+            'titulo'         => $data['titulo'],
+            'resumen'        => $data['resumen'] ?? null,
+            'area_id'        => $data['area_id'],
+            'modalidad_id'   => $data['modalidad_id'],
+            'categoria_id'   => $data['categoria_id'],
+            'institucion_id' => $data['institucion_id'],
+            'feria_id'       => $data['feria_id'],
+            'estado'         => 'inscrito',
+        ];
+
+        // Detecta qué columna de etapa usa tu tabla proyectos
+        if (\Schema::hasColumn('proyectos', 'etapa_id') && !is_null($etapaId)) {
+            $attrs['etapa_id'] = $etapaId;
+        } elseif (\Schema::hasColumn('proyectos', 'etapa_actual')) {
+            // ENUM
+            $attrs['etapa_actual'] = $etapaSlug; // 'institucional' | 'circuital' | 'regional'
+        }
+
+        $proyecto = Proyecto::create($attrs);
+
+        if (!empty($data['estudiantes'])) {
+            $proyecto->estudiantes()->sync($data['estudiantes']);
+        }
+
+        DB::commit();
+
+        // Devuelve con relaciones útiles (agregué feria y modalidad si querés mostrarlas)
+        return response()->json(
+            $proyecto->load([
+                'area',
+                'categoria',
+                'feria',
+                'estudiantes:id,cedula,nombre,apellidos',
+                'modalidad:id,nombre',
+                'etapa' // si tenés relación en Proyecto cuando uses etapa_id
+            ]),
+            201
+        );
+    } catch (\Throwable $e) {
+        DB::rollBack();
+        $context = [
+            'request_all' => $request->all(),
+            'validated'   => $data,
+            'user_id'     => optional($request->user())->id,
+        ];
+        $payload = $this->formatAndLogException($e, $context);
+        return response()->json($payload, 500);
     }
+}
+
 
     /**
      * GET /api/proyectos/form-data?institucion_id=...
