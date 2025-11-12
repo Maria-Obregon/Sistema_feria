@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Lista de archivos staged (added/copied/modified) con extensión .php
+FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.php$' || true)
+if [ -z "$FILES" ]; then
+  exit 0
+fi
+echo "[pre-commit] Ejecutando Pint sobre archivos staged:"
+echo "$FILES"
+# Ejecuta Pint sobre esos archivos y vuelve a agregarlos al index si hubo cambios
+echo "$FILES" | xargs -r vendor/bin/pint
+echo "$FILES" | xargs -r git add

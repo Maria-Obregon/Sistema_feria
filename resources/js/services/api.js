@@ -84,6 +84,17 @@ export const usuariosApi = {
 }
 
 // =========================
+// Jueces (compat)
+// =========================
+export const juecesApi = {
+  listar:     (params = {})     => api.get('/jueces', { params }),
+  crear:      (datos)           => api.post('/jueces', datos),
+  obtener:    (id)              => api.get(`/jueces/${id}`),
+  actualizar: (id, datos)       => api.put(`/jueces/${id}`, datos),
+  eliminar:   (id)              => api.delete(`/jueces/${id}`),
+}
+
+// =========================
 // Admin (dashboard + catálogos)
 // =========================
 export const adminApi = {

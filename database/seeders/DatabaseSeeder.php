@@ -12,6 +12,8 @@ class DatabaseSeeder extends Seeder
             CoreCatalogSeeder::class,
             RolesAndPermissionsSeeder::class,
             UsuariosSeeder::class,
+            RubricaPronafecytSeeder::class,
+            DemoJuezAsignacionSeeder::class,
         ]);
     }
 }
