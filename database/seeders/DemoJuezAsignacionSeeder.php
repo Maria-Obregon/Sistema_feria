@@ -112,6 +112,16 @@ class DemoJuezAsignacionSeeder extends Seeder
             ->where('etapa_id', $etapaId)
             ->first();
 
+        // Asegurar visibilidad en UI: proyecto en evaluación y asignación no finalizada
+        DB::table('proyectos')
+            ->where('id', $proyecto->id)
+            ->update(['estado' => 'en_evaluacion', 'updated_at' => now()]);
+        if ($asignacion) {
+            DB::table('asignaciones_jueces')
+                ->where('id', $asignacion->id)
+                ->update(['finalizada_at' => null, 'updated_at' => now()]);
+        }
+
         // Espejo legacy si existe
         if ($asignacion && Schema::hasTable('asignacion_juez')) {
             DB::table('asignacion_juez')->updateOrInsert(

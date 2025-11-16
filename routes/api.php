@@ -11,6 +11,7 @@ use App\Http\Controllers\EstudianteController;
 use App\Http\Controllers\FeriaController;
 use App\Http\Controllers\InstitucionController;
 use App\Http\Controllers\JuezController;
+use App\Http\Controllers\MisAsignacionesController;
 use App\Http\Controllers\ProyectoController;
 use App\Http\Controllers\RubricaResolverController;
 use App\Http\Controllers\UserController;
@@ -187,6 +188,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/asignaciones-jueces/{id}/finalizar', [AsignacionJuezController::class, 'finalizar'])
         ->middleware('permission:calificaciones.crear')
         ->whereNumber('id');
+
+    // --- Mis asignaciones (solo lectura, juez autenticado) ---
+    Route::get('juez/asignaciones/mias', [MisAsignacionesController::class, 'index'])
+        ->middleware('auth:sanctum');
 
     /*
     |--------------------------------------------------------------------------
