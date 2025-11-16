@@ -173,6 +173,16 @@ export const feriasApi = {
 }
 
 // =========================
+// Jueces (CRUD administrativo)
+// =========================
+export const juecesApi = {
+  listar:     (params = {}) => api.get('/jueces', { params }),
+  crear:      (datos)       => api.post('/jueces', datos),
+  actualizar: (id, datos)   => api.put(`/jueces/${id}`, datos),
+  eliminar:   (id)          => api.delete(`/jueces/${id}`),
+}
+
+// =========================
 // Estudiantes
 // =========================
 export const estudiantesApi = {

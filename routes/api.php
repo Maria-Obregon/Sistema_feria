@@ -16,6 +16,8 @@ use App\Http\Controllers\JuezController;
 use App\Http\Controllers\AsignacionJuezController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CategoriaController;
+use App\Http\Controllers\JudgeAssignmentController;
+use App\Http\Controllers\RubricaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -149,6 +151,28 @@ Route::get(
 
     /*
     |--------------------------------------------------------------------------
+    | ETAPAS - Cierre y consulta de resultados
+    |--------------------------------------------------------------------------
+    */
+    Route::post('/etapas/cerrar', [App\Http\Controllers\StageController::class, 'close'])
+        ->middleware('permission:calificaciones.consolidar');
+    
+    Route::post('/etapas/abrir', [App\Http\Controllers\StageController::class, 'open'])
+        ->middleware('permission:calificaciones.consolidar');
+    
+    Route::get('/etapas/resultado', [App\Http\Controllers\StageController::class, 'show'])
+        ->middleware('permission:calificaciones.ver');
+
+    /*
+    |--------------------------------------------------------------------------
+    | RÚBRICAS Y CRITERIOS
+    |--------------------------------------------------------------------------
+    | Acceso a criterios de evaluación para construir formularios
+    */
+    Route::get('/rubricas/{tipo_eval}/criterios', [RubricaController::class, 'criteriosPorTipoEval']);
+
+    /*
+    |--------------------------------------------------------------------------
     | FERIAS
     |--------------------------------------------------------------------------
     */
@@ -159,7 +183,7 @@ Route::get(
 
     /*
     |--------------------------------------------------------------------------
-    | JUECES
+    | JUECES (CRUD administrativo)
     |--------------------------------------------------------------------------
     */
     Route::get   ('/jueces',        [JuezController::class, 'index'])->middleware('permission:jueces.ver');
@@ -179,6 +203,24 @@ Route::get(
     Route::delete('/asignaciones-jueces/{id}',             [AsignacionJuezController::class, 'unassign'])
         ->middleware('permission:jueces.asignar')
         ->whereNumber('id');
+
+    /*
+    |--------------------------------------------------------------------------
+    | JUEZ - API de solo lectura (portal de jueces)
+    |--------------------------------------------------------------------------
+    | Rutas protegidas para jueces autenticados
+    | Permisos: proyectos.ver, calificaciones.ver
+    */
+    Route::middleware(['role:juez'])->group(function () {
+        Route::get('/juez/asignaciones', [JudgeAssignmentController::class, 'index'])
+            ->middleware('permission:proyectos.ver');
+        
+        Route::get('/juez/proyectos/{id}', [JudgeAssignmentController::class, 'showProject'])
+            ->middleware('permission:proyectos.ver');
+        
+        Route::get('/juez/stats', [JudgeAssignmentController::class, 'stats'])
+            ->middleware('permission:proyectos.ver');
+    });
 
     /*
     |--------------------------------------------------------------------------

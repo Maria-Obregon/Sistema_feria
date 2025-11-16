@@ -13,7 +13,7 @@
               Mis Asignaciones
             </router-link>
             <router-link
-              :to="{ name: 'juez.calificaciones' }"
+              :to="{ name: 'juez.misCalificaciones' }"
               class="text-sm text-gray-600 hover:text-gray-900"
             >
               Calificaciones
@@ -35,7 +35,26 @@
 
     <!-- Contenido -->
     <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div v-if="loading" class="text-center py-8">
+        <p class="text-gray-500">Cargando estadísticas...</p>
+      </div>
+
+      <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+        <p class="text-sm text-red-600">{{ error }}</p>
+      </div>
+
+      <!-- Mensaje sin asignaciones -->
+      <div v-else-if="stats.totals.total === 0" class="bg-white rounded-lg shadow p-8 text-center mb-8">
+        <p class="text-gray-600 mb-4">No tienes asignaciones aún</p>
+        <router-link
+          :to="{ name: 'juez.asignaciones' }"
+          class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+        >
+          Ver Mis Asignaciones
+        </router-link>
+      </div>
+
+      <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div class="bg-white rounded-lg shadow p-6">
           <div class="flex items-center">
             <div class="p-3 bg-blue-100 rounded-full">
@@ -45,7 +64,7 @@
               </svg>
             </div>
             <div class="ml-4">
-              <p class="text-2xl font-semibold">{{ stats.pendientes }}</p>
+              <p class="text-2xl font-semibold">{{ stats.totals.pendientes }}</p>
               <p class="text-gray-500">Por calificar</p>
             </div>
           </div>
@@ -60,8 +79,8 @@
               </svg>
             </div>
             <div class="ml-4">
-              <p class="text-2xl font-semibold">{{ stats.calificadas }}</p>
-              <p class="text-gray-500">Calificaciones enviadas</p>
+              <p class="text-2xl font-semibold">{{ stats.totals.completadas }}</p>
+              <p class="text-gray-500">Calificadas</p>
             </div>
           </div>
         </div>
@@ -75,15 +94,16 @@
               </svg>
             </div>
             <div class="ml-4">
-              <p class="text-2xl font-semibold">{{ stats.total }}</p>
+              <p class="text-2xl font-semibold">{{ stats.totals.total }}</p>
               <p class="text-gray-500">Total asignaciones</p>
             </div>
           </div>
         </div>
       </div>
 
-      <h2 class="text-lg font-semibold mb-4">Acciones rápidas</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div v-if="stats.totals.total > 0">
+        <h2 class="text-lg font-semibold mb-4">Acciones rápidas</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <router-link
           :to="{ name: 'juez.asignaciones' }"
           class="bg-white p-6 rounded-lg shadow-sm border hover:shadow-md transition-shadow"
@@ -103,8 +123,8 @@
         </router-link>
 
         <router-link
-          :to="{ name: 'juez.calificaciones' }"
-          class="bg-white p-6 rounded-lg shadow-sm border hover:shadow-md transition-shadow"
+          :to="{ name: 'juez.misCalificaciones' }"
+          class="bg-white p-6 rounded-lg shadow-sm border hover:shadow-md transition-shadow block"
         >
           <div class="flex items-center">
             <div class="p-3 bg-green-100 rounded-lg">
@@ -114,11 +134,12 @@
               </svg>
             </div>
             <div class="ml-4">
-              <p class="text-sm text-gray-500">Ver</p>
+              <p class="text-sm text-gray-500">Ver calificaciones enviadas</p>
               <p class="text-lg font-semibold">Mis Calificaciones</p>
             </div>
           </div>
         </router-link>
+        </div>
       </div>
     </main>
   </div>
@@ -128,21 +149,54 @@
 import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import axios from 'axios'
 
 const router = useRouter()
 const auth = useAuthStore()
 
 const user = computed(() => auth.user)
-const stats = ref({ pendientes: 0, calificadas: 0, total: 0 })
+const loading = ref(false)
+const error = ref(null)
+const stats = ref({ 
+  totals: { 
+    total: 0, 
+    completadas: 0, 
+    pendientes: 0 
+  } 
+})
 
 const logout = async () => {
-  await auth.logout()            // limpia token + header en tu store
+  await auth.logout()
   await router.push({ name: 'login' })
 }
 
-// (Opcional) simula carga de stats del juez
+const fetchStats = async () => {
+  loading.value = true
+  error.value = null
+  
+  try {
+    const { data } = await axios.get('/api/juez/stats')
+    stats.value = data
+  } catch (err) {
+    error.value = err.response?.data?.message || 'Error al cargar estadísticas'
+    stats.value = { 
+      totals: { 
+        total: 0, 
+        completadas: 0, 
+        pendientes: 0 
+      } 
+    }
+  } finally {
+    loading.value = false
+  }
+}
+
 onMounted(async () => {
-  // Llama a tu endpoint real si ya lo tienes
-  stats.value = { pendientes: 5, calificadas: 12, total: 17 }
+  // Refrescar si se acaba de guardar calificaciones
+  if (sessionStorage.getItem('justGraded') === '1') {
+    sessionStorage.removeItem('justGraded')
+  }
+  
+  await fetchStats()
 })
 </script>

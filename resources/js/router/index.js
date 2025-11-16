@@ -88,9 +88,10 @@ const routes = [
   // =========================
   // Juez
   // =========================
-  { path: '/juez',               name: 'juez.dashboard',     component: JuezDashboard, meta: { requiresAuth: true, roles: ['juez'] } },
-  { path: '/juez/asignaciones',  name: 'juez.asignaciones',  component: () => import('../pages/juez/Asignaciones.vue'),    meta: { requiresAuth: true, roles: ['juez'] } },
-  { path: '/juez/calificaciones',name: 'juez.calificaciones',component: () => import('../pages/juez/Calificaciones.vue'),   meta: { requiresAuth: true, roles: ['juez'] } },
+  { path: '/juez',                       name: 'juez.dashboard',         component: JuezDashboard,                                             meta: { requiresAuth: true, roles: ['juez'] } },
+  { path: '/juez/asignaciones',          name: 'juez.asignaciones',      component: () => import('../pages/juez/Asignaciones.vue'),            meta: { requiresAuth: true, roles: ['juez'] } },
+  { path: '/juez/mis-calificaciones',    name: 'juez.misCalificaciones', component: () => import('../pages/juez/Asignaciones.vue'),            meta: { requiresAuth: true, roles: ['juez'] } },
+  { path: '/juez/calificaciones',        name: 'juez.calificaciones',    component: () => import('../pages/juez/Calificaciones.vue'),          meta: { requiresAuth: true, roles: ['juez'] } },
 
   // Genérico
   { path: '/dashboard', name: 'dashboard', component: Dashboard, meta: { requiresAuth: true } },

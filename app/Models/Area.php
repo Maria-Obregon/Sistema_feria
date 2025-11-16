@@ -27,4 +27,9 @@ class Area extends Model
     {
         return $this->hasMany(Proyecto::class);
     }
+
+    public function jueces()
+    {
+        return $this->hasMany(Juez::class);
+    }
 }
