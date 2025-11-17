@@ -40,9 +40,12 @@
           :items="modalidades"
           :columns="[
             {key:'nombre',label:'Nombre'},
+            {key:'nivel_id',label:'Nivel'},
             {key:'activo',label:'Activo'}
           ]"
           :loading="loading.modalidades"
+          :select-options="{ nivel_id: nivelIdOptions }"
+          :display-map="{ nivel_id: nivelIdLabelMap }"
           @crear="crearModalidad"
           @actualizar="actualizarModalidad"
           @eliminar="eliminarModalidad"
@@ -210,7 +213,8 @@ const CatalogoCrud = {
       // Validación para selects declarados
       for (const key of Object.keys(this.selectOptions || {})) {
         const opts = this.optionsFor(key)
-        if (opts.length && !opts.some(o => o.value === this.form?.[key])) {
+        const valid = opts.some(o => o.value === this.form?.[key])
+        if (opts.length && !valid) {
           alert(`Seleccioná un valor válido para "${key}"`)
           return
         }
@@ -241,13 +245,6 @@ const CatalogoCrud = {
       this.form = {}
       this.editItem = null
     },
-    // Dibuja input genérico de texto para columnas que no sean nombre/activo/select
-    renderGenericInput(c) {
-      return `
-        <label class="block text-sm font-medium text-gray-700 mb-1">${c.label}</label>
-        <input v-model="form['${c.key}']" class="w-full px-3 py-2 border rounded-md" />
-      `
-    }
   },
   template: `
     <div class="bg-white rounded-lg shadow-sm border">
@@ -331,7 +328,7 @@ const CatalogoCrud = {
                 </select>
               </template>
 
-              <!-- campo de texto genérico (ej: codigo en Circuitos) -->
+              <!-- campo de texto genérico -->
               <template v-else>
                 <label class="block text-sm font-medium text-gray-700 mb-1">{{ c.label }}</label>
                 <input v-model="form[c.key]" class="w-full px-3 py-2 border rounded-md" />
@@ -393,7 +390,17 @@ const pullMsg = (e, fallback = 'Error') =>
   e?.response?.data?.message ?? e?.response?.data?.error ?? e?.message ?? fallback
 
 /* =========================
-   Derivados para Categorías <- Niveles
+   Derivados para Modalidades <- Niveles (por id)
+   ========================= */
+const nivelIdOptions = computed(() =>
+  niveles.value.map(n => ({ value: n.id, label: n.nombre }))
+)
+const nivelIdLabelMap = computed(() => {
+  const m = {}; for (const n of niveles.value) m[n.id] = n.nombre; return m;
+})
+
+/* =========================
+   Derivados para Categorías <- Niveles (por nombre)
    ========================= */
 const nivelOptions = computed(() =>
   niveles.value.map(n => ({ value: n.nombre, label: n.nombre }))
@@ -417,17 +424,36 @@ const regionalLabelMap = computed(() => {
    ========================= */
 const cargarModalidades = async () => {
   loading.modalidades = true
-  try { const { data } = await adminApi.modalidades.listar(); modalidades.value = Array.isArray(data) ? data : [] }
-  catch (e) { alert(pullMsg(e, 'Error cargando modalidades')) }
-  finally { loading.modalidades = false }
+  try {
+    const { data } = await adminApi.modalidades.listar()
+    modalidades.value = Array.isArray(data) ? data : []
+  } catch (e) {
+    alert(pullMsg(e, 'Error cargando modalidades'))
+  } finally {
+    loading.modalidades = false
+  }
 }
 const crearModalidad = async (p) => {
-  try { await adminApi.modalidades.crear({ nombre: p.nombre, activo: p.activo ?? true }); await cargarModalidades() }
-  catch (e) { alert(pullMsg(e, 'Error creando modalidad')) }
+  if (!p?.nivel_id) return alert('Seleccioná el nivel')
+  try {
+    await adminApi.modalidades.crear({
+      nombre: p.nombre,
+      activo: p.activo ?? true,
+      nivel_id: p.nivel_id
+    })
+    await cargarModalidades()
+  } catch (e) { alert(pullMsg(e, 'Error creando modalidad')) }
 }
 const actualizarModalidad = async (id, p) => {
-  try { await adminApi.modalidades.actualizar(id, { nombre: p.nombre, activo: p.activo ?? true }); await cargarModalidades() }
-  catch (e) { alert(pullMsg(e, 'Error actualizando modalidad')) }
+  if (!p?.nivel_id) return alert('Seleccioná el nivel')
+  try {
+    await adminApi.modalidades.actualizar(id, {
+      nombre: p.nombre,
+      activo: p.activo ?? true,
+      nivel_id: p.nivel_id
+    })
+    await cargarModalidades()
+  } catch (e) { alert(pullMsg(e, 'Error actualizando modalidad')) }
 }
 const eliminarModalidad = async (id) => {
   if (!confirm('¿Eliminar modalidad?')) return
@@ -459,7 +485,7 @@ const eliminarArea = async (id) => {
 }
 
 /* =========================
-   Categorías (nivel por nombre de 'niveles')
+   Categorías (nivel por nombre)
    ========================= */
 const cargarCategorias = async () => {
   loading.categorias = true
@@ -597,7 +623,7 @@ const eliminarCircuito = async (id) => {
    Carga inicial
    ========================= */
 onMounted(async () => {
-  // Niveles primero (para options de categorías)
+  // Niveles primero (para options de modalidades y categorías)
   await cargarNiveles()
   // Regionales antes de circuitos (para options)
   await cargarRegionales()

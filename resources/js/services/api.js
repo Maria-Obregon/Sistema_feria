@@ -101,6 +101,12 @@ export const adminApi = {
   stats: () => api.get('/admin/stats'),
   roles: () => api.get('/admin/roles'),
 
+   actualizarRoles: (usuarioId, roles) =>
+    api.post(`/admin/usuarios/${usuarioId}/roles`, { roles }),
+
+  resetPassword: (usuarioId, password) =>
+  api.put(`/admin/usuarios/${usuarioId}/password`, password ? { password } : {}),
+
   // Modalidades
   modalidades: {
     listar:     ()            => api.get('/admin/modalidades'),
