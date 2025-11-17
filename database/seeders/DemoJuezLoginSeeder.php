@@ -55,19 +55,19 @@ class DemoJuezLoginSeeder extends Seeder
 
         // Juez vinculado a Usuario (1–1) - usar esquema actual (columna area__id)
         DB::table('jueces')->updateOrInsert(
-            ['usuario_id' => $usuario->id],
-            [
-                'nombre' => $usuario->nombre,
-                'cedula' => 'DEM-'.Str::upper(Str::random(6)),
-                'sexo' => 'N/D',
-                'telefono' => '0000-0000',
-                'correo' => $email,
-                'grado_academico' => 'Licenciatura',
-                'area__id' => $area->id,
-                'updated_at' => now(),
-                'created_at' => now(),
-            ]
-        );
+    ['usuario_id' => $usuario->id],
+    [
+        'nombre' => $usuario->nombre,
+        'cedula' => 'DEM-'.Str::upper(Str::random(6)),
+        'sexo' => 'N/D',
+        'telefono' => '0000-0000',
+        'correo' => $email,
+        'grado_academico' => 'Licenciatura',
+        'area_id' => $area->id,   // <-- aquí estaba 'area__id'
+        'updated_at' => now(),
+        'created_at' => now(),
+    ]
+);
 
         // Salida visible en consola para facilitar pruebas
         $this->command->info('Juez demo listo para login: '.$email.' / '.$passwordPlano);

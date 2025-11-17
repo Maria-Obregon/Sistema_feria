@@ -24,14 +24,15 @@ class CalificacionController extends Controller
 
         $q = DB::table('calificaciones as c')
             ->select([
-                'c.id', 'c.asignaciones_juez_id', 'c.criterio_id', 'c.puntaje', 'c.comentario',
+                'c.id', 'c.asignacion_juez_id', 'c.criterio_id', 'c.puntaje', 'c.comentario',
                 'k.nombre as criterio_nombre', 'k.peso', 'k.max_puntos',
                 'r.tipo_eval',
                 'aj.proyecto_id', 'aj.juez_id', 'aj.etapa_id',
             ])
             ->join('criterios as k', 'k.id', '=', 'c.criterio_id')
             ->join('rubricas as r', 'r.id', '=', 'k.rubrica_id')
-            ->join('asignaciones_jueces as aj', 'aj.id', '=', 'c.asignaciones_juez_id');
+            ->join('asignacion_juez as aj', 'aj.id', '=', 'c.asignacion_juez_id'); // ✅
+
 
         if ($proyId) {
             $q->where('aj.proyecto_id', (int) $proyId);
@@ -53,7 +54,7 @@ class CalificacionController extends Controller
             $q->where('aj.juez_id', $juez->id);
         }
 
-        $q->orderBy('c.asignaciones_juez_id')->orderBy('c.criterio_id');
+        $q->orderBy('c.asignacion_juez_id')->orderBy('c.criterio_id');
 
         return response()->json($q->paginate($perPage));
     }
@@ -61,7 +62,7 @@ class CalificacionController extends Controller
     public function store(Request $r)
     {
         $data = $r->validate([
-            'asignacion_id' => ['required', 'integer', 'exists:asignaciones_jueces,id'],
+            'asignacion_id' => ['required','integer','exists:asignacion_juez,id'], 
             'criterio_id' => ['required', 'integer', 'exists:criterios,id'],
             'puntaje' => ['required'],
             'comentario' => ['nullable', 'string', 'max:2000'],
@@ -94,7 +95,7 @@ class CalificacionController extends Controller
             }
         }
 
-        $asignacion = DB::table('asignaciones_jueces')->where('id', $asignacionId)->first();
+        $asignacion = DB::table('asignacion_juez')->where('id', $asignacionId)->first();
         if (! $asignacion) {
             return response()->json(['message' => 'Asignación no encontrada.'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
@@ -130,23 +131,21 @@ class CalificacionController extends Controller
         }
 
         // Detectar columnas disponibles una sola vez
-        $hasLegacy = Schema::hasColumn('calificaciones', 'asignacion_juez_id');
-        $hasPlural = Schema::hasColumn('calificaciones', 'asignaciones_juez_id');
 
+        $hasLegacy = Schema::hasColumn('calificaciones', 'asignacion_juez_id');
+        $hasPlural = Schema::hasColumn('calificaciones', 'asignaciones_juez_id'); 
         // Resolver el id de la asignación (ya calculado arriba)
         $fkColumn = null;
         $fkValue = $asignacionId;
 
         // Preferir legacy si existe; si no, usar plural
-        if ($hasLegacy) {
-            $fkColumn = 'asignacion_juez_id';
-        } elseif ($hasPlural) {
-            $fkColumn = 'asignaciones_juez_id';
-        } else {
-            return response()->json([
-                'message' => 'Esquema de calificaciones sin FK reconocible',
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+      if ($hasLegacy) {
+    $fkColumn = 'asignacion_juez_id';
+} elseif ($hasPlural) {
+    $fkColumn = 'asignaciones_juez_id';
+} else {
+    return response()->json(['message' => 'Esquema de calificaciones sin FK reconocible'], 500);
+}
 
         // Construir payload SIN la otra columna
         $criterioId = (int) $data['criterio_id'];
@@ -207,12 +206,14 @@ class CalificacionController extends Controller
         $etapaId = (int) $data['etapa_id'];
 
         // Detectar columna FK dinámica igual que en store()
-        $hasLegacy = Schema::hasColumn('calificaciones', 'asignacion_juez_id');
-        $hasPlural = Schema::hasColumn('calificaciones', 'asignaciones_juez_id');
-        if (! $hasLegacy && ! $hasPlural) {
-            return response()->json(['message' => 'Esquema de calificaciones sin FK reconocible'], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-        $fkColumn = $hasLegacy ? 'asignacion_juez_id' : 'asignaciones_juez_id';
+     $hasLegacy = Schema::hasColumn('calificaciones', 'asignacion_juez_id');
+$hasPlural = Schema::hasColumn('calificaciones', 'asignaciones_juez_id');
+
+if (! $hasLegacy && ! $hasPlural) {
+    return response()->json(['message' => 'Esquema de calificaciones sin FK reconocible'], 500);
+}
+
+$fkColumn = $hasLegacy ? 'asignacion_juez_id' : 'asignaciones_juez_id'; // ✅ usa la que exista
 
         // Telemetría (solo entorno testing)
         $__dbg = [];
@@ -230,7 +231,7 @@ class CalificacionController extends Controller
             ])
             ->join('criterios as k', 'k.id', '=', 'c.criterio_id')
             ->join('rubricas as r', 'r.id', '=', 'k.rubrica_id')
-            ->join('asignaciones_jueces as aj', 'aj.id', '=', DB::raw('c.'.$fkColumn))
+            ->join('asignacion_juez as aj', 'aj.id', '=', DB::raw('c.'.$fkColumn))
             ->where('aj.proyecto_id', $proyectoId)
             ->where('aj.etapa_id', $etapaId)
             ->get();

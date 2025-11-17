@@ -42,31 +42,28 @@
   </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from '@/composables/useToast'
-import { listarAsignacionesPorProyecto } from '@/services/asignaciones'
+import { listarMisAsignaciones } from '@/services/asignaciones'
 
 const router = useRouter()
 const { mostrarToast } = useToast()
 
-const proyectoId = ref('')
+const proyectoId = ref('')              // ← NUEVO: evita el warning y te deja escribir un ID
 const asignaciones = ref([])
 const loading = ref(false)
 
 const cargar = async () => {
-  if (!proyectoId.value) {
-    mostrarToast('Ingresa un proyectoId', 'warning')
-    return
-  }
   loading.value = true
   try {
-    const { data } = await listarAsignacionesPorProyecto(proyectoId.value)
-    asignaciones.value = Array.isArray(data) ? data : (data?.data || [])
+    const { data } = await listarMisAsignaciones()
+    asignaciones.value = Array.isArray(data?.data) ? data.data : []
+    if (!asignaciones.value.length) {
+      mostrarToast('No tienes asignaciones todavía', 'info')
+    }
   } catch (e) {
-    const status = e?.response?.status
-    if (status === 422 || status === 403) mostrarToast(e?.response?.data?.message || 'Error de validación', 'error')
-    else mostrarToast('Error cargando asignaciones', 'error')
+    mostrarToast('Error cargando asignaciones', 'error')
   } finally {
     loading.value = false
   }
@@ -75,4 +72,8 @@ const cargar = async () => {
 const irACalificar = (a) => {
   router.push({ name: 'juez.calificaciones', query: { proyectoId: a.proyecto_id, etapaId: a.etapa_id } })
 }
+
+onMounted(cargar)
 </script>
+
+

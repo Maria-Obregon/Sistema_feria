@@ -103,9 +103,9 @@ class LabF13BSeeder extends Seeder
 
             // Upsert de rubrica_asignacion para la categoría "Mi experiencia científica" en etapas reales
             if ($rubrica && $categoria) {
-                $inst = \App\Models\Etapa::idPorNombre(\App\Models\Etapa::INSTITUCIONAL);
-                $circ = \App\Models\Etapa::idPorNombre(\App\Models\Etapa::CIRCUITAL);
-                $reg = \App\Models\Etapa::idPorNombre(\App\Models\Etapa::REGIONAL);
+                $inst = Etapa::idPorNombre(Etapa::INSTITUCIONAL);
+                $circ = Etapa::idPorNombre(Etapa::CIRCUITAL);
+                $reg = Etapa::idPorNombre(Etapa::REGIONAL);
                 $etapas = array_values(array_filter([$inst, $circ, $reg]));
                 foreach ($etapas as $eId) {
                     DB::table('rubrica_asignacion')->updateOrInsert([

@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (! Schema::hasColumn('asignaciones_jueces', 'finalizada_at')) {
-            Schema::table('asignaciones_jueces', function (Blueprint $table) {
+        if (! Schema::hasColumn('asignacion_juez', 'finalizada_at')) {
+            Schema::table('asignacion_juez', function (Blueprint $table) {
                 $table->timestamp('finalizada_at')->nullable()->after('tipo_eval');
                 $table->index('finalizada_at');
             });

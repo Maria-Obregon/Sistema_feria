@@ -12,8 +12,13 @@ class DatabaseSeeder extends Seeder
             CoreCatalogSeeder::class,
             RolesAndPermissionsSeeder::class,
             UsuariosSeeder::class,
+            NivelesYModalidadesSeeder::class,
+            CategoriasSeeder::class,
+            ModalidadEtapaSeeder::class,
             RubricaPronafecytSeeder::class,
-            DemoJuezAsignacionSeeder::class,
+            RubricaMiExperienciaSeeder::class,
+            DemoJuezLoginSeeder::class,
+             DemoJuezAsignacionSeeder::class,
         ]);
     }
 }

@@ -5,151 +5,157 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
+
+use App\Models\Etapa;
+use App\Models\Area;
+use App\Models\Modalidad;
+use App\Models\Categoria;
+use App\Models\Institucion;
+use App\Models\Proyecto;
+use App\Models\Juez;
+use App\Models\Usuario;
 
 class DemoJuezAsignacionSeeder extends Seeder
 {
     public function run(): void
     {
-        // Etapa INSTITUCIONAL
-        $etapaId = \App\Models\Etapa::idPorNombre(\App\Models\Etapa::INSTITUCIONAL);
-        if (! $etapaId) {
-            $this->command->info('DemoJuezAsignacionSeeder: Etapa INSTITUCIONAL no encontrada.');
+        DB::beginTransaction();
 
-            return;
-        }
+        try {
+            // 1) ETAPA "institucional" (idempotente)
+            $etapa = Etapa::firstOrCreate(['nombre' => 'institucional']);
+            $etapaId = (int) $etapa->id;
 
-        // Área "Ciencias Generales"
-        $area = \App\Models\Area::firstOrCreate(['nombre' => 'Ciencias Generales']);
+            // 2) MODALIDAD habilitada para esa etapa (pivot modalidad_etapa) o cualquiera
+            $modalidad = Modalidad::whereHas('etapas', fn($q) => $q->where('etapas.id', $etapaId))->first()
+                      ?? Modalidad::first();
 
-        // Modalidad "Experimental" (nivel_id NULL)
-        $modalidad = \App\Models\Modalidad::query()
-            ->where('nombre', 'Experimental')
-            ->whereNull('nivel_id')
-            ->first();
-        if (! $modalidad) {
-            $modalidad = \App\Models\Modalidad::create(['nombre' => 'Experimental', 'nivel_id' => null]);
-        }
-
-        // Categoría preferida "Mi experiencia científica" si existe; si no, la primera disponible
-        $categoria = \App\Models\Categoria::query()
-            ->where('nombre', 'like', '%experiencia cient%')
-            ->first();
-        if (! $categoria) {
-            $categoria = \App\Models\Categoria::query()->first();
-            if (! $categoria) {
-                $this->command->info('DemoJuezAsignacionSeeder: No hay categorías disponibles.');
-
-                return;
+            if (! $modalidad) {
+                $this->command?->error('No hay modalidades. Corre NivelesYModalidadesSeeder.');
+                DB::rollBack(); return;
             }
-        }
 
-        // Institución Demo
-        $institucion = \App\Models\Institucion::firstOrCreate(
-            ['nombre' => 'Institución Demo Jueces'],
-            [
-                'codigo_presupuestario' => 'IDJ-001',
-                'tipo' => 'Colegio',
-                'modalidad' => 'Académica',
-                'regional_id' => 1,
-                'circuito_id' => 1,
-                'activo' => true,
-            ]
-        );
+            // 3) CATEGORÍA vinculada a esa modalidad (pivot categoria_modalidad) o cualquiera
+            $categoria = Categoria::whereHas('modalidades', fn($q) => $q->where('modalidades.id', $modalidad->id))->first()
+                     ?? Categoria::first();
 
-        // Usuario / Juez
-        $usuario = \App\Models\Usuario::where('email', 'juez.demo@prueba.local')->first();
-        if (! $usuario) {
-            $this->command->info('DemoJuezAsignacionSeeder: Usuario juez.demo@prueba.local no existe. Ejecute DemoJuezLoginSeeder primero.');
+            if (! $categoria) {
+                $this->command?->error('No hay categorías o ninguna vinculada a la modalidad. Corre CategoriasSeeder.');
+                DB::rollBack(); return;
+            }
 
-            return;
-        }
-        $juez = \App\Models\Juez::where('usuario_id', $usuario->id)->first();
-        if (! $juez) {
-            $this->command->info('DemoJuezAsignacionSeeder: Juez asociado al usuario demo no existe. Ejecute DemoJuezLoginSeeder primero.');
+            // 4) ÁREA existente (cualquiera)
+            $area = Area::first();
+            if (! $area) {
+                $this->command?->error('No hay áreas. Corre CoreCatalogSeeder.');
+                DB::rollBack(); return;
+            }
 
-            return;
-        }
+            // 5) INSTITUCIÓN existente (o crea mínima si no hay)
+            $inst = Institucion::first();
+            if (! $inst) {
+                $inst = Institucion::create([
+                    'nombre'                => 'Institución Demo',
+                    'codigo_presupuestario' => 'ID-'.Str::upper(Str::random(5)),
+                    'tipo'                  => 'publica',
+                    'modalidad'             => 'Académica',
+                    'regional_id'           => 1,
+                    'circuito_id'           => 1,
+                    'activo'                => true,
+                ]);
+            }
 
-        // Proyecto Demo
-        DB::table('proyectos')->updateOrInsert(
-            ['titulo' => 'Proyecto Demo Jueces'],
-            [
-                'codigo' => 'PDJ-001',
-                'resumen' => 'Proyecto de prueba para flujo de jueces',
-                'estado' => 'en_evaluacion',
-                'institucion_id' => $institucion->id,
-                'etapa_id' => $etapaId,
-                'area_id' => $area->id,
-                'modalidad_id' => $modalidad->id,
-                'categoria_id' => $categoria->id,
-                'updated_at' => now(),
-                'created_at' => now(),
-            ]
-        );
-        $proyecto = \App\Models\Proyecto::where('titulo', 'Proyecto Demo Jueces')->first();
-        if (! $proyecto) {
-            $this->command->info('DemoJuezAsignacionSeeder: No se pudo recuperar el proyecto de demo.');
+            // 6) JUEZ: prioriza el demo; si no existe, toma el primero que haya
+            $juez = Juez::whereHas('usuario', fn($q) => $q->where('email','juez.demo@prueba.local'))->first()
+                 ?? Juez::first();
 
-            return;
-        }
+            if (! $juez) {
+                $this->command?->error('No hay jueces. Corre DemoJuezLoginSeeder o crea uno.');
+                DB::rollBack(); return;
+            }
 
-        // Asignación en asignaciones_jueces (exposición)
-        DB::table('asignaciones_jueces')->updateOrInsert(
-            [
-                'proyecto_id' => $proyecto->id,
-                'juez_id' => $juez->id,
-                'etapa_id' => $etapaId,
-            ],
-            [
-                'tipo_eval' => 'exposicion',
-                'updated_at' => now(),
-                'created_at' => now(),
-            ]
-        );
-        $asignacion = DB::table('asignaciones_jueces')
-            ->where('proyecto_id', $proyecto->id)
-            ->where('juez_id', $juez->id)
-            ->where('etapa_id', $etapaId)
-            ->first();
+            // 7) (Opcional) FERIA si tu esquema la usa
+            $feriaId = null;
+            if (class_exists(Feria::class)) {
+                $feria = Feria::firstOrCreate(
+                    ['anio' => (int) date('Y'), 'institucion_id' => $inst->id],
+                    [
+                        'fecha'              => now()->toDateString(),
+                        'hora_inicio'        => '08:00:00',
+                        'sede'               => 'Gimnasio',
+                        'proyectos_por_aula' => 0,
+                        'tipo_feria'         => 'institucional',
+                        'lugar_realizacion'  => 'Sede central',
+                        'etapa_id'           => $etapaId,
+                    ]
+                );
+                $feriaId = (int) $feria->id;
+            }
 
-        // Asegurar visibilidad en UI: proyecto en evaluación y asignación no finalizada
-        DB::table('proyectos')
-            ->where('id', $proyecto->id)
-            ->update(['estado' => 'en_evaluacion', 'updated_at' => now()]);
-        if ($asignacion) {
-            DB::table('asignaciones_jueces')
-                ->where('id', $asignacion->id)
-                ->update(['finalizada_at' => null, 'updated_at' => now()]);
-        }
+            // 8) PROYECTO con columnas obligatorias (según tu migración)
+            $codigo = 'PRJ-'.Str::upper(Str::random(6));
 
-        // Espejo legacy si existe
-        if ($asignacion && Schema::hasTable('asignacion_juez')) {
+            $payload = [
+                'titulo'         => 'Proyecto Demo Jueces',
+                'resumen'        => 'Proyecto de prueba para flujo de jueces (listado admin y evaluación).',
+                'area_id'        => $area->id,
+                'categoria_id'   => $categoria->id,
+                'institucion_id' => $inst->id,
+                'estado'         => 'en_evaluacion', // enum válido
+                'modalidad_id'   => $modalidad->id,
+                'codigo'         => $codigo,
+                'created_at'     => now(),
+                'updated_at'     => now(),
+            ];
+
+            if (Schema::hasColumn('proyectos','feria_id') && $feriaId) {
+                $payload['feria_id'] = $feriaId;
+            }
+            if (Schema::hasColumn('proyectos','etapa_id')) {
+                $payload['etapa_id'] = $etapaId;
+            }
+
+            DB::table('proyectos')->insert($payload);
+
+            /** @var Proyecto $proyecto */
+            $proyecto = Proyecto::where('codigo', $codigo)->first();
+            if (! $proyecto) {
+                $this->command?->error('No se pudo recuperar el proyecto creado.');
+                DB::rollBack(); return;
+            }
+
+            // 9) ASIGNACIÓN del juez (tu tabla es singular: asignacion_juez)
             DB::table('asignacion_juez')->updateOrInsert(
-                ['id' => $asignacion->id],
                 [
                     'proyecto_id' => $proyecto->id,
-                    'juez_id' => $juez->id,
-                    'etapa_id' => $etapaId,
-                    'tipo_eval' => 'exposicion',
-                    'created_at' => now(),
-                    'updated_at' => now(),
+                    'juez_id'     => $juez->id,
+                    'etapa_id'    => $etapaId,
+                ],
+                [
+                    'tipo_eval'   => 'exposicion', // cambia a 'escrito' si querés probar
+                    'asignado_en' => now(),
+                    'created_at'  => now(),
+                    'updated_at'  => now(),
                 ]
             );
-        }
 
-        // Verificar rúbrica asignada para la categoría del proyecto (no crear)
-        $rubAsig = DB::table('rubrica_asignacion')
-            ->where('etapa_id', $etapaId)
-            ->where('tipo_eval', 'exposicion')
-            ->where('categoria_id', $categoria->id)
-            ->first();
-        if (! $rubAsig) {
-            $this->command->info('DemoJuezAsignacionSeeder: No hay rubrica_asignacion para exposición en esta categoría/etapa.');
-        }
+            // 10) Asegurar visibilidad
+            DB::table('proyectos')->where('id', $proyecto->id)->update([
+                'estado'     => 'en_evaluacion',
+                'updated_at' => now(),
+            ]);
 
-        // Salida
-        $modalidadNombre = DB::table('modalidades')->where('id', $modalidad->id)->value('nombre');
-        $categoriaNombre = DB::table('categorias')->where('id', $categoria->id)->value('nombre');
-        $this->command->info('Proyecto demo listo: proyecto_id='.$proyecto->id.' asignacion_id='.($asignacion->id ?? 'N/A').' etapa=Institucional categoria='.$categoriaNombre.' modalidad='.$modalidadNombre);
+            DB::commit();
+
+            $this->command?->info(
+                "Proyecto demo listo: proyecto_id={$proyecto->id} · modalidad={$modalidad->nombre} · categoría={$categoria->nombre} · etapa=institucional"
+            );
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            $this->command?->error('Error en DemoJuezAsignacionSeeder: '.$e->getMessage());
+            throw $e;
+        }
     }
 }
