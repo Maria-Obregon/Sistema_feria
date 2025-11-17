@@ -16,48 +16,67 @@ use Symfony\Component\HttpFoundation\Response;
 class CalificacionController extends Controller
 {
     public function index(Request $r)
-    {
-        $perPage = max(1, min((int) $r->query('per_page', 50), 200));
-        $proyId = $r->query('proyecto_id');
-        $juezId = $r->query('juez_id');
-        $etapaId = $r->query('etapa_id');
+{
+    $perPage  = max(1, min((int) $r->query('per_page', 200), 200));
+    $proyId   = (int) $r->query('proyecto_id');
+    $etapaId  = (int) $r->query('etapa_id');
+    $tipoEval = $r->query('tipo_eval', 'exposicion'); // por defecto
 
-        $q = DB::table('calificaciones as c')
-            ->select([
-                'c.id', 'c.asignacion_juez_id', 'c.criterio_id', 'c.puntaje', 'c.comentario',
-                'k.nombre as criterio_nombre', 'k.peso', 'k.max_puntos',
-                'r.tipo_eval',
-                'aj.proyecto_id', 'aj.juez_id', 'aj.etapa_id',
-            ])
-            ->join('criterios as k', 'k.id', '=', 'c.criterio_id')
-            ->join('rubricas as r', 'r.id', '=', 'k.rubrica_id')
-            ->join('asignacion_juez as aj', 'aj.id', '=', 'c.asignacion_juez_id'); // ✅
-
-
-        if ($proyId) {
-            $q->where('aj.proyecto_id', (int) $proyId);
-        }
-        if ($juezId) {
-            $q->where('aj.juez_id', (int) $juezId);
-        }
-        if ($etapaId) {
-            $q->where('aj.etapa_id', (int) $etapaId);
-        }
-
-        // Visibilidad: si es juez, solo sus asignaciones
-        $user = Auth::user();
-        if ($user && method_exists($user, 'hasRole') && $user->hasRole('juez')) {
-            $juez = Juez::where('usuario_id', $user->id)->first();
-            if (! $juez) {
-                return response()->json(['message' => 'No autorizado'], Response::HTTP_FORBIDDEN);
-            }
-            $q->where('aj.juez_id', $juez->id);
-        }
-
-        $q->orderBy('c.asignacion_juez_id')->orderBy('c.criterio_id');
-
-        return response()->json($q->paginate($perPage));
+    if (!$proyId || !$etapaId) {
+        return response()->json(['message' => 'proyecto_id y etapa_id son requeridos'], 422);
     }
+
+    // Juez autenticado
+    $user = Auth::user();
+    if (!$user || !method_exists($user, 'hasRole') || !$user->hasRole('juez')) {
+        return response()->json(['message' => 'No autorizado'], 403);
+    }
+    $juez = Juez::where('usuario_id', $user->id)->first();
+    if (!$juez) {
+        return response()->json(['message' => 'No autorizado'], 403);
+    }
+
+    // Asignación del juez para ese proyecto/etapa
+    $asign = DB::table('asignacion_juez')
+        ->where('proyecto_id', $proyId)
+        ->where('etapa_id',   $etapaId)
+        ->where('juez_id',    $juez->id)
+        ->first();
+
+    if (!$asign) {
+        return response()->json(['data' => [], 'meta' => ['count' => 0]]);
+    }
+
+    // Resolver rúbrica (servicio que ya usas)
+    $rubrica = app(\App\Services\RubricaResolver::class)
+        ->resolveForProyecto($proyId, $etapaId, $tipoEval);
+
+    if (!$rubrica) {
+        return response()->json(['data' => [], 'meta' => ['count' => 0]]);
+    }
+
+    // Partimos de CRITERIOS y hacemos LEFT JOIN a calificaciones
+    $rows = DB::table('criterios as k')
+        ->leftJoin('calificaciones as c', function ($j) use ($asign) {
+            $j->on('c.criterio_id', '=', 'k.id')
+              ->where('c.asignacion_juez_id', '=', $asign->id);
+        })
+        ->where('k.rubrica_id', $rubrica->id)
+        ->orderBy('k.id')
+        ->selectRaw('
+            COALESCE(c.asignacion_juez_id, ?) as asignacion_juez_id,
+            k.id   as criterio_id,
+            k.nombre as criterio_nombre,
+            k.peso,
+            k.max_puntos,
+            c.puntaje,
+            c.comentario
+        ', [$asign->id])
+        ->paginate($perPage);
+
+    return response()->json($rows);
+}
+
 
     public function store(Request $r)
     {

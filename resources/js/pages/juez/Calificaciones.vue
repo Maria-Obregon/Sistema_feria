@@ -24,8 +24,8 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="row in califs" :key="`${row.asignaciones_juez_id}-${row.criterio_id}`" class="border-t">
-          <td class="px-4 py-2">{{ row.asignaciones_juez_id }}</td>
+        <tr v-for="row in califs" :key="`${row.asignacion_juez_id}-${row.criterio_id}`" class="border-t">
+          <td class="px-4 py-2">{{ row.asignacion_juez_id }}</td>
           <td class="px-4 py-2">
             <div class="font-medium">{{ row.criterio_nombre }}</div>
             <div class="text-xs text-gray-500">ID {{ row.criterio_id }}</div>
@@ -135,7 +135,7 @@ const cargar = async () => {
 const guardar = async (row) => {
   try {
     const payload = {
-      asignacion_id: row.asignaciones_juez_id,
+      asignacion_id: row.asignacion_juez_id,
       criterio_id: row.criterio_id,
       puntaje: rubrica?.value?.modo === 'escala_1_5' ? Math.max(1, Math.min(5, parseInt(form[row.criterio_id]?.puntaje || 0))) : (form[row.criterio_id]?.puntaje ?? 0),
       comentario: form[row.criterio_id]?.comentario ?? null,
