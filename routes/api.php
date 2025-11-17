@@ -155,9 +155,14 @@ Route::middleware('auth:sanctum')->group(function () {
         ->middleware('permission:jueces.asignar')->whereNumber('id');
     Route::post('/asignaciones-jueces/{id}/finalizar', [AsignacionJuezController::class, 'finalizar'])
         ->middleware('permission:calificaciones.crear')->whereNumber('id');
+    Route::post('/asignaciones-jueces/{id}/reabrir', [AsignacionJuezController::class, 'reabrir'])
+        ->middleware('permission:calificaciones.crear')->whereNumber('id');
 
     // --- Mis asignaciones (solo lectura, juez autenticado) ---
     Route::get('juez/asignaciones/mias', [MisAsignacionesController::class, 'index']);
+
+    // --- Mis calificaciones (asignaciones finalizadas, solo lectura) ---
+    Route::get('juez/asignaciones/finalizadas', [\App\Http\Controllers\MisCalificacionesController::class, 'index']);
 });
 
 /*
@@ -165,7 +170,7 @@ Route::middleware('auth:sanctum')->group(function () {
 | ADMIN (dashboard, catálogos)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth:sanctum','role:admin'])->prefix('admin')->group(function () {
+Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
     // Dashboard / util
     Route::get('/stats', [AdminController::class, 'stats']);
 

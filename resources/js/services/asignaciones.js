@@ -32,10 +32,26 @@ export const quitarAsignacion = (id) => {
   return api.delete(`/asignaciones-jueces/${id}`)
 }
 
+/**
+ * Marca una asignación como finalizada.
+ */
+export const finalizarAsignacion = (id) => {
+  return api.post(`/asignaciones-jueces/${id}/finalizar`)
+}
+
+/**
+ * Reabre una asignación finalizada para poder editarla.
+ */
+export const reabrirAsignacion = (id) => {
+  return api.post(`/asignaciones-jueces/${id}/reabrir`)
+}
+
 // (opcional) export por defecto con todas las funciones
 export default {
   listarMisAsignaciones,
   listarAsignacionesPorProyecto,
   asignarJuecesAProyecto,
   quitarAsignacion,
+  finalizarAsignacion,
+  reabrirAsignacion,
 }

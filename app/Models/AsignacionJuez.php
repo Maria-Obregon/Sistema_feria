@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class AsignacionJuez extends Model
 {
-    protected $table = 'asignaciones_jueces';
+    protected $table = 'asignacion_juez';
 
     protected $fillable = [
         'proyecto_id',
@@ -17,8 +17,8 @@ class AsignacionJuez extends Model
 
     protected $casts = [
         'proyecto_id' => 'integer',
-        'juez_id'     => 'integer',
-        'etapa_id'    => 'integer',
+        'juez_id' => 'integer',
+        'etapa_id' => 'integer',
     ];
 
     public function proyecto()

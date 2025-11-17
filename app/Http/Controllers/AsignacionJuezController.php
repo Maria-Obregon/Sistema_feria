@@ -112,4 +112,42 @@ class AsignacionJuezController extends Controller
             'finalizada_at' => $asig->finalizada_at,
         ]);
     }
+
+    /**
+     * POST /api/asignaciones-jueces/{id}/reabrir
+     */
+    public function reabrir(Request $request, $id)
+    {
+        $user = Auth::user();
+        $asig = AsignacionJuez::findOrFail($id);
+
+        if ($user && method_exists($user, 'hasRole') && $user->hasRole('juez')) {
+            $juez = \App\Models\Juez::where('usuario_id', $user->id)->first();
+            if (! $juez) {
+                return response()->json(['message' => 'No autorizado'], 403);
+            }
+            if ((int) $asig->juez_id !== (int) $juez->id) {
+                return response()->json(['message' => 'Asignación no pertenece al juez autenticado'], 403);
+            }
+        }
+
+        if (is_null($asig->finalizada_at)) {
+            return response()->json([
+                'message' => 'Asignación ya está abierta',
+            ], 200);
+        }
+
+        $asig->finalizada_at = null;
+        $asig->save();
+
+        Log::info('asignaciones.reabrir', [
+            'user_id' => $user?->id,
+            'asignacion_id' => $asig->id,
+            'ts' => now()->toDateTimeString(),
+        ]);
+
+        return response()->json([
+            'message' => 'Asignación reabierta para edición',
+        ]);
+    }
 }

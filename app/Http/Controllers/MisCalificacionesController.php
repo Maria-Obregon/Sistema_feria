@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class MisAsignacionesController extends Controller
+class MisCalificacionesController extends Controller
 {
     public function index(Request $request)
     {
@@ -16,7 +16,7 @@ class MisAsignacionesController extends Controller
 
         $usuarioId = $user->id;
 
-        // Importante: usamos la tabla plural "asignaciones_jueces"
+        // Traer solo asignaciones finalizadas
         $rows = DB::table('jueces as j')
             ->join('asignacion_juez as aj', 'aj.juez_id', '=', 'j.id')
             ->join('proyectos as p', 'p.id', '=', 'aj.proyecto_id')
@@ -24,8 +24,8 @@ class MisAsignacionesController extends Controller
             ->leftJoin('modalidades as m', 'm.id', '=', 'p.modalidad_id')
             ->leftJoin('etapas as e', 'e.id', '=', 'aj.etapa_id')
             ->where('j.usuario_id', $usuarioId)
-            ->whereNull('aj.finalizada_at') // solo asignaciones pendientes
-            ->orderByDesc('aj.id')
+            ->whereNotNull('aj.finalizada_at') // solo finalizadas
+            ->orderByDesc('aj.finalizada_at')
             ->selectRaw('
                 aj.id           as asignacion_id,
                 aj.proyecto_id  as proyecto_id,
@@ -41,12 +41,10 @@ class MisAsignacionesController extends Controller
 
         $data = $rows->map(function ($r) {
             return [
-                // ids planos (lo que necesita el front para navegar)
                 'id' => (int) $r->asignacion_id,
                 'proyecto_id' => (int) $r->proyecto_id,
                 'etapa_id' => (int) $r->etapa_id,
 
-                // objeto anidado para mostrar en tabla
                 'proyecto' => [
                     'id' => (int) $r->proyecto_id,
                     'titulo' => $r->proyecto_titulo,
@@ -56,7 +54,7 @@ class MisAsignacionesController extends Controller
                 ],
 
                 'tipo_eval' => $r->tipo_eval,
-                'finalizada' => ! is_null($r->finalizada_at),
+                'finalizada_at' => $r->finalizada_at,
             ];
         });
 
