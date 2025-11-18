@@ -6,6 +6,10 @@ use App\Models\Area;
 use App\Models\Categoria;
 use App\Models\Modalidad;
 use App\Models\Nivel;
+use App\Models\Usuario;
+use App\Models\Institucion;
+use App\Models\Proyecto;
+use App\Models\Feria;
 use App\Models\TipoInstitucion;
 use App\Models\Regional;
 use App\Models\Circuito;
@@ -18,12 +22,12 @@ class AdminController extends Controller
     /** ====== Dashboard / utilidades ====== */
    public function stats()
 {
-    $usuarios      = class_exists(\App\Models\Usuario::class)     ? \App\Models\Usuario::count()     : 0;
-    $instituciones = class_exists(\App\Models\Institucion::class) ? \App\Models\Institucion::count() : 0;
-    $proyectos     = class_exists(\App\Models\Proyecto::class)     ? \App\Models\Proyecto::count()     : 0;
+    $usuarios      = class_exists(Usuario::class)     ? Usuario::count()     : 0;
+    $instituciones = class_exists(Institucion::class) ? Institucion::count() : 0;
+    $proyectos     = class_exists(Proyecto::class)     ? Proyecto::count()     : 0;
 
     // por ahora, total de ferias (no “activas”)
-    $feriasActivas = class_exists(\App\Models\Feria::class) ? \App\Models\Feria::count() : 0;
+    $feriasActivas = class_exists(Feria::class) ? Feria::count() : 0;
 
     return response()->json([
         'usuarios'       => $usuarios,

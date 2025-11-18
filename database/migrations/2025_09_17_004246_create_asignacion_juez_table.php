@@ -11,25 +11,31 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('asignacion_juez', function (Blueprint $table) {
-            $table->id();
-    $table->foreignId('proyecto_id')->constrained('proyectos')->cascadeOnDelete();
-    $table->foreignId('juez_id')->constrained('jueces')->cascadeOnDelete();
-    $table->unsignedTinyInteger('etapa_id');
-    $table->string('tipo_eval', 50)->nullable();
-    $table->dateTime('asignado_en')->nullable();
-    $table->timestamps();
+         Schema::create('asignacion_juez', function (Blueprint $table) {
+                $table->id();
 
-    $table->foreign('etapa_id')->references('id')->on('etapas')->restrictOnDelete();
-    $table->unique(['proyecto_id','juez_id','etapa_id']);
-        });
-    }
+                $table->foreignId('proyecto_id')
+                    ->constrained('proyectos')
+                    ->cascadeOnDelete();
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('asignacion_juez');
-    }
-};
+                $table->foreignId('juez_id')
+                    ->constrained('jueces')
+                    ->cascadeOnDelete();
+
+                // igual que en asignacion_juez
+                $table->unsignedTinyInteger('etapa_id'); // FK abajo
+                $table->string('tipo_eval', 50)->nullable();
+                $table->dateTime('asignado_en')->nullable();
+
+                $table->timestamps();
+
+                // FK a etapas con RESTRICT ON DELETE (igual que tu tabla singular)
+                $table->foreign('etapa_id')
+                    ->references('id')->on('etapas')
+                    ->restrictOnDelete();
+
+                // Evita duplicados
+                $table->unique(['proyecto_id','juez_id','etapa_id'], 'uniq_proy_juez_etapa');
+            });
+        }
+    };

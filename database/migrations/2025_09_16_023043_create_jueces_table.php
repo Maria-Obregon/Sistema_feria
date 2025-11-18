@@ -19,7 +19,7 @@ return new class extends Migration
     $table->string('telefono', 20)->nullable();
     $table->string('correo', 120)->nullable();
     $table->string('grado_academico', 120)->nullable();
-    $table->foreignId('area__id')->nullable()->constrained('areas')->nullOnDelete();
+    $table->foreignId('area_id')->nullable()->constrained('areas')->nullOnDelete();
     $table->foreignId('usuario_id')->nullable()->unique()->constrained('usuarios')->nullOnDelete();
     $table->timestamps();
         });

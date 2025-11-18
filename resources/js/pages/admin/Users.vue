@@ -117,7 +117,7 @@
               <td class="px-6 py-4 text-right text-sm font-medium">
                 <div class="flex justify-end gap-2">
                   <button class="text-indigo-600 hover:text-indigo-900" @click="abrirEditar(u)">Editar</button>
-                  <button class="text-yellow-600 hover:text-yellow-900" @click="resetearPassword(u)">Reset pass</button>
+                  <button class="text-yellow-600 hover:text-yellow-900" @click="abrirReset(u)">Reset pass</button>
                   <button class="text-red-600 hover:text-red-900" @click="eliminar(u)">Eliminar</button>
                 </div>
               </td>
@@ -160,6 +160,69 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal Reset Password -->
+<div v-if="mostrarReset" class="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-50">
+  <div class="bg-white w-full max-w-md rounded-lg shadow-lg border">
+    <div class="px-6 py-4 border-b flex justify-between items-center bg-gray-50">
+      <h3 class="text-lg font-medium">Restablecer contraseña</h3>
+      <button @click="cerrarReset" class="text-gray-400 hover:text-gray-600">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="p-6">
+      <div class="mb-4">
+        <div class="text-sm text-gray-600">Usuario</div>
+        <div class="font-medium text-gray-900">{{ usuarioReset?.nombre }} <span class="text-gray-500">({{ usuarioReset?.email }})</span></div>
+      </div>
+
+      <form @submit.prevent="enviarReset">
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nueva contraseña *</label>
+            <input
+              v-model="reset.password"
+              type="password"
+              minlength="8"
+              required
+              class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500"
+              placeholder="Mínimo 8 caracteres"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Confirmar contraseña *</label>
+            <input
+              v-model="reset.confirm"
+              type="password"
+              minlength="8"
+              required
+              class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500"
+              placeholder="Repite la contraseña"
+            />
+            <p v-if="reset.confirm && reset.confirm !== reset.password" class="mt-1 text-sm text-red-600">
+              Las contraseñas no coinciden
+            </p>
+          </div>
+        </div>
+
+        <div class="mt-6 flex justify-end gap-3">
+          <button type="button" @click="cerrarReset"
+                  class="px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-50">Cancelar</button>
+          <button type="submit" :disabled="enviandoReset || !resetValida"
+                  class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50">
+            <span v-if="enviandoReset">Guardando…</span>
+            <span v-else>Actualizar</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 
     <!-- Modal Crear/Editar -->
     <div v-if="mostrarModal" class="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-50">
@@ -388,7 +451,7 @@ const guardar = async () => {
       mostrarToast('Usuario actualizado', 'success')
     } else {
       // Crear + asignar rol + enviar correo (password opcional)
-      await adminApi.crearUsuario({
+      await usuariosApi.crear({
         nombre: form.nombre,
         email: form.email,
         password: form.password || undefined, // si va vacío, el backend genera una
@@ -409,17 +472,40 @@ const guardar = async () => {
   }
 }
 
-const resetearPassword = async (u) => {
-  if (!confirm(`¿Restablecer contraseña de ${u.nombre}?`)) return
+const mostrarReset = ref(false)
+const usuarioReset = ref(null)
+const enviandoReset = ref(false)
+const reset = reactive({ password: '', confirm: '' })
+
+const resetValida = computed(() =>
+  reset.password?.length >= 8 && reset.password === reset.confirm
+)
+
+const abrirReset = (u) => {
+  usuarioReset.value = u
+  reset.password = ''
+  reset.confirm = ''
+  mostrarReset.value = true
+}
+
+const cerrarReset = () => {
+  mostrarReset.value = false
+  usuarioReset.value = null
+  reset.password = ''
+  reset.confirm = ''
+}
+
+const enviarReset = async () => {
+  if (!resetValida.value || !usuarioReset.value) return
   try {
-    const { data } = await adminApi.resetPassword(u.id) // <— SIN segundo arg para autogenerar
-    if (data.password_plano) {
-      alert(`Nueva contraseña de ${u.nombre}:\n\n${data.password_plano}`)
-    } else {
-      mostrarToast('Contraseña restablecida. Revisa el correo del usuario.', 'success')
-    }
-  } catch {
+    enviandoReset.value = true
+    await adminApi.resetPassword(usuarioReset.value.id, reset.password)
+    mostrarToast('Contraseña actualizada', 'success')
+    cerrarReset()
+  } catch (e) {
     mostrarToast('Error al restablecer contraseña', 'error')
+  } finally {
+    enviandoReset.value = false
   }
 }
 

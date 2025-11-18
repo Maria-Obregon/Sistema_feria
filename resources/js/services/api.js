@@ -84,11 +84,28 @@ export const usuariosApi = {
 }
 
 // =========================
+// Jueces (compat)
+// =========================
+export const juecesApi = {
+  listar:     (params = {})     => api.get('/jueces', { params }),
+  crear:      (datos)           => api.post('/jueces', datos),
+  obtener:    (id)              => api.get(`/jueces/${id}`),
+  actualizar: (id, datos)       => api.put(`/jueces/${id}`, datos),
+  eliminar:   (id)              => api.delete(`/jueces/${id}`),
+}
+
+// =========================
 // Admin (dashboard + catálogos)
 // =========================
 export const adminApi = {
   stats: () => api.get('/admin/stats'),
   roles: () => api.get('/admin/roles'),
+
+   actualizarRoles: (usuarioId, roles) =>
+    api.post(`/admin/usuarios/${usuarioId}/roles`, { roles }),
+
+  resetPassword: (usuarioId, password) =>
+  api.put(`/admin/usuarios/${usuarioId}/password`, password ? { password } : {}),
 
   // Modalidades
   modalidades: {

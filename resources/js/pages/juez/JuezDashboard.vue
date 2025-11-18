@@ -12,12 +12,6 @@
             >
               Mis Asignaciones
             </router-link>
-            <router-link
-              :to="{ name: 'juez.calificaciones' }"
-              class="text-sm text-gray-600 hover:text-gray-900"
-            >
-              Calificaciones
-            </router-link>
           </div>
 
           <div class="flex items-center space-x-4">
@@ -103,7 +97,7 @@
         </router-link>
 
         <router-link
-          :to="{ name: 'juez.calificaciones' }"
+          :to="{ name: 'juez.mis-calificaciones' }"
           class="bg-white p-6 rounded-lg shadow-sm border hover:shadow-md transition-shadow"
         >
           <div class="flex items-center">

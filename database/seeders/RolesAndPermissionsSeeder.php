@@ -11,173 +11,112 @@ class RolesAndPermissionsSeeder extends Seeder
 {
     public function run(): void
     {
-        // Reset cached roles and permissions
+        // Reset cache de permisos/roles
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // Crear permisos por módulo
-        $permissions = [
+        // ---- Crear/asegurar permisos (idempotente) ----
+        $all = [
             // Usuarios
-            'usuarios.ver',
-            'usuarios.crear',
-            'usuarios.editar',
-            'usuarios.eliminar',
-            
+            'usuarios.ver','usuarios.crear','usuarios.editar','usuarios.eliminar',
+
             // Instituciones
-            'instituciones.ver',
-            'instituciones.crear',
-            'instituciones.editar',
-            'instituciones.eliminar',
-            
+            'instituciones.ver','instituciones.crear','instituciones.editar','instituciones.eliminar',
+
             // Proyectos
-            'proyectos.ver',
-            'proyectos.crear',
-            'proyectos.editar',
-            'proyectos.eliminar',
-            'proyectos.calificar',
-            
+            'proyectos.ver','proyectos.crear','proyectos.editar','proyectos.eliminar','proyectos.calificar',
+
             // Estudiantes
-            'estudiantes.ver',
-            'estudiantes.crear',
-            'estudiantes.editar',
-            'estudiantes.eliminar',
-            
+            'estudiantes.ver','estudiantes.crear','estudiantes.editar','estudiantes.eliminar',
+
             // Jueces
-            'jueces.ver',
-            'jueces.crear',
-            'jueces.editar',
-            'jueces.eliminar',
-            'jueces.asignar',
-            
+            'jueces.ver','jueces.crear','jueces.editar','jueces.eliminar','jueces.asignar',
+
             // Ferias
-            'ferias.ver',
-            'ferias.crear',
-            'ferias.editar',
-            'ferias.eliminar',
-            'ferias.cerrar_etapa',
-            
+            'ferias.ver','ferias.crear','ferias.editar','ferias.eliminar','ferias.cerrar_etapa',
+
             // Calificaciones
-            'calificaciones.ver',
-            'calificaciones.crear',
-            'calificaciones.consolidar',
-            
+            'calificaciones.ver','calificaciones.crear','calificaciones.consolidar',
+
             // Reportes
-            'reportes.ver',
-            'reportes.exportar',
-            
+            'reportes.ver','reportes.exportar',
+
             // Certificados
-            'certificados.ver',
-            'certificados.generar',
-            
+            'certificados.ver','certificados.generar',
+
             // Administración
-            'admin.configuracion',
-            'admin.respaldos',
-            'admin.logs',
+            'admin.configuracion','admin.respaldos','admin.logs',
         ];
 
-        foreach ($permissions as $permission) {
-            Permission::create([
-                'name' => $permission,
-                'guard_name' => 'sanctum'
-            ]);
+        foreach ($all as $p) {
+            Permission::firstOrCreate(['name' => $p, 'guard_name' => 'sanctum']);
         }
 
-        // Crear roles
-        $roleEstudiante = Role::create(['name' => 'estudiante', 'guard_name' => 'sanctum']);
-        $roleJuez = Role::create(['name' => 'juez', 'guard_name' => 'sanctum']);
-        $roleComite = Role::create(['name' => 'comite_institucional', 'guard_name' => 'sanctum']);
-        $roleCoordinadorCircuito = Role::create(['name' => 'coordinador_circuito', 'guard_name' => 'sanctum']);
-        $roleCoordinadorRegional = Role::create(['name' => 'coordinador_regional', 'guard_name' => 'sanctum']);
-        $roleAdmin = Role::create(['name' => 'admin', 'guard_name' => 'sanctum']);
+        // ---- Roles (idempotente) ----
+        $roleEstudiante          = Role::firstOrCreate(['name' => 'estudiante',           'guard_name' => 'sanctum']);
+        $roleJuez                = Role::firstOrCreate(['name' => 'juez',                 'guard_name' => 'sanctum']);
+        $roleComite              = Role::firstOrCreate(['name' => 'comite_institucional', 'guard_name' => 'sanctum']);
+        $roleCoordinadorCircuito = Role::firstOrCreate(['name' => 'coordinador_circuito', 'guard_name' => 'sanctum']);
+        $roleCoordinadorRegional = Role::firstOrCreate(['name' => 'coordinador_regional', 'guard_name' => 'sanctum']);
+        $roleAdmin               = Role::firstOrCreate(['name' => 'admin',                'guard_name' => 'sanctum']);
 
-        // Asignar permisos a roles
-        
-        // Estudiante - Solo lectura de su información
-        $roleEstudiante->givePermissionTo([
+        // ---- Permisos por rol ----
+
+        // Estudiante
+        $roleEstudiante->syncPermissions([
             'proyectos.ver',
             'certificados.ver',
         ]);
 
-        // Juez - Calificar proyectos asignados
-        $roleJuez->givePermissionTo([
+        // Juez (leer proyecto asignado y calificar)
+        $roleJuez->syncPermissions([
             'proyectos.ver',
             'proyectos.calificar',
+            'jueces.ver',                    // <- necesario para /proyectos/{id}/rubrica si dejaras permission
             'calificaciones.ver',
             'calificaciones.crear',
+            'calificaciones.consolidar',     // <- para consolidar
         ]);
 
         // Comité Institucional
-        $roleComite->givePermissionTo([
-            'instituciones.ver',
-            'instituciones.crear',
-            'instituciones.editar',
-            'proyectos.ver',
-            'proyectos.crear',
-            'proyectos.editar',
-            'estudiantes.ver',
-            'estudiantes.crear',
-            'estudiantes.editar',
-            'jueces.ver',
-            'jueces.crear',        // <- temporal
-            'jueces.editar',       // <- temporal
-            'jueces.eliminar',     // <- temporal
-            'jueces.asignar',      // <- temporal
+        $roleComite->syncPermissions([
+            'instituciones.ver','instituciones.crear','instituciones.editar',
+            'proyectos.ver','proyectos.crear','proyectos.editar',
+            'estudiantes.ver','estudiantes.crear','estudiantes.editar',
+            'jueces.ver','jueces.crear','jueces.editar','jueces.eliminar','jueces.asignar',
             'ferias.ver',
             'calificaciones.ver',
             'reportes.ver',
-            'certificados.ver',
-            'certificados.generar',
+            'certificados.ver','certificados.generar',
         ]);
 
         // Coordinador de Circuito
-        $roleCoordinadorCircuito->givePermissionTo([
-            'instituciones.ver',
-            'instituciones.editar',
-            'proyectos.ver',
-            'proyectos.editar',
+        $roleCoordinadorCircuito->syncPermissions([
+            'instituciones.ver','instituciones.editar',
+            'proyectos.ver','proyectos.editar',
             'estudiantes.ver',
-            'jueces.ver',
-            'jueces.crear',
-            'jueces.editar',
-            'jueces.asignar',
-            'ferias.ver',
-            'ferias.crear',
-            'ferias.editar',
-            'ferias.cerrar_etapa',
-            'calificaciones.ver',
-            'calificaciones.consolidar',
-            'reportes.ver',
-            'reportes.exportar',
-            'certificados.ver',
-            'certificados.generar',
+            'jueces.ver','jueces.crear','jueces.editar','jueces.asignar',
+            'ferias.ver','ferias.crear','ferias.editar','ferias.cerrar_etapa',
+            'calificaciones.ver','calificaciones.consolidar',
+            'reportes.ver','reportes.exportar',
+            'certificados.ver','certificados.generar',
         ]);
 
         // Coordinador Regional
-        $roleCoordinadorRegional->givePermissionTo([
-            'instituciones.ver',
-            'instituciones.crear',
-            'instituciones.editar',
-            'proyectos.ver',
-            'proyectos.editar',
+        $roleCoordinadorRegional->syncPermissions([
+            'instituciones.ver','instituciones.crear','instituciones.editar',
+            'proyectos.ver','proyectos.editar',
             'estudiantes.ver',
-            'jueces.ver',
-            'jueces.crear',
-            'jueces.editar',
-            'jueces.eliminar',
-            'jueces.asignar',
-            'ferias.ver',
-            'ferias.crear',
-            'ferias.editar',
-            'ferias.eliminar',
-            'ferias.cerrar_etapa',
-            'calificaciones.ver',
-            'calificaciones.consolidar',
-            'reportes.ver',
-            'reportes.exportar',
-            'certificados.ver',
-            'certificados.generar',
+            'jueces.ver','jueces.crear','jueces.editar','jueces.eliminar','jueces.asignar',
+            'ferias.ver','ferias.crear','ferias.editar','ferias.eliminar','ferias.cerrar_etapa',
+            'calificaciones.ver','calificaciones.consolidar',
+            'reportes.ver','reportes.exportar',
+            'certificados.ver','certificados.generar',
         ]);
 
-        // Admin - Todos los permisos
-        $roleAdmin->givePermissionTo(Permission::all());
+        // Admin: todos
+        $roleAdmin->syncPermissions(Permission::all());
+
+        // Limpia el caché de nuevo por seguridad
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
     }
 }

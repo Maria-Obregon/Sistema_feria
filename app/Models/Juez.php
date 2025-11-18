@@ -21,7 +21,7 @@ class Juez extends Model
 
     public function area()
     {
-        return $this->belongsTo(Area::class);
+        return $this->belongsTo(\App\Models\Area::class, 'area__id');
     }
 
     public function usuario()
@@ -37,13 +37,22 @@ class Juez extends Model
     public function proyectos()
     {
         return $this->belongsToMany(Proyecto::class, 'asignaciones_jueces', 'juez_id', 'proyecto_id')
-            ->withPivot(['etapa_id','tipo_eval'])
+            ->withPivot(['etapa_id', 'tipo_eval'])
             ->withTimestamps();
-/*************  ✨ Windsurf Command ⭐  *************/
-    /**
-     * Devuelve los proyectos a los que est  asignado el juez actual.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-     */
-/*******  8b5ab102-ec9f-458f-9fd7-4f4d819843f6  *******/    }
+    }
+
+    public function instituciones()
+    {
+        return $this->belongsToMany(\App\Models\Institucion::class, 'juez_institucion', 'juez_id', 'institucion_id')
+            ->withTimestamps();
+    }
+
+    public function institucionPrincipal(): ?\App\Models\Institucion
+    {
+        if ($this->usuario && $this->usuario->institucion) {
+            return $this->usuario->institucion;
+        }
+
+        return $this->instituciones()->first();
+    }
 }
