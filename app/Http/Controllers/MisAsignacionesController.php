@@ -21,24 +21,31 @@ class MisAsignacionesController extends Controller
 
         $asignaciones = \App\Models\AsignacionJuez::with(['proyecto.categoria'])
             ->where('juez_id', $juez->id)
-            ->where('fue_finalizada', false) // Solo mostrar pendientes reales que nunca se han terminado
             ->orderByDesc('finalizada_at')
             ->get();
 
-        $data = $asignaciones->map(function ($asig) {
+        $grouped = $asignaciones->groupBy('proyecto_id');
+
+        $filtered = $grouped->filter(function ($items) {
+            return $items->contains('fue_finalizada', false);
+        });
+
+        $result = $filtered->flatten();
+
+        $data = $result->map(function ($asig) {
             return [
                 'id' => $asig->id,
                 'proyecto_id' => $asig->proyecto_id,
                 'etapa_id' => $asig->etapa_id,
                 'tipo_eval' => $asig->tipo_eval,
-                'finalizada' => ! is_null($asig->finalizada_at),
+                'finalizada' => (bool) $asig->fue_finalizada,
                 'proyecto' => [
                     'id' => $asig->proyecto->id,
                     'titulo' => $asig->proyecto->titulo,
                     'categoria' => $asig->proyecto->categoria ? $asig->proyecto->categoria->nombre : 'Sin Categoría',
                 ],
             ];
-        });
+        })->values();
 
         return response()->json([
             'data' => $data,

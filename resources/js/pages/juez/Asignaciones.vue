@@ -152,7 +152,7 @@ const cargar = async () => {
   }
 }
 
-// Lógica de Agrupación
+
 const proyectosAgrupados = computed(() => {
     const grupos = {}
 
@@ -170,7 +170,7 @@ const proyectosAgrupados = computed(() => {
             }
         }
         
-        // Asignar según tipo
+
         if (a.tipo_eval === 'escrito') {
             grupos[a.proyecto_id].escrito = a
         } else if (a.tipo_eval === 'exposicion') {
@@ -184,7 +184,7 @@ const proyectosAgrupados = computed(() => {
     })
 
     return Object.values(grupos).map(p => {
-        // Calcular Estado
+
         let estado = 'Pendiente'
         if (p.total_finalizadas === p.total_asignadas && p.total_asignadas > 0) {
             estado = 'Completado ✅'
@@ -195,10 +195,10 @@ const proyectosAgrupados = computed(() => {
     })
 })
 
-// Lógica de Filtrado en Tiempo Real
+
 const proyectosFiltrados = computed(() => {
     return proyectosAgrupados.value.filter(p => {
-        // Ocultar completados
+
         if (p.estado === 'Completado ✅') return false
 
         const matchTexto = 
@@ -220,12 +220,17 @@ const getStatusClass = (estado) => {
 
 const getButtonClass = (finalizada) => {
     if (finalizada) {
-        return 'bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-200'
+        return 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-75'
     }
-    return 'bg-white text-blue-600 border-blue-200 hover:bg-blue-50 hover:border-blue-300'
+    return 'bg-white text-blue-600 border-blue-200 hover:bg-blue-50 hover:border-blue-300 shadow-sm'
 }
 
 const irACalificar = (asignacion) => {
+
+  if (asignacion.finalizada) {
+      return
+  }
+  
   router.push({ 
     name: 'juez.calificaciones', 
     query: { 

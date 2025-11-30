@@ -63,12 +63,7 @@
       </div>
     </div>
 
-    <!-- Inputs ocultos para debug (opcional, o eliminarlos del todo) -->
-    <!-- <div class="flex items-center gap-2 mb-4 opacity-50 text-xs">
-      <input v-model.number="proyectoId" type="number" placeholder="proyectoId" class="border rounded px-2 py-1 w-20" />
-      <input v-model.number="etapaId" type="number" placeholder="etapaId" class="border rounded px-2 py-1 w-20" />
-      <button @click="cargar" class="px-2 py-1 bg-gray-200 rounded">Recargar</button>
-    </div> -->
+
 
     <div v-if="hayErrores" class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 flex items-center gap-3">
       <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -93,7 +88,7 @@
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
-            <!-- <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th> -->
+
             <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-1/3">Criterio</th>
             <th class="text-center px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Peso</th>
             <th class="text-center px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Máx</th>
@@ -227,12 +222,12 @@ const cargar = async () => {
     return
   }
   
-  // Limpiar formulario al cargar nueva data para evitar datos residuales de otros proyectos
+
   Object.keys(form).forEach(key => delete form[key])
   
   loading.value = true
   try {
-    // Si viene desde "Mis Calificaciones", está finalizada
+
     if (route.query.finalizada === '1') {
       estaFinalizada.value = true
       fueReabierta.value = false
@@ -352,10 +347,8 @@ const finalizarAsignacionActual = async () => {
   try {
     await finalizarAsignacion(asignacionId.value)
     mostrarToast('Asignación finalizada correctamente', 'success')
-    // Resetear flag de reabierta
     fueReabierta.value = false
     estaFinalizada.value = true
-    // Redirigir a Mis Calificaciones en lugar de Mis Asignaciones
     setTimeout(() => {
       router.push({ name: 'juez.mis-calificaciones' })
     }, 1000)
@@ -376,7 +369,6 @@ const reabrirAsignacionActual = async () => {
   try {
     await reabrirAsignacion(asignacionId.value)
     mostrarToast('Asignación reabierta. Recuerda finalizarla de nuevo cuando termines de editar', 'success')
-    // Actualizar estado
     estaFinalizada.value = false
     fueReabierta.value = true
   } catch (e) {
@@ -393,7 +385,7 @@ watch(() => route.query, () => {
   cargar()
 })
 
-// Resumen 1–5
+
 const suma15 = computed(() => {
   if (rubrica.value?.modo !== 'escala_1_5') return 0
   return califs.value.reduce((acc, row) => acc + (parseInt(form[row.criterio_id]?.puntaje || 0) || 0), 0)
@@ -412,7 +404,7 @@ const equivalente100 = computed(() => {
   return (suma15.value / max) * rubrica.value.max_total
 })
 
-// Resumen por criterio (F13B y similares)
+
 const sumaPC = computed(() => {
   if (rubrica.value?.modo !== 'por_criterio') return 0
   return califs.value.reduce((acc, row) => {

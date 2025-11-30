@@ -133,7 +133,7 @@ const cargar = async () => {
   }
 }
 
-// Lógica de Agrupación (Similar a Asignaciones.vue)
+
 const proyectosAgrupados = computed(() => {
     const grupos = {}
 
@@ -172,9 +172,7 @@ const proyectosFiltrados = computed(() => {
 })
 
 const verCalificacion = (calif) => {
-  // Reutilizamos la vista de calificar, que debería permitir editar si se reabre o solo ver
-  // OJO: Si está finalizada, el backend/frontend de Calificaciones.vue debe manejar el modo "solo lectura" o "edición restringida"
-  // Por ahora enviamos al mismo lugar.
+
     router.push({
         name: 'juez.calificaciones',
         query: {
