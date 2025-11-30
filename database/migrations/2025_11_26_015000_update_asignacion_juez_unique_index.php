@@ -18,9 +18,16 @@ return new class extends Migration
             // $table->dropForeign(['etapa_id']); // Probablemente no tiene FK si etapa es tinyint sin constraint explicita previa
 
             // 2. Dropear el índice único problemático
+            // Intentamos dropear ambos nombres por si acaso (el default y el custom)
             try {
-                $table->dropUnique('asignacion_juez_proyecto_id_juez_id_etapa_id_unique');
+                $table->dropUnique('uniq_proy_juez_etapa');
             } catch (\Exception $e) {
+                // Si falla, intentamos con el nombre default
+                try {
+                    $table->dropUnique('asignacion_juez_proyecto_id_juez_id_etapa_id_unique');
+                } catch (\Exception $e2) {
+                    // Si ambos fallan, asumimos que no existe y continuamos
+                }
             }
 
             // 3. Crear el nuevo índice único
