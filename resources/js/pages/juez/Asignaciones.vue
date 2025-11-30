@@ -198,6 +198,9 @@ const proyectosAgrupados = computed(() => {
 // Lógica de Filtrado en Tiempo Real
 const proyectosFiltrados = computed(() => {
     return proyectosAgrupados.value.filter(p => {
+        // Ocultar completados
+        if (p.estado === 'Completado ✅') return false
+
         const matchTexto = 
             p.titulo.toLowerCase().includes(busqueda.value.toLowerCase()) ||
             p.proyecto_id.toString().includes(busqueda.value)
