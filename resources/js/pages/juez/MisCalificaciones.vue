@@ -181,7 +181,7 @@ const verCalificacion = (calif) => {
             proyectoId: calif.proyecto_id,
             etapaId: calif.etapa_id,
             tipo_eval: calif.tipo_eval,
-            finalizada: 1,
+            // finalizada: 1, // NO forzar finalizada, dejar que el backend decida si está abierta o cerrada
             from: 'mis-calificaciones' // Origen
         }
     })

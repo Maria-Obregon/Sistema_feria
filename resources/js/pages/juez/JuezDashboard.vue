@@ -1,26 +1,27 @@
 <template>
-  <div class="min-h-screen bg-gray-100">
+  <div class="min-h-screen bg-gray-50">
     <!-- Topbar -->
-    <nav class="bg-white shadow">
+    <nav class="bg-white border-b border-gray-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
-          <div class="flex items-center space-x-6">
-            <h1 class="text-xl font-semibold">Panel de Juez</h1>
-            <router-link
-              :to="{ name: 'juez.asignaciones' }"
-              class="text-sm text-gray-600 hover:text-gray-900"
-            >
-              Mis Asignaciones
-            </router-link>
+          <div class="flex items-center">
+            <h1 class="text-2xl font-bold text-gray-800">Panel de Juez</h1>
           </div>
 
           <div class="flex items-center space-x-4">
-            <span class="text-sm text-gray-500">{{ user?.email }}</span>
+            <div class="text-right hidden sm:block">
+              <p class="text-sm font-medium text-gray-900">Juez</p>
+              <p class="text-xs text-gray-500">{{ user?.email }}</p>
+            </div>
+            <div class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
+              {{ user?.email?.charAt(0).toUpperCase() }}
+            </div>
             <button
               @click="logout"
-              class="text-sm text-red-600 hover:text-red-800"
+              class="ml-4 text-sm text-gray-500 hover:text-red-600 transition-colors"
+              title="Cerrar Sesión"
             >
-              Cerrar Sesión
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
             </button>
           </div>
         </div>
@@ -28,91 +29,73 @@
     </nav>
 
     <!-- Contenido -->
-    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div class="bg-white rounded-lg shadow p-6">
-          <div class="flex items-center">
-            <div class="p-3 bg-blue-100 rounded-full">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-            </div>
-            <div class="ml-4">
-              <p class="text-2xl font-semibold">{{ stats.pendientes }}</p>
-              <p class="text-gray-500">Por calificar</p>
-            </div>
+    <main class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center justify-between hover:shadow-md transition-shadow">
+          <div>
+            <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Por Calificar</p>
+            <p class="text-3xl font-bold text-blue-600 mt-1">{{ stats.pendientes }}</p>
+          </div>
+          <div class="p-3 bg-blue-50 rounded-full text-blue-600">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
           </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-6">
-          <div class="flex items-center">
-            <div class="p-3 bg-green-100 rounded-full">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M9 12h6m-6 4h6M5 7h14M5 7l2-2m-2 2l2 2"/>
-              </svg>
-            </div>
-            <div class="ml-4">
-              <p class="text-2xl font-semibold">{{ stats.calificadas }}</p>
-              <p class="text-gray-500">Calificaciones enviadas</p>
-            </div>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center justify-between hover:shadow-md transition-shadow">
+          <div>
+            <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Enviadas</p>
+            <p class="text-3xl font-bold text-green-600 mt-1">{{ stats.calificadas }}</p>
+          </div>
+          <div class="p-3 bg-green-50 rounded-full text-green-600">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
           </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-6">
-          <div class="flex items-center">
-            <div class="p-3 bg-yellow-100 rounded-full">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M3 7h18M5 10h14M7 13h10M9 16h6"/>
-              </svg>
-            </div>
-            <div class="ml-4">
-              <p class="text-2xl font-semibold">{{ stats.total }}</p>
-              <p class="text-gray-500">Total asignaciones</p>
-            </div>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center justify-between hover:shadow-md transition-shadow">
+          <div>
+            <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Total</p>
+            <p class="text-3xl font-bold text-gray-800 mt-1">{{ stats.total }}</p>
+          </div>
+          <div class="p-3 bg-gray-50 rounded-full text-gray-600">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
           </div>
         </div>
       </div>
 
-      <h2 class="text-lg font-semibold mb-4">Acciones rápidas</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <router-link
-          :to="{ name: 'juez.asignaciones' }"
-          class="bg-white p-6 rounded-lg shadow-sm border hover:shadow-md transition-shadow"
-        >
-          <div class="flex items-center">
-            <div class="p-3 bg-blue-100 rounded-lg">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-            </div>
-            <div class="ml-4">
-              <p class="text-sm text-gray-500">Revisar</p>
-              <p class="text-lg font-semibold">Mis Asignaciones</p>
-            </div>
+      <!-- Main Actions -->
+      <h2 class="text-xl font-bold text-gray-800 mb-6">¿Qué deseas hacer hoy?</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Card: Mis Asignaciones -->
+        <router-link :to="{ name: 'juez.asignaciones' }" class="group relative bg-white rounded-2xl shadow-sm border border-gray-200 p-8 hover:shadow-lg hover:border-blue-300 transition-all duration-300 flex flex-col items-center text-center">
+          <div class="h-20 w-20 bg-blue-50 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+            <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
           </div>
+          <h3 class="text-2xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">Mis Asignaciones</h3>
+          <p class="text-gray-500 mb-6 max-w-sm">
+            Accede a la lista de proyectos pendientes por calificar. Revisa los detalles y completa las rúbricas.
+          </p>
+          <span class="inline-flex items-center text-blue-600 font-medium group-hover:translate-x-1 transition-transform">
+            Ir a calificar <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+          </span>
         </router-link>
 
-        <router-link
-          :to="{ name: 'juez.mis-calificaciones' }"
-          class="bg-white p-6 rounded-lg shadow-sm border hover:shadow-md transition-shadow"
-        >
-          <div class="flex items-center">
-            <div class="p-3 bg-green-100 rounded-lg">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M9 12h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586l5.414 5.414V15a2 2 0 01-2 2z"/>
-              </svg>
-            </div>
-            <div class="ml-4">
-              <p class="text-sm text-gray-500">Ver</p>
-              <p class="text-lg font-semibold">Mis Calificaciones</p>
-            </div>
+        <!-- Card: Mis Calificaciones -->
+        <router-link :to="{ name: 'juez.mis-calificaciones' }" class="group relative bg-white rounded-2xl shadow-sm border border-gray-200 p-8 hover:shadow-lg hover:border-green-300 transition-all duration-300 flex flex-col items-center text-center">
+          <div class="h-20 w-20 bg-green-50 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+            <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
           </div>
+          <h3 class="text-2xl font-bold text-gray-900 mb-2 group-hover:text-green-600 transition-colors">Mis Calificaciones</h3>
+          <p class="text-gray-500 mb-6 max-w-sm">
+            Consulta el historial de proyectos que ya has evaluado. Puedes reabrir asignaciones si necesitas editar algo.
+          </p>
+          <span class="inline-flex items-center text-green-600 font-medium group-hover:translate-x-1 transition-transform">
+            Ver historial <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+          </span>
         </router-link>
+
       </div>
     </main>
   </div>

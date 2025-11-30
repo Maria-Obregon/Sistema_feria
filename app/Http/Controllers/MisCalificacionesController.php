@@ -21,7 +21,7 @@ class MisCalificacionesController extends Controller
 
         $asignaciones = \App\Models\AsignacionJuez::with(['proyecto.categoria'])
             ->where('juez_id', $juez->id)
-            ->whereNotNull('finalizada_at')
+            ->where('fue_finalizada', true) // Mostrar historial completo, incluso si se reabrió
             ->orderByDesc('finalizada_at')
             ->get();
 

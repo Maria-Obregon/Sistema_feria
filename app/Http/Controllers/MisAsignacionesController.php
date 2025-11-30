@@ -21,8 +21,8 @@ class MisAsignacionesController extends Controller
 
         $asignaciones = \App\Models\AsignacionJuez::with(['proyecto.categoria'])
             ->where('juez_id', $juez->id)
-            // ->whereNull('finalizada_at') // COMENTADO: Queremos ver todas para el historial
-            ->orderByDesc('id')
+            ->where('fue_finalizada', false) // Solo mostrar pendientes reales que nunca se han terminado
+            ->orderByDesc('finalizada_at')
             ->get();
 
         $data = $asignaciones->map(function ($asig) {
