@@ -123,6 +123,8 @@ import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
+import api from '@/services/api'
+
 const router = useRouter()
 const auth = useAuthStore()
 
@@ -130,13 +132,16 @@ const user = computed(() => auth.user)
 const stats = ref({ pendientes: 0, calificadas: 0, total: 0 })
 
 const logout = async () => {
-  await auth.logout()            // limpia token + header en tu store
+  await auth.logout()            
   await router.push({ name: 'login' })
 }
 
-// (Opcional) simula carga de stats del juez
 onMounted(async () => {
-  // Llama a tu endpoint real si ya lo tienes
-  stats.value = { pendientes: 5, calificadas: 12, total: 17 }
+  try {
+    const { data } = await api.get('/juez/stats')
+    stats.value = data
+  } catch (e) {
+    console.error('Error cargando estadísticas', e)
+  }
 })
 </script>

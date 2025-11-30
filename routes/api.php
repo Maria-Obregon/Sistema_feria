@@ -160,6 +160,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // --- Mis asignaciones (solo lectura, juez autenticado) ---
     Route::get('juez/asignaciones/mias', [MisAsignacionesController::class, 'index']);
+    Route::get('juez/stats', [MisAsignacionesController::class, 'stats']);
 
     // --- Mis calificaciones (asignaciones finalizadas, solo lectura) ---
     Route::get('juez/asignaciones/finalizadas', [\App\Http\Controllers\MisCalificacionesController::class, 'index']);

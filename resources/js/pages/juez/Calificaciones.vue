@@ -2,24 +2,42 @@
   <div class="max-w-5xl mx-auto py-6">
     <div class="flex items-center justify-between mb-4">
       <h1 class="text-xl font-semibold">Calificaciones</h1>
-      <router-link
-        :to="{ name: 'juez.dashboard' }"
-        class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 flex items-center gap-2"
-      >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-        </svg>
-        Volver al menú
-      </router-link>
+      <div class="flex gap-2">
+        <!-- Botón Volver Atrás -->
+        <button
+          @click="volverAtras"
+          class="px-4 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded hover:bg-gray-200 flex items-center gap-2 transition-colors"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+          </svg>
+          Volver atrás
+        </button>
+
+        <!-- Botón Volver al Menú -->
+        <router-link
+          :to="{ name: 'juez.dashboard' }"
+          class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 flex items-center gap-2 transition-colors"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+          Volver al menú
+        </router-link>
+      </div>
     </div>
 
     <div class="flex items-center gap-2 mb-4">
       <input v-model.number="proyectoId" type="number" placeholder="proyectoId" class="border rounded px-3 py-2 w-44" />
       <input v-model.number="etapaId" type="number" placeholder="etapaId" class="border rounded px-3 py-2 w-36" />
       <button @click="cargar" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Cargar</button>
-      <button @click="hacerConsolidacion" class="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700" :disabled="estaFinalizada">Consolidar</button>
-      <button v-if="!estaFinalizada" @click="finalizarAsignacionActual" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700" :disabled="!asignacionId">Finalizar asignación</button>
+      <button @click="hacerConsolidacion" class="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700" :disabled="estaFinalizada || hayErrores">Consolidar</button>
+      <button v-if="!estaFinalizada" @click="finalizarAsignacionActual" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed" :disabled="!asignacionId || hayErrores">Finalizar asignación</button>
       <button v-else @click="reabrirAsignacionActual" class="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700">Reabrir asignación</button>
+    </div>
+
+    <div v-if="hayErrores" class="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-800">
+      ⚠️ Hay puntajes inválidos que exceden el máximo permitido. Por favor corrígelos antes de finalizar.
     </div>
 
     <div v-if="estaFinalizada" class="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded text-yellow-800">
@@ -60,28 +78,38 @@
                 <span class="text-sm">{{ v }}</span>
               </label>
             </div>
-            <div v-else>
-              <input
-                v-model.number="form[row.criterio_id].puntaje"
-                type="number"
-                step="0.01"
-                :min="0"
-                :max="row.max_puntos"
-                :disabled="estaFinalizada"
-                @input="(e)=>{ const v=Number(e.target.value); const m=Number(row.max_puntos||0); form[row.criterio_id].puntaje = Math.max(0, Math.min(m, isNaN(v)?0:v)); }"
-                class="border rounded px-2 py-1 w-28"
-                :class="{'bg-gray-100': estaFinalizada}"
-              />
+            <div v-else class="flex items-center gap-2">
+              <div class="relative">
+                <input
+                  v-model.number="form[row.criterio_id].puntaje"
+                  type="number"
+                  step="0.01"
+                  :min="0"
+                  :max="row.max_puntos"
+                  :disabled="estaFinalizada"
+                  @input="(e)=>{ const v=Number(e.target.value); const m=Number(row.max_puntos||0); if(v>m || v<0) { e.target.classList.add('border-red-500'); } else { e.target.classList.remove('border-red-500'); } form[row.criterio_id].puntaje = v; }"
+                  class="border rounded px-2 py-1 w-20 text-right"
+                  :class="{'bg-gray-100': estaFinalizada, 'border-red-500': esInvalido(row)}"
+                />
+              </div>
+              <span class="text-sm text-gray-500">/ {{ row.max_puntos }} pts</span>
+            </div>
+            <div v-if="esInvalido(row)" class="text-xs text-red-600 mt-1">
+              Máx {{ row.max_puntos }}
             </div>
           </td>
           <td class="px-4 py-2">
             <input v-model="form[row.criterio_id].comentario" type="text" maxlength="2000"
                    :disabled="estaFinalizada"
-                   class="border rounded px-2 py-1 w-64"
+                   class="border rounded px-2 py-1 w-full"
                    :class="{'bg-gray-100': estaFinalizada}" />
           </td>
           <td class="px-4 py-2">
-            <button @click="guardar(row)" class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700" :disabled="estaFinalizada" :class="{'opacity-50 cursor-not-allowed': estaFinalizada}">Guardar</button>
+            <button @click="guardar(row)" 
+                    class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed" 
+                    :disabled="estaFinalizada || esInvalido(row)">
+              Guardar
+            </button>
           </td>
         </tr>
       </tbody>
@@ -131,6 +159,16 @@ const form = reactive({})
 const loading = ref(false)
 const rubrica = ref(null)
 
+const hayErrores = computed(() => {
+  return califs.value.some(row => esInvalido(row))
+})
+
+const esInvalido = (row) => {
+  const val = Number(form[row.criterio_id]?.puntaje || 0)
+  const max = Number(row.max_puntos || 0)
+  return val < 0 || val > max
+}
+
 const primingForm = (rows) => {
   rows.forEach(r => {
     if (!form[r.criterio_id]) {
@@ -153,11 +191,18 @@ const cargar = async () => {
       console.log('Asignación marcada como finalizada desde query param')
     }
 
-    // Obtener rúbrica (exposición por defecto para juez)
-    const rres = await obtenerRubricaDeProyecto(proyectoId.value, { etapa_id: etapaId.value, tipo_eval: 'exposicion' })
+    const tipoEval = route.query.tipo_eval || 'exposicion'
+
+    // Obtener rúbrica (usando el tipo de evaluación de la URL)
+    const rres = await obtenerRubricaDeProyecto(proyectoId.value, { etapa_id: etapaId.value, tipo_eval: tipoEval })
     rubrica.value = rres.data?.rubrica || null
 
-    const { data } = await listarCalificaciones({ proyecto_id: proyectoId.value, etapa_id: etapaId.value, per_page: 200 })
+    const { data } = await listarCalificaciones({ 
+      proyecto_id: proyectoId.value, 
+      etapa_id: etapaId.value, 
+      tipo_eval: tipoEval, // Enviar al backend
+      per_page: 200 
+    })
     const items = Array.isArray(data) ? data : (data?.data || [])
     califs.value = items
     // Extraer asignacion_id y verificar estado solo si no viene de "Mis Calificaciones"
@@ -324,4 +369,20 @@ const porcentajePC = computed(() => {
   const max = maxTotalPC.value || 1
   return (sumaPC.value / max) * 100
 })
+
+const volverAtras = () => {
+  const from = route.query.from
+  if (from === 'mis-calificaciones') {
+    router.push({ name: 'juez.mis-calificaciones' })
+  } else if (from === 'asignaciones') {
+    router.push({ name: 'juez.asignaciones' })
+  } else {
+    // Default fallback (intentar historial o ir a asignaciones)
+    if (window.history.length > 1) {
+      router.back()
+    } else {
+      router.push({ name: 'juez.asignaciones' })
+    }
+  }
+}
 </script>

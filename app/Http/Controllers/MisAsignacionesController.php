@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class MisAsignacionesController extends Controller
 {
@@ -14,55 +13,65 @@ class MisAsignacionesController extends Controller
             return response()->json(['message' => 'No autenticado'], 401);
         }
 
-        $usuarioId = $user->id;
+        $juez = \App\Models\Juez::where('usuario_id', $user->id)->first();
 
-        // Importante: usamos la tabla plural "asignaciones_jueces"
-        $rows = DB::table('jueces as j')
-            ->join('asignacion_juez as aj', 'aj.juez_id', '=', 'j.id')
-            ->join('proyectos as p', 'p.id', '=', 'aj.proyecto_id')
-            ->leftJoin('categorias as c', 'c.id', '=', 'p.categoria_id')
-            ->leftJoin('modalidades as m', 'm.id', '=', 'p.modalidad_id')
-            ->leftJoin('etapas as e', 'e.id', '=', 'aj.etapa_id')
-            ->where('j.usuario_id', $usuarioId)
-            ->whereNull('aj.finalizada_at') // solo asignaciones pendientes
-            ->orderByDesc('aj.id')
-            ->selectRaw('
-                aj.id           as asignacion_id,
-                aj.proyecto_id  as proyecto_id,
-                aj.etapa_id     as etapa_id,
-                aj.tipo_eval,
-                aj.finalizada_at,
-                p.titulo        as proyecto_titulo,
-                c.nombre        as categoria_nombre,
-                m.nombre        as modalidad_nombre,
-                e.nombre        as etapa_nombre
-            ')
+        if (! $juez) {
+            return response()->json(['data' => [], 'meta' => ['count' => 0]]);
+        }
+
+        $asignaciones = \App\Models\AsignacionJuez::with(['proyecto.categoria'])
+            ->where('juez_id', $juez->id)
+            // ->whereNull('finalizada_at') // COMENTADO: Queremos ver todas para el historial
+            ->orderByDesc('id')
             ->get();
 
-        $data = $rows->map(function ($r) {
+        $data = $asignaciones->map(function ($asig) {
             return [
-                // ids planos (lo que necesita el front para navegar)
-                'id' => (int) $r->asignacion_id,
-                'proyecto_id' => (int) $r->proyecto_id,
-                'etapa_id' => (int) $r->etapa_id,
-
-                // objeto anidado para mostrar en tabla
+                'id' => $asig->id,
+                'proyecto_id' => $asig->proyecto_id,
+                'etapa_id' => $asig->etapa_id,
+                'tipo_eval' => $asig->tipo_eval,
+                'finalizada' => ! is_null($asig->finalizada_at),
                 'proyecto' => [
-                    'id' => (int) $r->proyecto_id,
-                    'titulo' => $r->proyecto_titulo,
-                    'categoria' => $r->categoria_nombre,
-                    'modalidad' => $r->modalidad_nombre,
-                    'etapa' => $r->etapa_nombre,
+                    'id' => $asig->proyecto->id,
+                    'titulo' => $asig->proyecto->titulo,
+                    'categoria' => $asig->proyecto->categoria ? $asig->proyecto->categoria->nombre : 'Sin Categoría',
                 ],
-
-                'tipo_eval' => $r->tipo_eval,
-                'finalizada' => ! is_null($r->finalizada_at),
             ];
         });
 
         return response()->json([
-            'data' => $data->values(),
+            'data' => $data,
             'meta' => ['count' => $data->count()],
+        ]);
+    }
+
+    public function stats(Request $request)
+    {
+        $user = $request->user();
+        if (! $user) {
+            return response()->json(['message' => 'No autenticado'], 401);
+        }
+
+        $juez = \App\Models\Juez::where('usuario_id', $user->id)->first();
+
+        if (! $juez) {
+            return response()->json([
+                'pendientes' => 0,
+                'calificadas' => 0,
+                'total' => 0,
+            ]);
+        }
+
+        $total = \App\Models\AsignacionJuez::where('juez_id', $juez->id)->count();
+        $calificadas = \App\Models\AsignacionJuez::where('juez_id', $juez->id)
+            ->whereNotNull('finalizada_at')
+            ->count();
+
+        return response()->json([
+            'pendientes' => $total - $calificadas,
+            'calificadas' => $calificadas,
+            'total' => $total,
         ]);
     }
 }
