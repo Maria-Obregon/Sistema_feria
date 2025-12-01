@@ -138,14 +138,9 @@
                       :class="{'bg-gray-100 text-gray-500': estaFinalizada, 'border-red-500 text-red-600': esInvalido(row)}"
                     />
                   </div>
-                  <div class="text-2xl font-bold text-gray-900">
-            {{ sumaPuntos.toFixed(2) }} <span class="text-sm text-gray-400 font-normal">/ {{ rubrica?.max_puntos }} pts</span>
-          </div>
-          <div class="text-xs text-blue-600 font-medium mt-1">
-            Valor de esta nota: {{ porcentajeValor }}%
-          </div>
-        </div>
-        <button @click="finalizar" esInvalido(row)" class="text-xs text-red-600 mt-1 font-medium">
+                  <span class="text-sm text-gray-500">/ {{ row.max_puntos }} pts</span>
+                </div>
+                <div v-if="esInvalido(row)" class="text-xs text-red-600 mt-1 font-medium">
                   Excede el máximo ({{ row.max_puntos }})
                 </div>
               </td>
@@ -185,6 +180,7 @@
         <div class="text-gray-600">Suma Puntos: <span class="font-medium text-gray-900">{{ sumaPC.toFixed(2) }}</span> / {{ maxTotalPC.toFixed(2) }}</div>
         <div class="text-gray-600">Porcentaje: <span class="font-medium text-gray-900">{{ porcentajePC.toFixed(2) }}%</span></div>
         <div class="text-gray-600">Nota (Base 100): <span class="font-bold text-blue-600 text-lg">{{ porcentajePC.toFixed(2) }}</span></div>
+        <div class="text-blue-600 font-medium border-l-2 border-blue-200 pl-3 ml-2">Valor de esta nota: {{ porcentajeValor }}%</div>
       </div>
     </div>
   </div>
