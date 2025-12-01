@@ -15,10 +15,10 @@ class DatabaseSeeder extends Seeder
             NivelesYModalidadesSeeder::class,
             CategoriasSeeder::class,
             ModalidadEtapaSeeder::class,
-            RubricaPronafecytSeeder::class,
-            RubricaMiExperienciaSeeder::class,
+            PronafecytRubricasSeeder::class, // Reemplaza a RubricaPronafecytSeeder y RubricaMiExperienciaSeeder
             DemoJuezLoginSeeder::class,
-             DemoJuezAsignacionSeeder::class,
+            DemoJuezAsignacionSeeder::class,
+            TestProyectosVariadosSeeder::class, // Agregado para generar proyectos de todas las categorías
         ]);
     }
 }
