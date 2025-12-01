@@ -62,11 +62,43 @@ class PronafecytRubricasSeeder extends Seeder
                 ],
                 'escrito' => [
                     'max' => 64,
+                    'nombre_rubrica' => 'Demostraciones Científicas - Informe Escrito',
                     'criterios' => [
-                        'Autenticidad del trabajo' => 3,
-                        'Portada e Índice' => 9,
-                        'Aspectos iniciales y Marco Teórico' => 45,
-                        'Referencias y Resumen' => 7,
+                        // SECCIÓN 1: I PARTE Y PÁGINA 1
+                        ['seccion' => 'I. Autenticidad', 'nombre' => 'Estilo, estructura y vocabulario sugieren elaboración propia', 'max' => 3.00],
+                        ['seccion' => 'I. Autenticidad', 'nombre' => 'No plagio: Da crédito a la producción intelectual ajena', 'max' => 3.00],
+
+                        ['seccion' => 'II. Estructura (Página 1)', 'nombre' => 'Portada: Contiene los elementos oficiales', 'max' => 1.00],
+                        ['seccion' => 'II. Estructura (Página 1)', 'nombre' => 'Título: Establece una idea general del trabajo', 'max' => 1.00],
+                        ['seccion' => 'II. Estructura (Página 1)', 'nombre' => 'Índice: Indica las secciones y páginas', 'max' => 1.00],
+
+                        // SECCIÓN 2: PÁGINA 2 - CUERPO DEL INFORME
+                        ['seccion' => 'Introducción', 'nombre' => 'Anota las ideas previas que motivan el proyecto', 'max' => 3.00],
+                        ['seccion' => 'Introducción', 'nombre' => 'Señala la importancia del tema relacionado', 'max' => 3.00],
+                        ['seccion' => 'Introducción', 'nombre' => 'Indica las preguntas generales relacionadas', 'max' => 3.00],
+                        ['seccion' => 'Introducción', 'nombre' => 'Explica el propósito principal de la demostración', 'max' => 3.00],
+
+                        ['seccion' => 'Marco Teórico', 'nombre' => 'Describe palabras claves y conceptos técnicos', 'max' => 3.00],
+                        ['seccion' => 'Marco Teórico', 'nombre' => 'Registra información adicional de fuentes', 'max' => 3.00],
+                        ['seccion' => 'Marco Teórico', 'nombre' => 'Cita o hace referencia a las fuentes (formato)', 'max' => 3.00],
+
+                        ['seccion' => 'Metodología', 'nombre' => 'Explica pasos, procedimientos o técnicas', 'max' => 3.00],
+                        ['seccion' => 'Metodología', 'nombre' => 'Narra los aportes propios que enriquecen', 'max' => 3.00],
+                        ['seccion' => 'Metodología', 'nombre' => 'Indica si presenta cambios de la fuente original', 'max' => 1.00],
+                        ['seccion' => 'Metodología', 'nombre' => 'Anota lista de recursos tecnológicos/materiales', 'max' => 1.00],
+                        ['seccion' => 'Metodología', 'nombre' => 'Describe manejo de residuos y sostenibilidad', 'max' => 3.00],
+
+                        ['seccion' => 'Resultados y Conclusiones', 'nombre' => 'Analiza o interpreta los resultados obtenidos', 'max' => 3.00],
+                        ['seccion' => 'Resultados y Conclusiones', 'nombre' => 'Contrasta resultados con información consultada', 'max' => 3.00],
+                        ['seccion' => 'Resultados y Conclusiones', 'nombre' => 'Cita fuentes en el análisis para evitar plagio', 'max' => 1.00],
+                        ['seccion' => 'Resultados y Conclusiones', 'nombre' => 'Establece conclusiones obtenidas', 'max' => 3.00],
+                        ['seccion' => 'Resultados y Conclusiones', 'nombre' => 'Aporta evidencias de comunicación (fotos/listas)', 'max' => 3.00],
+
+                        // SECCIÓN 3: PÁGINA 3 - FINAL
+                        ['seccion' => 'Referencias y Resumen', 'nombre' => 'Referencias: Utiliza mínimo cuatro fuentes', 'max' => 1.00],
+                        ['seccion' => 'Referencias y Resumen', 'nombre' => 'Referencias: Fuentes confiables (< 10 años)', 'max' => 3.00],
+                        ['seccion' => 'Referencias y Resumen', 'nombre' => 'Referencias: Formato bibliográfico consistente', 'max' => 3.00],
+                        ['seccion' => 'Referencias y Resumen', 'nombre' => 'Resumen: Síntesis de aspectos relevantes', 'max' => 3.00],
                     ],
                 ],
             ],
