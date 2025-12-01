@@ -20,7 +20,7 @@ class PronafecytRubricasSeeder extends Seeder
 
         $datos = [
             // F8: Demostraciones Científicas
-            'Demostraciones Científicas' => [
+            'DEMOSTRACIONES CIENTÍFICAS Y TECNOLÓGICAS' => [
                 'exposicion' => [
                     'max' => 40,
                     'criterios' => [
@@ -44,7 +44,7 @@ class PronafecytRubricasSeeder extends Seeder
             ],
 
             // F9: Investigación Científica
-            'Investigación Científica' => [
+            'INVESTIGACIÓN CIENTÍFICA' => [
                 'exposicion' => [
                     'max' => 40,
                     'criterios' => [
@@ -68,7 +68,7 @@ class PronafecytRubricasSeeder extends Seeder
             ],
 
             // F10: Investigación y Desarrollo Tecnológico
-            'Investigación y Desarrollo Tecnológico' => [
+            'INVESTIGACIÓN Y DESARROLLO TECNOLÓGICO' => [
                 'exposicion' => [
                     'max' => 40,
                     'criterios' => [
@@ -93,7 +93,7 @@ class PronafecytRubricasSeeder extends Seeder
             ],
 
             // F11: Quehacer Científico
-            'Quehacer Científico' => [
+            'QUEHACER CIENTÍFICO Y TECNOLÓGICO' => [
                 'exposicion' => [
                     'max' => 40,
                     'criterios' => [
@@ -117,7 +117,7 @@ class PronafecytRubricasSeeder extends Seeder
             ],
 
             // F12: Sumando Experiencias
-            'Sumando Experiencias' => [
+            'SUMANDO EXPERIENCIAS CIENTÍFICAS' => [
                 'exposicion' => [
                     'max' => 40,
                     'criterios' => [
@@ -140,7 +140,7 @@ class PronafecytRubricasSeeder extends Seeder
             ],
 
             // F13: Mi Experiencia Científica (SOLO EXPOSICIÓN)
-            'Mi Experiencia Científica' => [
+            'MI EXPERIENCIA CIENTÍFICA' => [
                 'exposicion' => [
                     'max' => 100,
                     'criterios' => [

@@ -44,12 +44,12 @@ class TestProyectosVariadosSeeder extends Seeder
         $area = Area::firstOrCreate(['nombre' => 'Ciencias Generales']);
 
         $categoriasNombres = [
-            'Demostraciones Científicas',
-            'Investigación Científica',
-            'Investigación y Desarrollo Tecnológico',
-            'Quehacer Científico',
-            'Sumando Experiencias',
-            'Mi Experiencia Científica',
+            'DEMOSTRACIONES CIENTÍFICAS Y TECNOLÓGICAS',
+            'INVESTIGACIÓN CIENTÍFICA',
+            'INVESTIGACIÓN Y DESARROLLO TECNOLÓGICO',
+            'QUEHACER CIENTÍFICO Y TECNOLÓGICO',
+            'SUMANDO EXPERIENCIAS CIENTÍFICAS',
+            'MI EXPERIENCIA CIENTÍFICA',
         ];
 
         $etapaId = 1;
@@ -74,7 +74,7 @@ class TestProyectosVariadosSeeder extends Seeder
                 'codigo' => 'TEST-'.rand(1000, 9999).'-'.substr(str_replace(' ', '', $nombreCat), 0, 3),
             ]);
 
-            $esF13 = $nombreCat === 'Mi Experiencia Científica';
+            $esF13 = $nombreCat === 'MI EXPERIENCIA CIENTÍFICA';
 
             // Limpiar asignaciones previas para asegurar estado limpio
             AsignacionJuez::where('proyecto_id', $proyecto->id)->delete();
