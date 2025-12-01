@@ -31,6 +31,7 @@ class MisCalificacionesController extends Controller
                 'proyecto_id' => $asig->proyecto_id,
                 'etapa_id' => $asig->etapa_id,
                 'tipo_eval' => $asig->tipo_eval,
+                'puntaje' => $asig->puntaje,
                 'finalizada_at' => $asig->finalizada_at,
                 'proyecto' => [
                     'id' => $asig->proyecto->id,
