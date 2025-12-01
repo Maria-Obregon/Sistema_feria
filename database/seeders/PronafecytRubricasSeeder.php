@@ -239,12 +239,52 @@ class PronafecytRubricasSeeder extends Seeder
                 ],
                 'escrito' => [
                     'max' => 98,
+                    'nombre_rubrica' => 'Investigación y Desarrollo Tecnológico - Informe Escrito',
                     'criterios' => [
-                        // Genéricos distribuidos para sumar 98
-                        'Autenticidad y formato' => 6,
-                        'Definición del problema y antecedentes' => 10,
-                        'Descripción técnica y diseño' => 54,
-                        'Pruebas, resultados y manuales' => 28,
+                        // SECCIÓN 1: I PARTE Y PÁGINA 1
+                        ['seccion' => 'I PARTE: AUTENTICIDAD Y PÁGINA 1 (10 pts)', 'nombre' => 'Autenticidad: Estilo, estructura y vocabulario propios', 'max' => 3.00],
+                        ['seccion' => 'I PARTE: AUTENTICIDAD Y PÁGINA 1 (10 pts)', 'nombre' => 'Autenticidad: No plagio: Créditos a producción ajena', 'max' => 3.00],
+                        ['seccion' => 'I PARTE: AUTENTICIDAD Y PÁGINA 1 (10 pts)', 'nombre' => 'Portada: Contiene elementos oficiales', 'max' => 1.00],
+                        ['seccion' => 'I PARTE: AUTENTICIDAD Y PÁGINA 1 (10 pts)', 'nombre' => 'Portada: Informa contenido de la investigación', 'max' => 1.00],
+                        ['seccion' => 'I PARTE: AUTENTICIDAD Y PÁGINA 1 (10 pts)', 'nombre' => 'Título: Breve, conciso y específico', 'max' => 1.00],
+                        ['seccion' => 'I PARTE: AUTENTICIDAD Y PÁGINA 1 (10 pts)', 'nombre' => 'Índice: Indica secciones y páginas', 'max' => 1.00],
+
+                        // SECCIÓN 2: PÁGINA 2 - CUERPO DEL INFORME
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (54 pts)', 'nombre' => 'Intro: Anota ideas previas que motivan el proyecto', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (54 pts)', 'nombre' => 'Intro: Destaca el problema/necesidad a resolver', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (54 pts)', 'nombre' => 'Intro: Presenta la pregunta/problema orientador', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (54 pts)', 'nombre' => 'Intro: Describe dimensiones del problema (social/amb/etc)', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (54 pts)', 'nombre' => 'Intro: Presenta objetivo general y 3 específicos', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (54 pts)', 'nombre' => 'Intro: Claridad en la redacción de objetivos', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (54 pts)', 'nombre' => 'Intro: Concordancia entre objetivos y pregunta', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (54 pts)', 'nombre' => 'Intro: Describe razones y propósito (Justificación)', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (54 pts)', 'nombre' => 'Intro: Describe conveniencia para la comunidad', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (54 pts)', 'nombre' => 'Intro: Presenta análisis de viabilidad', 'max' => 3.00],
+
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (54 pts)', 'nombre' => 'Marco: Describe conceptos, variables o términos técnicos', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (54 pts)', 'nombre' => 'Marco: Registra información adicional fuentes', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (54 pts)', 'nombre' => 'Marco: Cita o hace referencia a fuentes (Formato)', 'max' => 3.00],
+
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (54 pts)', 'nombre' => 'Metodología: Explica pasos, procedimientos o técnicas', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (54 pts)', 'nombre' => 'Metodología: Presenta lista de recursos tecnológicos/materiales', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (54 pts)', 'nombre' => 'Metodología: Selecciona y describe instrumentos de investigación', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (54 pts)', 'nombre' => 'Metodología: Describe método para análisis de datos', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (54 pts)', 'nombre' => 'Metodología: Describe manejo de residuos y sostenibilidad', 'max' => 3.00],
+
+                        // SECCIÓN 3: PÁGINA 3 - RESULTADOS Y FINAL
+                        ['seccion' => 'PÁGINA 3: RESULTADOS Y FINAL (34 pts)', 'nombre' => 'Resultados: Analiza estadísticamente datos obtenidos', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 3: RESULTADOS Y FINAL (34 pts)', 'nombre' => 'Resultados: Explica impacto positivo sobre el problema', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 3: RESULTADOS Y FINAL (34 pts)', 'nombre' => 'Resultados: Contrasta resultados con teoría', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 3: RESULTADOS Y FINAL (34 pts)', 'nombre' => 'Resultados: Conclusiones asociadas a objetivos', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 3: RESULTADOS Y FINAL (34 pts)', 'nombre' => 'Resultados: Conclusiones demuestran comprensión del tema', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 3: RESULTADOS Y FINAL (34 pts)', 'nombre' => 'Resultados: Brinda sugerencias para mejorar/futuro', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 3: RESULTADOS Y FINAL (34 pts)', 'nombre' => 'Resultados: Aporta evidencias de comunicación', 'max' => 3.00],
+
+                        ['seccion' => 'PÁGINA 3: RESULTADOS Y FINAL (34 pts)', 'nombre' => 'Referencias: Presenta suficientes (mínimo 7)', 'max' => 1.00],
+                        ['seccion' => 'PÁGINA 3: RESULTADOS Y FINAL (34 pts)', 'nombre' => 'Referencias: Calidad (<10 años/Confiables)', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 3: RESULTADOS Y FINAL (34 pts)', 'nombre' => 'Referencias: Formato consistente', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 3: RESULTADOS Y FINAL (34 pts)', 'nombre' => 'Resumen: Síntesis aspectos relevantes', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 3: RESULTADOS Y FINAL (34 pts)', 'nombre' => 'Bitácora: Completa (Fechas/Actividades)', 'max' => 3.00],
                     ],
                 ],
             ],
