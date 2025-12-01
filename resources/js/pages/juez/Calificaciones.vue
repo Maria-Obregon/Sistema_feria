@@ -138,9 +138,14 @@
                       :class="{'bg-gray-100 text-gray-500': estaFinalizada, 'border-red-500 text-red-600': esInvalido(row)}"
                     />
                   </div>
-                  <span class="text-sm text-gray-500">/ {{ row.max_puntos }} pts</span>
-                </div>
-                <div v-if="esInvalido(row)" class="text-xs text-red-600 mt-1 font-medium">
+                  <div class="text-2xl font-bold text-gray-900">
+            {{ sumaPuntos.toFixed(2) }} <span class="text-sm text-gray-400 font-normal">/ {{ rubrica?.max_puntos }} pts</span>
+          </div>
+          <div class="text-xs text-blue-600 font-medium mt-1">
+            Valor de esta nota: {{ porcentajeValor }}%
+          </div>
+        </div>
+        <button @click="finalizar" esInvalido(row)" class="text-xs text-red-600 mt-1 font-medium">
                   Excede el máximo ({{ row.max_puntos }})
                 </div>
               </td>
@@ -474,6 +479,14 @@ const codigoProyecto = computed(() => {
   }
   
   return code
+})
+
+const porcentajeValor = computed(() => {
+  if (!proyecto.value) return 0
+  const cat = (proyecto.value.categoria?.nombre || proyecto.value.categoria || '').toUpperCase()
+  // F13 es 100% expo, el resto es 50/50
+  if (cat.includes('MI EXPERIENCIA')) return 100
+  return 50
 })
 
 const volverAtras = () => {
