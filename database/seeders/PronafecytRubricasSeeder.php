@@ -327,12 +327,35 @@ class PronafecytRubricasSeeder extends Seeder
                 ],
                 'escrito' => [
                     'max' => 57,
+                    'nombre_rubrica' => 'Quehacer Científico y Tecnológico - Informe Escrito',
                     'criterios' => [
-                        'Autenticidad' => 3,
-                        'Introducción y justificación' => 15,
-                        'Desarrollo del ensayo/investigación' => 25,
-                        'Conclusiones y opinión personal' => 10,
-                        'Referencias' => 4,
+                        // SECCIÓN 1: I PARTE Y PÁGINA 1
+                        ['seccion' => 'I PARTE: AUTENTICIDAD Y PÁGINA 1 (11 pts)', 'nombre' => 'Autenticidad: El estilo, la estructura y el vocabulario sugieren elaboración propia', 'max' => 4.00],
+                        ['seccion' => 'I PARTE: AUTENTICIDAD Y PÁGINA 1 (11 pts)', 'nombre' => 'Autenticidad: No se cometió plagio / Da crédito a autores', 'max' => 4.00],
+                        ['seccion' => 'I PARTE: AUTENTICIDAD Y PÁGINA 1 (11 pts)', 'nombre' => 'Portada: Contiene los elementos básicos', 'max' => 1.00],
+                        ['seccion' => 'I PARTE: AUTENTICIDAD Y PÁGINA 1 (11 pts)', 'nombre' => 'Título: Establece una idea general del trabajo', 'max' => 1.00],
+                        ['seccion' => 'I PARTE: AUTENTICIDAD Y PÁGINA 1 (11 pts)', 'nombre' => 'Índice: Indica las secciones y páginas', 'max' => 1.00],
+
+                        // SECCIÓN 2: PÁGINA 2 - CUERPO DEL INFORME
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (46 pts)', 'nombre' => 'Aspectos Iniciales: Establece ideas previas que motivan la investigación', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (46 pts)', 'nombre' => 'Aspectos Iniciales: Presenta la(s) pregunta(s) que orienta la investigación', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (46 pts)', 'nombre' => 'Aspectos Iniciales: Señala suposiciones o predicciones (Hipótesis)', 'max' => 3.00],
+
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (46 pts)', 'nombre' => 'Pasos por Seguir: Narra o describe las acciones o pasos necesarios', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (46 pts)', 'nombre' => 'Pasos por Seguir: Refiere a recursos tecnológicos o materiales requeridos', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (46 pts)', 'nombre' => 'Pasos por Seguir: Describe el manejo de residuos y sostenibilidad', 'max' => 3.00],
+
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (46 pts)', 'nombre' => 'Logros Obtenidos: Registra los hallazgos encontrados (imágenes/datos)', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (46 pts)', 'nombre' => 'Logros Obtenidos: Cita o hace referencia a las fuentes utilizadas', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (46 pts)', 'nombre' => 'Logros Obtenidos: Compara hallazgos con información consultada', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (46 pts)', 'nombre' => 'Logros Obtenidos: Verifica si se cumplieron las suposiciones/predicciones', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (46 pts)', 'nombre' => 'Logros Obtenidos: Establece los logros obtenidos y sugiere ideas', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (46 pts)', 'nombre' => 'Logros Obtenidos: Aporta evidencias de comunicación (fotos/listas)', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (46 pts)', 'nombre' => 'Logros Obtenidos: Demuestra apropiación del proceso de investigación', 'max' => 3.00],
+
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (46 pts)', 'nombre' => 'Referencias: Utiliza mínimo tres referencias', 'max' => 1.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (46 pts)', 'nombre' => 'Referencias: Calidad (Recientes/Confiables)', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (46 pts)', 'nombre' => 'Referencias: Formato consistente (APA u otro)', 'max' => 3.00],
                     ],
                 ],
             ],
@@ -351,11 +374,35 @@ class PronafecytRubricasSeeder extends Seeder
                 ],
                 'escrito' => [
                     'max' => 57,
+                    'nombre_rubrica' => 'Sumando Experiencias Científicas - Informe Escrito',
                     'criterios' => [
-                        'Autenticidad' => 3,
-                        'Bitácora/Registro de actividades' => 20,
-                        'Evidencias y reflexiones' => 20,
-                        'Organización y presentación' => 14,
+                        // SECCIÓN 1: I PARTE Y PÁGINA 1
+                        ['seccion' => 'I PARTE: AUTENTICIDAD Y PÁGINA 1 (11 pts)', 'nombre' => 'Autenticidad: El estilo, la estructura y el vocabulario sugieren elaboración propia', 'max' => 4.00],
+                        ['seccion' => 'I PARTE: AUTENTICIDAD Y PÁGINA 1 (11 pts)', 'nombre' => 'Autenticidad: No se cometió plagio / Da crédito a autores', 'max' => 4.00],
+                        ['seccion' => 'I PARTE: AUTENTICIDAD Y PÁGINA 1 (11 pts)', 'nombre' => 'Portada: Contiene los elementos básicos', 'max' => 1.00],
+                        ['seccion' => 'I PARTE: AUTENTICIDAD Y PÁGINA 1 (11 pts)', 'nombre' => 'Título: Establece una idea general del trabajo', 'max' => 1.00],
+                        ['seccion' => 'I PARTE: AUTENTICIDAD Y PÁGINA 1 (11 pts)', 'nombre' => 'Índice: Indica las secciones y páginas', 'max' => 1.00],
+
+                        // SECCIÓN 2: PÁGINA 2 - CUERPO DEL INFORME
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (46 pts)', 'nombre' => 'Aspectos Iniciales: Establece ideas previas que motivan la investigación', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (46 pts)', 'nombre' => 'Aspectos Iniciales: Presenta la(s) pregunta(s) que orienta la investigación', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (46 pts)', 'nombre' => 'Aspectos Iniciales: Señala suposiciones o predicciones (Hipótesis)', 'max' => 3.00],
+
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (46 pts)', 'nombre' => 'Pasos por Seguir: Narra o describe las acciones o pasos necesarios', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (46 pts)', 'nombre' => 'Pasos por Seguir: Refiere a recursos tecnológicos o materiales requeridos', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (46 pts)', 'nombre' => 'Pasos por Seguir: Describe el manejo de residuos y sostenibilidad', 'max' => 3.00],
+
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (46 pts)', 'nombre' => 'Logros Obtenidos: Registra los hallazgos encontrados (imágenes/datos)', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (46 pts)', 'nombre' => 'Logros Obtenidos: Cita o hace referencia a las fuentes utilizadas', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (46 pts)', 'nombre' => 'Logros Obtenidos: Compara hallazgos con información consultada', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (46 pts)', 'nombre' => 'Logros Obtenidos: Verifica si se cumplieron las suposiciones/predicciones', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (46 pts)', 'nombre' => 'Logros Obtenidos: Establece los logros obtenidos y sugiere ideas', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (46 pts)', 'nombre' => 'Logros Obtenidos: Aporta evidencias de comunicación (fotos/listas)', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (46 pts)', 'nombre' => 'Logros Obtenidos: Demuestra apropiación del proceso de investigación', 'max' => 3.00],
+
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (46 pts)', 'nombre' => 'Referencias: Utiliza mínimo tres referencias', 'max' => 1.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (46 pts)', 'nombre' => 'Referencias: Calidad (Recientes/Confiables)', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (46 pts)', 'nombre' => 'Referencias: Formato consistente (APA u otro)', 'max' => 3.00],
                     ],
                 ],
             ],

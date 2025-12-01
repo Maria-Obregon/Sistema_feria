@@ -466,7 +466,7 @@ const codigoProyecto = computed(() => {
   else if (cat.includes('MI EXPERIENCIA')) code = 'F13'
   
   if (code) {
-    if ((code === 'F8' || code === 'F9' || code === 'F10') && tipo === 'escrito') {
+    if ((code === 'F8' || code === 'F9' || code === 'F10' || code === 'F11' || code === 'F12') && tipo === 'escrito') {
       code += 'C'
     } else {
       if (tipo === 'escrito') code += 'A'
