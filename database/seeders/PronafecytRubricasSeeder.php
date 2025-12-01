@@ -198,13 +198,43 @@ class PronafecytRubricasSeeder extends Seeder
             'INVESTIGACIÓN Y DESARROLLO TECNOLÓGICO' => [
                 'exposicion' => [
                     'max' => 40,
+                    'nombre_rubrica' => 'Investigación y Desarrollo Tecnológico - Exposición',
                     'criterios' => [
-                        // Genéricos distribuidos
-                        'Identificación de la necesidad y solución' => 10,
-                        'Diseño y desarrollo del prototipo' => 10,
-                        'Funcionamiento y validación' => 10,
-                        'Presentación y comunicación' => 6,
-                        'Autenticidad' => 4,
+                        // SECCIÓN A
+                        ['seccion' => 'SECCIÓN A: Planteamiento de los objetivos y justificación del problema (5 pts)', 'nombre' => 'La escogencia del problema/pregunta responde a una necesidad concreta', 'max' => 1.00],
+                        ['seccion' => 'SECCIÓN A: Planteamiento de los objetivos y justificación del problema (5 pts)', 'nombre' => 'Justifica, de forma cualitativa o cuantitativa, la relevancia del problema', 'max' => 2.00],
+                        ['seccion' => 'SECCIÓN A: Planteamiento de los objetivos y justificación del problema (5 pts)', 'nombre' => 'Los objetivos tienen relación con el problema de investigación', 'max' => 1.00],
+                        ['seccion' => 'SECCIÓN A: Planteamiento de los objetivos y justificación del problema (5 pts)', 'nombre' => 'Los objetivos son explicados con claridad y coherencia', 'max' => 1.00],
+
+                        // SECCIÓN B
+                        ['seccion' => 'SECCIÓN B: Marco teórico (5 pts)', 'nombre' => 'Existe familiaridad y manejo de los contenidos de las fuentes', 'max' => 1.00],
+                        ['seccion' => 'SECCIÓN B: Marco teórico (5 pts)', 'nombre' => 'Existe claridad y precisión en los conceptos utilizados', 'max' => 1.00],
+                        ['seccion' => 'SECCIÓN B: Marco teórico (5 pts)', 'nombre' => 'Utiliza correctamente el lenguaje científico y tecnológico acorde', 'max' => 3.00],
+
+                        // SECCIÓN C
+                        ['seccion' => 'SECCIÓN C: Metodología aplicada (10 pts)', 'nombre' => 'Selección de instrumentos y métodos adecuados', 'max' => 1.00],
+                        ['seccion' => 'SECCIÓN C: Metodología aplicada (10 pts)', 'nombre' => 'Describe las metodologías utilizadas para la obtención de soluciones', 'max' => 2.00],
+                        ['seccion' => 'SECCIÓN C: Metodología aplicada (10 pts)', 'nombre' => 'Cumplimiento de las etapas planificadas en el diseño', 'max' => 2.00],
+                        ['seccion' => 'SECCIÓN C: Metodología aplicada (10 pts)', 'nombre' => 'Utiliza recursos materiales de bajo costo', 'max' => 1.00],
+                        ['seccion' => 'SECCIÓN C: Metodología aplicada (10 pts)', 'nombre' => 'Los recursos están orientados hacia la sostenibilidad ambiental', 'max' => 2.00],
+                        ['seccion' => 'SECCIÓN C: Metodología aplicada (10 pts)', 'nombre' => 'Describe las metodologías de evaluación y perfeccionamiento', 'max' => 2.00],
+
+                        // SECCIÓN D
+                        ['seccion' => 'SECCIÓN D: Discusión, interpretación y aplicación de los resultados (8 pts)', 'nombre' => 'Coherencia de los objetivos con los resultados obtenidos', 'max' => 2.00],
+                        ['seccion' => 'SECCIÓN D: Discusión, interpretación y aplicación de los resultados (8 pts)', 'nombre' => 'Explica cómo los resultados tienen un impacto positivo sobre el problema', 'max' => 2.00],
+                        ['seccion' => 'SECCIÓN D: Discusión, interpretación y aplicación de los resultados (8 pts)', 'nombre' => 'Presentación y congruencia de datos, tablas y gráficos', 'max' => 2.00],
+                        ['seccion' => 'SECCIÓN D: Discusión, interpretación y aplicación de los resultados (8 pts)', 'nombre' => 'Analiza posibles aplicaciones del desarrollo tecnológico en la sociedad', 'max' => 2.00],
+
+                        // SECCIÓN E
+                        ['seccion' => 'SECCIÓN E: Presentación y comunicación científica (8 pts)', 'nombre' => 'El cartel presentado apoya la comunicación en forma fluida', 'max' => 1.00],
+                        ['seccion' => 'SECCIÓN E: Presentación y comunicación científica (8 pts)', 'nombre' => 'El material expuesto tiene relación con el trabajo de investigación', 'max' => 1.00],
+                        ['seccion' => 'SECCIÓN E: Presentación y comunicación científica (8 pts)', 'nombre' => 'Existe capacidad de síntesis para llevar a cabo la comunicación', 'max' => 2.00],
+                        ['seccion' => 'SECCIÓN E: Presentación y comunicación científica (8 pts)', 'nombre' => 'Claridad al explicar el propósito, proceso y relevancia', 'max' => 2.00],
+                        ['seccion' => 'SECCIÓN E: Presentación y comunicación científica (8 pts)', 'nombre' => 'Participación y dominio del tema (todos los miembros)', 'max' => 2.00],
+
+                        // SECCIÓN F
+                        ['seccion' => 'SECCIÓN F: Autenticidad del trabajo realizado (4 pts)', 'nombre' => 'El cartel y material expuesto da muestras de realización propia', 'max' => 2.00],
+                        ['seccion' => 'SECCIÓN F: Autenticidad del trabajo realizado (4 pts)', 'nombre' => 'Existe originalidad en la elaboración del material', 'max' => 2.00],
                     ],
                 ],
                 'escrito' => [
