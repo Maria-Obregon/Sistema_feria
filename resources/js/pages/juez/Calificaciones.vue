@@ -33,6 +33,9 @@
         <div>
           <h2 class="text-2xl font-bold text-gray-800 mb-2">{{ proyecto.titulo }}</h2>
           <div class="flex flex-wrap items-center gap-3 text-sm">
+            <span v-if="codigoProyecto" class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 font-bold">
+              {{ codigoProyecto }}
+            </span>
             <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-800 font-medium">
               {{ proyecto.categoria?.nombre || proyecto.categoria || 'Sin Categoría' }}
             </span>
@@ -98,57 +101,65 @@
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
-          <tr v-for="row in califs" :key="`${row.asignacion_juez_id}-${row.criterio_id}`" class="hover:bg-gray-50 transition-colors">
-            <!-- <td class="px-6 py-4 text-sm text-gray-500">{{ row.asignacion_juez_id }}</td> -->
-            <td class="px-6 py-4">
-              <div class="text-sm font-medium text-gray-900">{{ row.criterio_nombre }}</div>
-              <!-- <div class="text-xs text-gray-400 mt-1">ID {{ row.criterio_id }}</div> -->
-            </td>
-            <td class="px-4 py-4 text-center text-sm text-gray-500">{{ row.peso }}</td>
-            <td class="px-4 py-4 text-center text-sm text-gray-500 font-medium">{{ row.max_puntos }}</td>
-            <td class="px-6 py-4">
-              <div v-if="rubrica?.modo === 'escala_1_5'" class="flex items-center gap-3">
-                <label v-for="v in [1,2,3,4,5]" :key="v" class="inline-flex items-center gap-1 cursor-pointer">
-                  <input type="radio" :name="`c-${row.criterio_id}`" :value="v" v-model.number="form[row.criterio_id].puntaje" :disabled="estaFinalizada" 
-                         class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300"/>
-                  <span class="text-sm text-gray-700">{{ v }}</span>
-                </label>
-              </div>
-              <div v-else class="flex items-center gap-2">
-                <div class="relative">
-                  <input
-                    v-model.number="form[row.criterio_id].puntaje"
-                    type="number"
-                    step="0.01"
-                    :min="0"
-                    :max="row.max_puntos"
-                    :disabled="estaFinalizada"
-                    @input="(e)=>{ const v=Number(e.target.value); const m=Number(row.max_puntos||0); if(v>m || v<0) { e.target.classList.add('border-red-500', 'focus:border-red-500', 'focus:ring-red-500'); } else { e.target.classList.remove('border-red-500', 'focus:border-red-500', 'focus:ring-red-500'); } form[row.criterio_id].puntaje = v; }"
-                    class="block w-24 pl-3 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition duration-150 ease-in-out text-right"
-                    :class="{'bg-gray-100 text-gray-500': estaFinalizada, 'border-red-500 text-red-600': esInvalido(row)}"
-                  />
+          <template v-for="(group, groupName) in califsGrouped" :key="groupName">
+            <!-- Section Header -->
+            <tr v-if="groupName !== 'default'" class="bg-gray-100">
+              <td colspan="6" class="px-6 py-2 text-sm font-bold text-gray-700 uppercase tracking-wide">
+                {{ groupName }}
+              </td>
+            </tr>
+            
+            <!-- Criteria Rows -->
+            <tr v-for="row in group" :key="`${row.asignacion_juez_id}-${row.criterio_id}`" class="hover:bg-gray-50 transition-colors">
+              <td class="px-6 py-4">
+                <div class="text-sm font-medium text-gray-900">{{ row.criterio_nombre }}</div>
+              </td>
+              <td class="px-4 py-4 text-center text-sm text-gray-500">{{ row.peso }}</td>
+              <td class="px-4 py-4 text-center text-sm text-gray-500 font-medium">{{ row.max_puntos }}</td>
+              <td class="px-6 py-4">
+                <div v-if="rubrica?.modo === 'escala_1_5'" class="flex items-center gap-3">
+                  <label v-for="v in [1,2,3,4,5]" :key="v" class="inline-flex items-center gap-1 cursor-pointer">
+                    <input type="radio" :name="`c-${row.criterio_id}`" :value="v" v-model.number="form[row.criterio_id].puntaje" :disabled="estaFinalizada" 
+                           class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300"/>
+                    <span class="text-sm text-gray-700">{{ v }}</span>
+                  </label>
                 </div>
-                <span class="text-sm text-gray-500">/ {{ row.max_puntos }} pts</span>
-              </div>
-              <div v-if="esInvalido(row)" class="text-xs text-red-600 mt-1 font-medium">
-                Excede el máximo ({{ row.max_puntos }})
-              </div>
-            </td>
-            <td class="px-6 py-4">
-              <input v-model="form[row.criterio_id].comentario" type="text" maxlength="2000"
-                     :disabled="estaFinalizada"
-                     placeholder="Agregar comentario..."
-                     class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm py-2"
-                     :class="{'bg-gray-100 text-gray-500': estaFinalizada}" />
-            </td>
-            <td class="px-6 py-4 text-right">
-              <button @click="guardar(row)" 
-                      class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" 
-                      :disabled="estaFinalizada || esInvalido(row)">
-                Guardar
-              </button>
-            </td>
-          </tr>
+                <div v-else class="flex items-center gap-2">
+                  <div class="relative">
+                    <input
+                      v-model.number="form[row.criterio_id].puntaje"
+                      type="number"
+                      step="0.01"
+                      :min="0"
+                      :max="row.max_puntos"
+                      :disabled="estaFinalizada"
+                      @input="(e)=>{ const v=Number(e.target.value); const m=Number(row.max_puntos||0); if(v>m || v<0) { e.target.classList.add('border-red-500', 'focus:border-red-500', 'focus:ring-red-500'); } else { e.target.classList.remove('border-red-500', 'focus:border-red-500', 'focus:ring-red-500'); } form[row.criterio_id].puntaje = v; }"
+                      class="block w-24 pl-3 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition duration-150 ease-in-out text-right"
+                      :class="{'bg-gray-100 text-gray-500': estaFinalizada, 'border-red-500 text-red-600': esInvalido(row)}"
+                    />
+                  </div>
+                  <span class="text-sm text-gray-500">/ {{ row.max_puntos }} pts</span>
+                </div>
+                <div v-if="esInvalido(row)" class="text-xs text-red-600 mt-1 font-medium">
+                  Excede el máximo ({{ row.max_puntos }})
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <input v-model="form[row.criterio_id].comentario" type="text" maxlength="2000"
+                       :disabled="estaFinalizada"
+                       placeholder="Agregar comentario..."
+                       class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm py-2"
+                       :class="{'bg-gray-100 text-gray-500': estaFinalizada}" />
+              </td>
+              <td class="px-6 py-4 text-right">
+                <button @click="guardar(row)" 
+                        class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" 
+                        :disabled="estaFinalizada || esInvalido(row)">
+                  Guardar
+                </button>
+              </td>
+            </tr>
+          </template>
         </tbody>
       </table>
     </div>
@@ -424,6 +435,41 @@ const maxTotalPC = computed(() => {
 const porcentajePC = computed(() => {
   const max = maxTotalPC.value || 1
   return (sumaPC.value / max) * 100
+})
+
+const califsGrouped = computed(() => {
+  const groups = {}
+  califs.value.forEach(row => {
+    // El backend debe enviar 'criterio_seccion' o similar. 
+    // Si no viene en el join, hay que asegurar que el backend lo envíe.
+    // Asumiremos que el backend envía 'criterio_seccion' o 'seccion'.
+    // Si no, usaremos 'default'.
+    const key = row.criterio_seccion || row.seccion || 'default'
+    if (!groups[key]) groups[key] = []
+    groups[key].push(row)
+  })
+  return groups
+})
+
+const codigoProyecto = computed(() => {
+  if (!proyecto.value) return ''
+  const cat = (proyecto.value.categoria?.nombre || proyecto.value.categoria || '').toUpperCase()
+  const tipo = (route.query.tipo_eval || '').toLowerCase()
+  
+  let code = ''
+  if (cat.includes('DEMOSTRACIONES')) code = 'F8'
+  else if (cat.includes('INVESTIGACIÓN CIENTÍFICA')) code = 'F9'
+  else if (cat.includes('DESARROLLO TECNOLÓGICO')) code = 'F10'
+  else if (cat.includes('QUEHACER')) code = 'F11'
+  else if (cat.includes('SUMANDO')) code = 'F12'
+  else if (cat.includes('MI EXPERIENCIA')) code = 'F13'
+  
+  if (code) {
+    if (tipo === 'escrito') code += 'A'
+    else if (tipo === 'exposicion') code += 'B'
+  }
+  
+  return code
 })
 
 const volverAtras = () => {

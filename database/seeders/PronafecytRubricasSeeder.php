@@ -23,13 +23,41 @@ class PronafecytRubricasSeeder extends Seeder
             'DEMOSTRACIONES CIENTÍFICAS Y TECNOLÓGICAS' => [
                 'exposicion' => [
                     'max' => 40,
+                    'nombre_rubrica' => 'Demostraciones Científicas - Exposición',
                     'criterios' => [
-                        'Propósito principal y justificación' => 4,
-                        'Marco teórico y metodología' => 10,
-                        'Análisis y conclusiones' => 6,
-                        'Dominio del principio científico' => 8,
-                        'Presentación y comunicación' => 8,
-                        'Autenticidad' => 4,
+                        // SECCIÓN A
+                        ['seccion' => 'SECCIÓN A: Propósito principal de la demostración e importancia del tema (4 pts)', 'nombre' => 'El propósito es explicado con claridad y coherencia, así como la importancia', 'max' => 2.00],
+                        ['seccion' => 'SECCIÓN A: Propósito principal de la demostración e importancia del tema (4 pts)', 'nombre' => 'Las preguntas generales están relacionadas con la demostración', 'max' => 1.00],
+                        ['seccion' => 'SECCIÓN A: Propósito principal de la demostración e importancia del tema (4 pts)', 'nombre' => 'La demostración corresponde a un proceso o principio científico o tecnológico', 'max' => 1.00],
+
+                        // SECCIÓN B
+                        ['seccion' => 'SECCIÓN B: Marco teórico y metodología (10 pts)', 'nombre' => 'Existe familiaridad y manejo de los contenidos de las fuentes consultadas', 'max' => 1.00],
+                        ['seccion' => 'SECCIÓN B: Marco teórico y metodología (10 pts)', 'nombre' => 'Existe claridad en los conceptos utilizados', 'max' => 1.00],
+                        ['seccion' => 'SECCIÓN B: Marco teórico y metodología (10 pts)', 'nombre' => 'La organización de la investigación demuestra una metodología de trabajo', 'max' => 2.00],
+                        ['seccion' => 'SECCIÓN B: Marco teórico y metodología (10 pts)', 'nombre' => 'Selecciona los instrumentos adecuados para su demostración', 'max' => 2.00],
+                        ['seccion' => 'SECCIÓN B: Marco teórico y metodología (10 pts)', 'nombre' => 'Utiliza recursos materiales en forma ingeniosa y creativa', 'max' => 2.00],
+                        ['seccion' => 'SECCIÓN B: Marco teórico y metodología (10 pts)', 'nombre' => 'Los recursos y desechos generados son utilizados considerando la sostenibilidad', 'max' => 2.00],
+
+                        // SECCIÓN C
+                        ['seccion' => 'SECCIÓN C: Análisis y conclusiones (Logros obtenidos) (6 pts)', 'nombre' => 'Realiza la interpretación de los resultados obtenidos en la demostración', 'max' => 2.00],
+                        ['seccion' => 'SECCIÓN C: Análisis y conclusiones (Logros obtenidos) (6 pts)', 'nombre' => 'Explica cómo la demostración ilustra el concepto o principio seleccionado', 'max' => 2.00],
+                        ['seccion' => 'SECCIÓN C: Análisis y conclusiones (Logros obtenidos) (6 pts)', 'nombre' => 'Contrasta o compara los resultados obtenidos con la información consultada', 'max' => 1.00],
+                        ['seccion' => 'SECCIÓN C: Análisis y conclusiones (Logros obtenidos) (6 pts)', 'nombre' => 'Complementa la comparación con reflexiones personales', 'max' => 1.00],
+
+                        // SECCIÓN D
+                        ['seccion' => 'SECCIÓN D: Dominio del principio o proceso científico o tecnológico (8 pts)', 'nombre' => 'Explica el principio, proceso científico o tecnológico', 'max' => 2.00],
+                        ['seccion' => 'SECCIÓN D: Dominio del principio o proceso científico o tecnológico (8 pts)', 'nombre' => 'Evidencia comprensión de los conceptos que fundamentan la demostración', 'max' => 3.00],
+                        ['seccion' => 'SECCIÓN D: Dominio del principio o proceso científico o tecnológico (8 pts)', 'nombre' => 'Todas las personas estudiantes participan en la exposición y dominan el tema', 'max' => 3.00],
+
+                        // SECCIÓN E
+                        ['seccion' => 'SECCIÓN E: Presentación y comunicación científica o tecnológica (8 pts)', 'nombre' => 'El cartel presentado apoya la comunicación en forma fluida', 'max' => 2.00],
+                        ['seccion' => 'SECCIÓN E: Presentación y comunicación científica o tecnológica (8 pts)', 'nombre' => 'El material expuesto tiene relación con el trabajo de investigación', 'max' => 2.00],
+                        ['seccion' => 'SECCIÓN E: Presentación y comunicación científica o tecnológica (8 pts)', 'nombre' => 'Existe claridad en la comunicación y se utiliza lenguaje científico acorde', 'max' => 2.00],
+                        ['seccion' => 'SECCIÓN E: Presentación y comunicación científica o tecnológica (8 pts)', 'nombre' => 'Existe capacidad de síntesis para realizar la comunicación', 'max' => 2.00],
+
+                        // SECCIÓN F
+                        ['seccion' => 'SECCIÓN F: Autenticidad del trabajo realizado (4 pts)', 'nombre' => 'El cartel y material expuesto da muestras de realización propia', 'max' => 2.00],
+                        ['seccion' => 'SECCIÓN F: Autenticidad del trabajo realizado (4 pts)', 'nombre' => 'Existe originalidad en la elaboración del material', 'max' => 2.00],
                     ],
                 ],
                 'escrito' => [
@@ -42,6 +70,8 @@ class PronafecytRubricasSeeder extends Seeder
                     ],
                 ],
             ],
+
+            // ... (rest of the array remains unchanged, I'm only targeting the start of the array and the loop logic if possible, but replace_file_content works on chunks. I'll do the loop logic in a separate call or try to fit it if the file structure allows. The loop is at the bottom. I'll do two edits.)
 
             // F9: Investigación Científica
             'INVESTIGACIÓN CIENTÍFICA' => [
@@ -161,7 +191,7 @@ class PronafecytRubricasSeeder extends Seeder
             $categoria = Categoria::firstOrCreate(['nombre' => $nombreCategoria]);
 
             foreach ($rubricas as $tipo => $data) {
-                $nombreRubrica = "Rúbrica $tipo - $nombreCategoria";
+                $nombreRubrica = $data['nombre_rubrica'] ?? "Rúbrica $tipo - $nombreCategoria";
 
                 // Crear rúbrica
                 $rubrica = Rubrica::create([
@@ -190,12 +220,28 @@ class PronafecytRubricasSeeder extends Seeder
                 // Si no existe, la creo dinámicamente con DB::table
 
                 // Insertar Criterios
-                foreach ($data['criterios'] as $nombreCriterio => $maxPuntos) {
+                foreach ($data['criterios'] as $key => $val) {
+                    $nombre = '';
+                    $max = 0;
+                    $seccion = null;
+
+                    if (is_array($val)) {
+                        // Nuevo formato con sección
+                        $nombre = $val['nombre'];
+                        $max = $val['max'];
+                        $seccion = $val['seccion'] ?? null;
+                    } else {
+                        // Formato anterior: "Nombre" => Puntos
+                        $nombre = $key;
+                        $max = $val;
+                    }
+
                     Criterio::create([
                         'rubrica_id' => $rubrica->id,
-                        'nombre' => $nombreCriterio,
-                        'peso' => $maxPuntos, // En modo por_criterio, peso puede actuar como max visual o ponderación
-                        'max_puntos' => $maxPuntos,
+                        'nombre' => $nombre,
+                        'peso' => $max, // En modo por_criterio, peso puede actuar como max visual o ponderación
+                        'max_puntos' => $max,
+                        'seccion' => $seccion,
                     ]);
                 }
 

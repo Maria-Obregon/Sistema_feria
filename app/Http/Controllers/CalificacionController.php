@@ -68,6 +68,7 @@ class CalificacionController extends Controller
             COALESCE(c.asignacion_juez_id, ?) as asignacion_juez_id,
             k.id   as criterio_id,
             k.nombre as criterio_nombre,
+            k.seccion,
             k.peso,
             k.max_puntos,
             c.puntaje,
