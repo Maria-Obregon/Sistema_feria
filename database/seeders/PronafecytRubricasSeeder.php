@@ -436,13 +436,37 @@ class PronafecytRubricasSeeder extends Seeder
             'MI EXPERIENCIA CIENTÍFICA' => [
                 'exposicion' => [
                     'max' => 100,
+                    'nombre_rubrica' => 'Mi Experiencia Científica - Exposición',
                     'criterios' => [
-                        'Dominio del tema' => 25,
-                        'Fluidez y vocabulario' => 20,
-                        'Material de apoyo' => 20,
-                        'Estructura lógica de la presentación' => 20,
-                        'Impacto y entusiasmo' => 10,
-                        'Autenticidad' => 5,
+                        // SECCIÓN A
+                        ['seccion' => 'SECCIÓN A: Aspectos iniciales (15 pts)', 'nombre' => 'Se evidencia el planteamiento de la hipótesis o problema', 'max' => 5.00],
+                        ['seccion' => 'SECCIÓN A: Aspectos iniciales (15 pts)', 'nombre' => 'Se demuestra que fue un tema desarrollado en el aula', 'max' => 5.00],
+                        ['seccion' => 'SECCIÓN A: Aspectos iniciales (15 pts)', 'nombre' => 'El tema corresponde al currículo del nivel de los estudiantes', 'max' => 5.00],
+
+                        // SECCIÓN B
+                        ['seccion' => 'SECCIÓN B: Pasos por seguir (15 pts)', 'nombre' => 'Expresa acciones/pasos realizados (material/fotos/señas/oral)', 'max' => 7.00],
+                        ['seccion' => 'SECCIÓN B: Pasos por seguir (15 pts)', 'nombre' => 'Evidencia familiaridad y comprensión de los pasos realizados', 'max' => 8.00],
+
+                        // SECCIÓN C
+                        ['seccion' => 'SECCIÓN C: Logros obtenidos (25 pts)', 'nombre' => 'Expresa hallazgos contrastados con información consultada', 'max' => 5.00],
+                        ['seccion' => 'SECCIÓN C: Logros obtenidos (25 pts)', 'nombre' => 'Expresa los logros de la investigación', 'max' => 10.00],
+                        ['seccion' => 'SECCIÓN C: Logros obtenidos (25 pts)', 'nombre' => 'Expresa las fuentes de información consultada', 'max' => 5.00],
+                        ['seccion' => 'SECCIÓN C: Logros obtenidos (25 pts)', 'nombre' => 'Evidencia el disfrute y la apropiación de la investigación', 'max' => 5.00],
+
+                        // SECCIÓN D
+                        ['seccion' => 'SECCIÓN D: Dominio de la temática (23 pts)', 'nombre' => 'Expresa el proceso de forma lógica y secuencial', 'max' => 8.00],
+                        ['seccion' => 'SECCIÓN D: Dominio de la temática (23 pts)', 'nombre' => 'Demuestra dominio al comunicar los logros obtenidos', 'max' => 8.00],
+                        ['seccion' => 'SECCIÓN D: Dominio de la temática (23 pts)', 'nombre' => 'Todas las personas integrantes participan en la comunicación', 'max' => 7.00],
+
+                        // SECCIÓN E
+                        ['seccion' => 'SECCIÓN E: Comunicación de la información (15 pts)', 'nombre' => 'El cartel presentado apoya la comunicación fluida', 'max' => 4.00],
+                        ['seccion' => 'SECCIÓN E: Comunicación de la información (15 pts)', 'nombre' => 'El material expuesto tiene relación con el trabajo', 'max' => 4.00],
+                        ['seccion' => 'SECCIÓN E: Comunicación de la información (15 pts)', 'nombre' => 'Señala o menciona elementos que apoyan la investigación', 'max' => 4.00],
+                        ['seccion' => 'SECCIÓN E: Comunicación de la información (15 pts)', 'nombre' => 'Manifiesta normas de cortesía al comunicar lo investigado', 'max' => 3.00],
+
+                        // SECCIÓN F
+                        ['seccion' => 'SECCIÓN F: Autenticidad del trabajo realizado (7 pts)', 'nombre' => 'El cartel y recursos corresponden al desarrollo cognitivo', 'max' => 4.00],
+                        ['seccion' => 'SECCIÓN F: Autenticidad del trabajo realizado (7 pts)', 'nombre' => 'Evidencia originalidad en la elaboración de material', 'max' => 3.00],
                     ],
                 ],
                 // No tiene escrito
