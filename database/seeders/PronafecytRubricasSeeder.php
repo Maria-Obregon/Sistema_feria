@@ -109,22 +109,87 @@ class PronafecytRubricasSeeder extends Seeder
             'INVESTIGACIÓN CIENTÍFICA' => [
                 'exposicion' => [
                     'max' => 40,
+                    'nombre_rubrica' => 'Investigación Científica - Exposición',
                     'criterios' => [
-                        'Planteamiento del problema' => 5,
-                        'Marco Teórico' => 5,
-                        'Metodología' => 10,
-                        'Discusión y Resultados' => 6,
-                        'Presentación y comunicación' => 10,
-                        'Autenticidad' => 4,
+                        // SECCIÓN A
+                        ['seccion' => 'A. Planteamiento de objetivos y justificación', 'nombre' => 'Creatividad y originalidad del problema', 'max' => 1.00],
+                        ['seccion' => 'A. Planteamiento de objetivos y justificación', 'nombre' => 'Objetivos tienen relación con el problema', 'max' => 1.00],
+                        ['seccion' => 'A. Planteamiento de objetivos y justificación', 'nombre' => 'Objetivos explicados con claridad y coherencia', 'max' => 1.00],
+                        ['seccion' => 'A. Planteamiento de objetivos y justificación', 'nombre' => 'Definición de la pregunta incluye las variables', 'max' => 1.00],
+                        ['seccion' => 'A. Planteamiento de objetivos y justificación', 'nombre' => 'Identificación de variables en la hipótesis', 'max' => 1.00],
+
+                        // SECCIÓN B
+                        ['seccion' => 'B. Marco Teórico', 'nombre' => 'Familiaridad y manejo de contenidos de fuentes', 'max' => 2.00],
+                        ['seccion' => 'B. Marco Teórico', 'nombre' => 'Comprensión de conceptos, variables o términos', 'max' => 3.00],
+
+                        // SECCIÓN C
+                        ['seccion' => 'C. Metodología Aplicada', 'nombre' => 'Planificación y cumplimiento por etapas', 'max' => 2.00],
+                        ['seccion' => 'C. Metodología Aplicada', 'nombre' => 'Selección de recursos e instrumentos adecuados', 'max' => 2.00],
+                        ['seccion' => 'C. Metodología Aplicada', 'nombre' => 'Descripción de recursos tecnológicos/materiales', 'max' => 2.00],
+                        ['seccion' => 'C. Metodología Aplicada', 'nombre' => 'Descripción adecuada de metodologías utilizadas', 'max' => 2.00],
+                        ['seccion' => 'C. Metodología Aplicada', 'nombre' => 'Manejo de residuos y sostenibilidad ambiental', 'max' => 2.00],
+
+                        // SECCIÓN D
+                        ['seccion' => 'D. Discusión e Interpretación', 'nombre' => 'Coherencia entre objetivos y conclusiones', 'max' => 1.00],
+                        ['seccion' => 'D. Discusión e Interpretación', 'nombre' => 'Análisis, discusión y correlación de variables', 'max' => 2.00],
+                        ['seccion' => 'D. Discusión e Interpretación', 'nombre' => 'Logra comprobación o negación de hipótesis', 'max' => 1.00],
+                        ['seccion' => 'D. Discusión e Interpretación', 'nombre' => 'Congruencia de datos/tablas con el tema', 'max' => 1.00],
+                        ['seccion' => 'D. Discusión e Interpretación', 'nombre' => 'Sugiere aplicaciones o mejoras a actividades', 'max' => 1.00],
+
+                        // SECCIÓN E
+                        ['seccion' => 'E. Presentación y Comunicación', 'nombre' => 'Cartel apoya la comunicación fluida', 'max' => 1.00],
+                        ['seccion' => 'E. Presentación y Comunicación', 'nombre' => 'Material expuesto tiene relación con trabajo', 'max' => 2.00],
+                        ['seccion' => 'E. Presentación y Comunicación', 'nombre' => 'Capacidad de síntesis en la comunicación', 'max' => 2.00],
+                        ['seccion' => 'E. Presentación y Comunicación', 'nombre' => 'Claridad/coherencia al explicar propósito/proceso', 'max' => 3.00],
+                        ['seccion' => 'E. Presentación y Comunicación', 'nombre' => 'Participación y dominio de todos los miembros', 'max' => 2.00],
+
+                        // SECCIÓN F
+                        ['seccion' => 'F. Autenticidad', 'nombre' => 'Muestras de realización propia (Cartel/Material)', 'max' => 2.00],
+                        ['seccion' => 'F. Autenticidad', 'nombre' => 'Originalidad en la elaboración del material', 'max' => 2.00],
                     ],
                 ],
                 'escrito' => [
                     'max' => 78,
+                    'nombre_rubrica' => 'Investigación Científica - Informe Escrito',
                     'criterios' => [
-                        'Autenticidad' => 3,
-                        'Estructura: Páginas preliminares e Introducción' => 11,
-                        'Estructura: Metodología y Resultados' => 37,
-                        'Estructura: Discusión, Conclusiones y Bibliografía' => 27,
+                        // SECCIÓN 1: I PARTE Y PÁGINA 1
+                        ['seccion' => 'I PARTE: AUTENTICIDAD Y PÁGINA 1 (11 pts)', 'nombre' => 'Autenticidad: Estilo, estructura y vocabulario', 'max' => 3.00],
+                        ['seccion' => 'I PARTE: AUTENTICIDAD Y PÁGINA 1 (11 pts)', 'nombre' => 'Autenticidad: No plagio (Créditos)', 'max' => 3.00],
+                        ['seccion' => 'I PARTE: AUTENTICIDAD Y PÁGINA 1 (11 pts)', 'nombre' => 'Portada: Contiene elementos oficiales', 'max' => 1.00],
+                        ['seccion' => 'I PARTE: AUTENTICIDAD Y PÁGINA 1 (11 pts)', 'nombre' => 'Título: Establece idea general (Breve/Conciso)', 'max' => 3.00],
+                        ['seccion' => 'I PARTE: AUTENTICIDAD Y PÁGINA 1 (11 pts)', 'nombre' => 'Índice: Indica secciones y páginas', 'max' => 1.00],
+
+                        // SECCIÓN 2: PÁGINA 2 - CUERPO DEL INFORME
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (37 pts)', 'nombre' => 'Intro: Ideas previas que motivan', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (37 pts)', 'nombre' => 'Intro: Importancia del tema investigado', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (37 pts)', 'nombre' => 'Intro: Preguntas que orientan la investigación', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (37 pts)', 'nombre' => 'Intro: Hipótesis (Variables Indep/Dep)', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (37 pts)', 'nombre' => 'Intro: Objetivo general y específicos', 'max' => 3.00],
+
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (37 pts)', 'nombre' => 'Marco: Conceptos/Variables/Términos técnicos', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (37 pts)', 'nombre' => 'Marco: Información adicional de fuentes', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (37 pts)', 'nombre' => 'Marco: Citas y referencias (Formato)', 'max' => 3.00],
+
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (37 pts)', 'nombre' => 'Metodología: Explicación de pasos/procedimientos', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (37 pts)', 'nombre' => 'Metodología: Lista de recursos tecnológicos', 'max' => 1.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (37 pts)', 'nombre' => 'Metodología: Selección de instrumentos adecuados', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (37 pts)', 'nombre' => 'Metodología: Explicación de variables (Indep/Dep)', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 2: CUERPO DEL INFORME (37 pts)', 'nombre' => 'Metodología: Manejo de residuos/sostenibilidad', 'max' => 3.00],
+
+                        // SECCIÓN 3: PÁGINA 3 - ANÁLISIS Y FINAL
+                        ['seccion' => 'PÁGINA 3: ANÁLISIS Y FINAL (30 pts)', 'nombre' => 'Resultados: Análisis estadístico de datos', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 3: ANÁLISIS Y FINAL (30 pts)', 'nombre' => 'Resultados: Indica cumplimiento de hipótesis', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 3: ANÁLISIS Y FINAL (30 pts)', 'nombre' => 'Resultados: Contraste con información consultada', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 3: ANÁLISIS Y FINAL (30 pts)', 'nombre' => 'Resultados: Citas/Referencias en análisis', 'max' => 1.00],
+                        ['seccion' => 'PÁGINA 3: ANÁLISIS Y FINAL (30 pts)', 'nombre' => 'Resultados: Conclusiones por objetivo específico', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 3: ANÁLISIS Y FINAL (30 pts)', 'nombre' => 'Resultados: Sugerencias de mejora', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 3: ANÁLISIS Y FINAL (30 pts)', 'nombre' => 'Resultados: Evidencias de comunicación', 'max' => 1.00],
+
+                        ['seccion' => 'PÁGINA 3: ANÁLISIS Y FINAL (30 pts)', 'nombre' => 'Referencias: Cantidad suficiente (7)', 'max' => 1.00],
+                        ['seccion' => 'PÁGINA 3: ANÁLISIS Y FINAL (30 pts)', 'nombre' => 'Referencias: Calidad (<10 años/Confiables)', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 3: ANÁLISIS Y FINAL (30 pts)', 'nombre' => 'Referencias: Formato consistente', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 3: ANÁLISIS Y FINAL (30 pts)', 'nombre' => 'Resumen: Síntesis completa', 'max' => 3.00],
+                        ['seccion' => 'PÁGINA 3: ANÁLISIS Y FINAL (30 pts)', 'nombre' => 'Bitácora: Completa (Fechas/Actividades)', 'max' => 3.00],
                     ],
                 ],
             ],
