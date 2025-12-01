@@ -199,6 +199,15 @@ class CalificacionController extends Controller
                 'ts' => now()->toDateTimeString(),
             ]);
 
+            // Recalcular puntaje total de la asignación
+            $totalPuntaje = DB::table('calificaciones')
+                ->where($fkColumn, $fkValue)
+                ->sum('puntaje');
+
+            DB::table('asignacion_juez')
+                ->where('id', $fkValue)
+                ->update(['puntaje' => $totalPuntaje]);
+
             return response()->json(['message' => 'Actualizado'], Response::HTTP_OK);
         } else {
             $payload['created_at'] = now();
@@ -210,6 +219,15 @@ class CalificacionController extends Controller
                 'criterio_id' => $criterioId,
                 'ts' => now()->toDateTimeString(),
             ]);
+
+            // Recalcular puntaje total de la asignación
+            $totalPuntaje = DB::table('calificaciones')
+                ->where($fkColumn, $fkValue)
+                ->sum('puntaje');
+
+            DB::table('asignacion_juez')
+                ->where('id', $fkValue)
+                ->update(['puntaje' => $totalPuntaje]);
 
             return response()->json(['message' => 'Creado'], Response::HTTP_CREATED);
         }
