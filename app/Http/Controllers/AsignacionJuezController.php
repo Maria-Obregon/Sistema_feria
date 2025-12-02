@@ -99,6 +99,7 @@ class AsignacionJuezController extends Controller
         }
 
         $asig->finalizada_at = now();
+        $asig->fue_finalizada = true;
         $asig->save();
 
         Log::info('asignaciones.finalizar', [
