@@ -2,13 +2,8 @@
   <div class="p-6">
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
       <div class="flex items-center gap-3">
-        <RouterLink
-          :to="{ name: 'inst.dashboard' }"        
-          class="inline-flex items-center gap-2 px-3 py-2 border rounded-lg text-gray-700 hover:bg-gray-50 transition-colors bg-white shadow-sm"
-        >
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-          </svg>
+        <RouterLink :to="{ name: 'inst.dashboard' }" class="inline-flex items-center gap-2 px-3 py-2 border rounded-lg text-gray-700 hover:bg-gray-50 transition-colors bg-white shadow-sm">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
           Volver
         </RouterLink>
         <div>
@@ -16,14 +11,8 @@
           <p class="text-gray-600">Administra el padrón estudiantil y asigna proyectos</p>
         </div>
       </div>
-
-      <button
-        @click="abrirCrear"
-        class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm transition-colors"
-      >
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-        </svg>
+      <button @click="abrirCrear" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm transition-colors">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
         Nuevo Estudiante
       </button>
     </div>
@@ -33,16 +22,8 @@
         <div class="md:col-span-1">
           <label class="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
           <div class="relative">
-            <input
-              v-model="filtros.buscar"
-              type="text"
-              placeholder="Buscar por nombre o cédula..."
-              class="w-full pl-10 px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
-              @input="debouncedBuscar"
-            />
-            <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-            </svg>
+            <input v-model="filtros.buscar" type="text" placeholder="Buscar por nombre o cédula..." class="w-full pl-10 px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" @input="debouncedBuscar" />
+            <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
           </div>
         </div>
       </div>
@@ -55,11 +36,7 @@
       </div>
 
       <div v-else-if="!estudiantes.length" class="p-12 text-center text-gray-500">
-        <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-        </svg>
         <p class="text-lg font-medium">No se encontraron estudiantes</p>
-        <p class="text-sm">Intenta ajustar los filtros o crea uno nuevo.</p>
       </div>
 
       <div v-else class="overflow-x-auto">
@@ -68,7 +45,6 @@
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estudiante</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cédula</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Institución</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nivel / Sección</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Proyectos Asignados</th>
               <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
@@ -91,12 +67,6 @@
                 {{ e.cedula }}
               </td>
               
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                    {{ e.institucion?.nombre || '—' }}
-                 </span>
-              </td>
-
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-gray-900">{{ e.nivel }}</div>
                 <div class="text-xs text-gray-500">{{ e.seccion || 'Sin sección' }}</div>
@@ -104,19 +74,9 @@
               <td class="px-6 py-4">
                 <div class="flex flex-wrap gap-2">
                   <span v-if="!e.proyectos?.length" class="text-xs text-gray-400 italic">Ninguno</span>
-                  <span
-                    v-for="p in e.proyectos"
-                    :key="p.id"
-                    class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                  >
+                  <span v-for="p in e.proyectos" :key="p.id" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                     {{ p.titulo }}
-                    <button 
-                      @click="quitarProyecto(e, p.id)"
-                      class="ml-1 text-blue-400 hover:text-blue-600 focus:outline-none"
-                      title="Desvincular proyecto"
-                    >
-                      
-                    </button>
+                    <button @click="quitarProyecto(e, p.id)" class="ml-1 text-blue-400 hover:text-blue-600 focus:outline-none">×</button>
                   </span>
                 </div>
               </td>
@@ -150,37 +110,19 @@
           </tbody>
         </table>
       </div>
-      
-      <div v-if="estudiantes.length > 0" class="px-6 py-3 border-t bg-gray-50 text-xs text-gray-500 text-right">
-        Mostrando {{ estudiantes.length }} registros
-      </div>
     </div>
 
     <div v-if="showNew" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div class="bg-white w-full max-w-3xl rounded-xl shadow-2xl border overflow-hidden">
         <div class="px-6 py-4 border-b flex justify-between items-center bg-gray-50">
-          <h2 class="text-lg font-semibold text-gray-800">
-            {{ editando ? 'Editar Estudiante' : 'Nuevo Estudiante' }}
-          </h2>
-          <button @click="closeNew" class="text-gray-400 hover:text-gray-600 transition-colors">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12"/></svg>
-          </button>
+          <h2 class="text-lg font-semibold text-gray-800">{{ editando ? 'Editar Estudiante' : 'Nuevo Estudiante' }}</h2>
+          <button @click="closeNew" class="text-gray-400 hover:text-gray-600">✕</button>
         </div>
 
         <div class="p-6 max-h-[80vh] overflow-y-auto">
           <form @submit.prevent="save" class="space-y-6">
-            
             <div class="grid md:grid-cols-2 gap-5">
-              <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Institución *</label>
-                <select v-model="f.institucion_id" class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 outline-none" required>
-                  <option value="">Seleccione una institución</option>
-                  <option v-for="inst in institucionesOpts" :key="inst.id" :value="inst.id">
-                    {{ inst.nombre }}
-                  </option>
-                </select>
-              </div>
-
+              
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Cédula *</label>
                 <input v-model="f.cedula" class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Identificación" required>
@@ -233,37 +175,27 @@
             </div>
 
             <div v-if="errorMsg" class="p-4 bg-red-50 text-red-700 rounded-lg flex items-start gap-3 text-sm">
-              <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
               <span>{{ errorMsg }}</span>
             </div>
 
             <div v-if="cred" class="p-4 bg-green-50 border border-green-100 rounded-lg">
               <div class="flex items-center gap-2 mb-2 text-green-800 font-semibold">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 ¡Estudiante registrado con éxito!
               </div>
               <div class="bg-white p-3 rounded border border-green-100 text-sm space-y-1">
                 <p><strong>Usuario:</strong> <span class="font-mono text-gray-800">{{ cred.usuario.username }}</span></p>
-                <p><strong>Contraseña:</strong> <span class="font-mono text-gray-800">{{ cred.plain_password }}</span> <span class="text-xs text-gray-500">(Cópiala, no se volverá a mostrar)</span></p>
+                <p><strong>Contraseña:</strong> <span class="font-mono text-gray-800">{{ cred.plain_password }}</span></p>
               </div>
               <div class="mt-4 flex flex-wrap gap-2">
-                <button 
-                  type="button" 
-                  @click="descargarCredencial(cred.estudiante.id, cred.plain_password)" 
-                  class="px-3 py-2 bg-green-600 text-white rounded flex items-center gap-2"
-                >
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                <button type="button" @click="descargarCredencial(cred.estudiante.id, cred.plain_password)" class="px-3 py-2 bg-green-600 text-white rounded flex items-center gap-2">
                   Descargar Ficha PDF
                 </button>
               </div>
             </div>
 
             <div class="flex justify-end gap-3 pt-4 border-t">
-              <button type="button" @click="closeNew" class="px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
-                {{ cred ? 'Cerrar' : 'Cancelar' }}
-              </button>
-              
-              <button v-if="!cred" :disabled="saving" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2">
+              <button type="button" @click="closeNew" class="px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">{{ cred ? 'Cerrar' : 'Cancelar' }}</button>
+              <button v-if="!cred" :disabled="saving" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm transition-colors disabled:opacity-70 flex items-center gap-2">
                 <svg v-if="saving" class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                 {{ saving ? 'Guardando...' : (editando ? 'Actualizar' : 'Guardar') }}
               </button>
@@ -279,12 +211,10 @@
           <h3 class="text-lg font-semibold text-gray-800">Asignar Proyecto</h3>
           <button @click="cerrarVinculo" class="text-gray-400 hover:text-gray-600">✕</button>
         </div>
-        
         <div class="p-6">
           <p class="text-sm text-gray-600 mb-4">
             Selecciona el proyecto científico para <strong>{{ selEst?.nombre }} {{ selEst?.apellidos }}</strong>.
           </p>
-
           <form @submit.prevent="guardarVinculo">
             <div class="mb-5">
               <label class="block text-sm font-medium text-gray-700 mb-1">Proyecto Disponible</label>
@@ -293,11 +223,7 @@
                 <option v-for="p in proyectos" :key="p.id" :value="p.id">{{ p.titulo }}</option>
               </select>
             </div>
-
-            <div v-if="linkError" class="mb-4 p-3 bg-red-50 text-red-700 text-sm rounded">
-              {{ linkError }}
-            </div>
-
+            <div v-if="linkError" class="mb-4 p-3 bg-red-50 text-red-700 text-sm rounded">{{ linkError }}</div>
             <div class="flex justify-end gap-3">
               <button type="button" @click="cerrarVinculo" class="px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50">Cancelar</button>
               <button :disabled="linking" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-70">
@@ -315,18 +241,15 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-// NUEVO: Agregamos institucionesApi a la importación
-import { estudiantesApi, proyectosApi, institucionesApi } from '@/services/api'
+// Quitamos institucionesApi ya que no lo usaremos
+import { estudiantesApi, proyectosApi } from '@/services/api'
 
 const auth = useAuthStore()
 
-// --- Estado Data ---
 const estudiantes = ref([])
 const loading = ref(false)
 const filtros = reactive({ buscar: '' })
-const institucionesOpts = ref([]) // NUEVO: Para guardar la lista de instituciones
 
-// --- Estado Modales ---
 const showNew = ref(false)
 const editando = ref(false)
 const idEdicion = ref(null) 
@@ -334,7 +257,6 @@ const saving = ref(false)
 const errorMsg = ref('')
 const cred = ref(null)
 
-// --- Estado Vinculación ---
 const showLink = ref(false)
 const selEst = ref(null)
 const proyectos = ref([])
@@ -342,38 +264,23 @@ const linkProjectId = ref('')
 const linking = ref(false)
 const linkError = ref('')
 
-// Formulario reactivo
 const f = ref({
   cedula: '', nombre: '', apellidos: '',
   nivel: '', seccion: '', telefono: '', email: '',
   fecha_nacimiento: '', genero: '',
-  institucion_id: '' // NUEVO: Campo para el ID de institución
+  institucion_id: '' 
 })
-
-// --- NUEVO: Cargar lista de instituciones ---
-const cargarInstituciones = async () => {
-  try {
-    const { data } = await institucionesApi.listar({ per_page: 100 }) // Traemos suficientes
-    institucionesOpts.value = data.data || data
-  } catch (e) {
-    console.error("Error cargando instituciones:", e)
-  }
-}
 
 let timeoutSearch = null
 const debouncedBuscar = () => {
   clearTimeout(timeoutSearch)
-  timeoutSearch = setTimeout(() => {
-    load()
-  }, 400)
+  timeoutSearch = setTimeout(() => load(), 400)
 }
 
 const load = async () => {
   loading.value = true
   try {
     if (!auth.user) await auth.fetchMe()
-    
-    // Al no enviar institucion_id, el backend devolverá TODOS los estudiantes (ideal para comité)
     const { data } = await estudiantesApi.listar({ 
       buscar: filtros.buscar 
     })
@@ -390,10 +297,9 @@ const abrirCrear= () => {
   idEdicion.value = null
   resetForm()
   
-  // NUEVO: Si el usuario logueado ya tiene institución, la pre-seleccionamos
-  const userInst = auth.user?.institucion?.id || auth.user?.institucion_id
-  if (userInst) {
-      f.value.institucion_id = userInst
+  // SEGURIDAD FRONTEND: Asignar ID de sesión
+  if (auth.user?.institucion?.id || auth.user?.institucion_id) {
+      f.value.institucion_id = auth.user.institucion?.id || auth.user.institucion_id
   }
   
   showNew.value = true
@@ -405,7 +311,6 @@ const abrirEditar = (est) => {
   errorMsg.value = ''
   cred.value = null
   
-  // Rellenar form
   f.value = {
     cedula: est.cedula,
     nombre: est.nombre,
@@ -416,7 +321,7 @@ const abrirEditar = (est) => {
     email: est.email,
     fecha_nacimiento: est.fecha_nacimiento,
     genero: est.genero,
-    institucion_id: est.institucion_id // NUEVO: Cargar la institución del estudiante
+    institucion_id: est.institucion_id
   }
   
   showNew.value = true
@@ -438,8 +343,9 @@ const save = async () => {
     saving.value = true
     errorMsg.value = ''
     
-    if (!auth.user) await auth.fetchMe()
-    const userInst = auth.user?.institucion?.id || auth.user?.institucion_id
+    if (!f.value.institucion_id && (auth.user?.institucion?.id || auth.user?.institucion_id)) {
+        f.value.institucion_id = auth.user.institucion?.id || auth.user.institucion_id
+    }
 
     // Normalizar fecha
     let fecha = f.value.fecha_nacimiento
@@ -448,12 +354,7 @@ const save = async () => {
       if (!isNaN(d.getTime())) fecha = d.toISOString().slice(0, 10)
     }
 
-    const payload = { 
-      ...f.value, 
-      fecha_nacimiento: fecha, 
-      // NUEVO: Usamos la institución del formulario. Si está vacía, fallback al usuario logueado.
-      institucion_id: f.value.institucion_id || userInst || undefined 
-    }
+    const payload = { ...f.value, fecha_nacimiento: fecha }
 
     if (editando.value) {
       await estudiantesApi.actualizar(idEdicion.value, payload)
@@ -480,8 +381,7 @@ const save = async () => {
 }
 
 const eliminar = async (est) => {
-  if (!confirm(`¿Estás seguro de eliminar al estudiante ${est.nombre}? Esta acción no se puede deshacer.`)) return
-
+  if (!confirm(`¿Estás seguro de eliminar al estudiante ${est.nombre}?`)) return
   try {
     await estudiantesApi.eliminar(est.id)
     await load()
@@ -493,12 +393,9 @@ const eliminar = async (est) => {
 const descargarCredencial = async (id, passwordPlain = null) => {
   try {
     const config = { responseType: 'blob' }
-    if (passwordPlain) {
-        config.params = { password: passwordPlain }
-    }
+    if (passwordPlain) config.params = { password: passwordPlain }
 
     const { data } = await estudiantesApi.descargarCredencial(id, passwordPlain) 
-    
     const url = window.URL.createObjectURL(new Blob([data]));
     const link = document.createElement('a');
     link.href = url;
@@ -507,7 +404,6 @@ const descargarCredencial = async (id, passwordPlain = null) => {
     link.click();
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
-
   } catch (e) {
     console.error("Error descargando PDF:", e)
     alert("Error al descargar el PDF") 
@@ -524,7 +420,6 @@ const abrirVinculo = async (est) => {
   const instId = auth.user?.institucion?.id || auth.user?.institucion_id
   
   try {
-    // NUEVO: Cargamos proyectos de la institución DEL ESTUDIANTE, no la mía
     const targetInst = est.institucion_id || instId
     const { data } = await proyectosApi.list({ institucion_id: targetInst, per_page: 100 })
     proyectos.value = data.data || data
@@ -569,10 +464,5 @@ const quitarProyecto = async (est, proyectoId) => {
   }
 }
 
-// Lifecycle
-onMounted(async () => {
-    // NUEVO: Cargamos instituciones y luego la tabla
-    await cargarInstituciones()
-    await load()
-})
+onMounted(load)
 </script>

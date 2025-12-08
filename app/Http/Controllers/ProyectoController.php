@@ -25,13 +25,18 @@ class ProyectoController extends Controller
     {
         $institucionId = $request->get('institucion_id') ?? optional($request->user())->institucion_id;
 
-        // CAMBIO AQUÍ: Agregamos 'institucion' y más campos a 'estudiantes'
+        // 2. LÓGICA CORREGIDA Y OPTIMIZADA
+        if (! $request->user()->hasAnyRole(['admin', 'comite_institucional'])) {
+             $institucionId = $institucionId ?? $request->user()->institucion_id;
+        }
+
         $q = Proyecto::with([
                 'area', 
                 'categoria', 
                 'modalidad',
-                'institucion:id,nombre', // <--- NUEVO
-                'estudiantes:id,cedula,nombre,apellidos,nivel,seccion' // <--- NUEVOS CAMPOS
+                'institucion:id,nombre',
+                'estudiantes:id,cedula,nombre,apellidos,nivel,seccion',
+                'asignacionesJuez.juez:id,nombre' 
             ])
             ->when($institucionId, fn($qq) => $qq->where('institucion_id', $institucionId))
             ->when($request->filled('buscar'), function ($qq) use ($request) {
@@ -41,11 +46,14 @@ class ProyectoController extends Controller
                       ->orWhere('resumen', 'like', "%{$b}%");
                 });
             })
+            ->when($request->filled('exclude_juez_id'), function($qq) use ($request) {
+                 $juezId = $request->integer('exclude_juez_id');
+                 $qq->whereDoesntHave('asignacionesJuez', fn($q) => $q->where('juez_id', $juezId));
+            })
             ->orderByDesc('id');
 
         return $q->paginate($request->integer('per_page', 10));
     }
-
     /**
      * GET /api/proyectos/{proyecto}
      * Devuelve un proyecto con sus relaciones.
@@ -62,17 +70,21 @@ class ProyectoController extends Controller
      */
     public function store(Request $request)
     {
-        // 1. VALIDACIÓN CORREGIDA (Sin la tabla pivote que daba error)
+        // 1. FORZAR INSTITUCIÓN DEL USUARIO (Si no es admin)
+        if (!$request->user()->hasRole('admin')) {
+             $request->merge(['institucion_id' => $request->user()->institucion_id]);
+        }
+
+        // 2. Validación (ahora institucion_id es required porque ya lo inyectamos)
         $data = $request->validate([
             'titulo'         => 'required|string|max:255',
             'resumen'        => 'nullable|string',
             'area_id'        => ['required', Rule::exists('areas', 'id')],
-            'modalidad_id'   => ['required', Rule::exists('modalidades', 'id')], // Ahora validamos esto
+            'modalidad_id'   => ['required', Rule::exists('modalidades', 'id')],
             'categoria_id'   => ['required', Rule::exists('categorias', 'id')],
-            'institucion_id' => ['nullable', Rule::exists('instituciones', 'id')],
             'feria_id'       => ['required', Rule::exists('ferias', 'id')],
-            'estudiantes'    => 'nullable|array',
-            'estudiantes.*'  => ['integer', Rule::exists('estudiantes', 'id')],
+            'institucion_id' => ['required', Rule::exists('instituciones', 'id')],
+            'aula'           => 'nullable|string|max:50',
         ]);
 
         // 2. Asignar Institución
@@ -92,6 +104,7 @@ class ProyectoController extends Controller
                 'categoria_id'   => $data['categoria_id'],
                 'institucion_id' => $data['institucion_id'],
                 'feria_id'       => $data['feria_id'],
+                'aula'           => $data['aula'] ?? null,
                 'estado'         => 'inscrito',
                 // 'etapa_id' => 1, // Descomentar si usas etapas y tienes un valor default
             ];
@@ -190,6 +203,7 @@ class ProyectoController extends Controller
             'categoria_id'   => ['required', Rule::exists('categorias', 'id')],
             'institucion_id' => ['nullable', Rule::exists('instituciones', 'id')],
             'feria_id'       => ['required', Rule::exists('ferias', 'id')],
+            'aula'           => 'nullable|string|max:50',
             'estudiantes'    => 'nullable|array',
             'estudiantes.*'  => ['integer', Rule::exists('estudiantes', 'id')],
         ]);
@@ -205,6 +219,7 @@ class ProyectoController extends Controller
                 'categoria_id'   => $data['categoria_id'],
                 'institucion_id' => $data['institucion_id'] ?? $proyecto->institucion_id, // Mantiene la anterior si viene nula
                 'feria_id'       => $data['feria_id'],
+                'aula'           => $data['aula'] ?? null,
             ]);
 
             // 3. Sincronizamos estudiantes (si se enviaron)

@@ -25,6 +25,7 @@ protected $fillable = [
     'palabras_clave',
     'archivo_proyecto',
     'archivo_presentacion',
+    'aula',
 ];
 
     protected function casts(): array

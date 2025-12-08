@@ -21,13 +21,11 @@ class EstudianteController extends Controller
     {
         $user = $request->user();
         
-        // 1. Iniciamos con el filtro que venga del frontend (el select de arriba)
+        // 1. Iniciamos con el filtro que venga del frontend (el select de filtros si existiera)
         $institucionId = $request->get('institucion_id');
 
-        
-        if (! $user->hasAnyRole(['admin', 'comite_institucional'])) {
-             // Si es un usuario normal (profe/estudiante), solo ve lo suyo
-             $institucionId = $institucionId ?? $user->institucion_id;
+        if (! $user->hasRole('admin')) {
+             $institucionId = $user->institucion_id;
         }
 
         $q = Estudiante::with(['institucion:id,nombre', 'proyectos:id,titulo'])
@@ -48,6 +46,12 @@ class EstudianteController extends Controller
     // POST /api/estudiantes  (solo creación; SIN ligarlo)
     public function store(Request $request)
     {
+        // 1. SEGURIDAD: Forzar institución si no es admin
+        if (! $request->user()->hasRole('admin')) {
+            $request->merge(['institucion_id' => $request->user()->institucion_id]);
+        }
+
+        // 2. Validaciones
         $data = $request->validate([
             'cedula'           => ['required','string','max:25','unique:estudiantes,cedula'],
             'nombre'           => ['required','string','max:100'],
