@@ -115,7 +115,7 @@
                       class="ml-1 text-blue-400 hover:text-blue-600 focus:outline-none"
                       title="Desvincular proyecto"
                     >
-                      ×
+                      
                     </button>
                   </span>
                 </div>

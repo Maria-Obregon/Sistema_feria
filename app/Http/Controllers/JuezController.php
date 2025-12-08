@@ -8,52 +8,87 @@ use Illuminate\Validation\Rule;
 
 class JuezController extends Controller
 {
-    // GET /api/jueces?buscar=&area_id=&per_page=&con_proyectos=1
+    // GET /api/jueces
     public function index(Request $request)
-{
-    $q = Juez::query()
-        ->when($request->filled('buscar'), function($qq) use ($request) {
-            $b = $request->get('buscar');
-            $qq->where(function($w) use ($b) {
-                $w->where('nombre','like',"%{$b}%")
-                  ->orWhere('cedula','like',"%{$b}%")
-                  ->orWhere('correo','like',"%{$b}%");
-            });
-        })
-        ->when($request->filled('area_id'), fn($qq)=>$qq->where('area_id',$request->integer('area_id')))
-        ->withCount('asignaciones as proyectos_count')
-        ->orderBy('nombre');
+    {
+    
+        $q = Juez::query()
+            ->when($request->filled('buscar'), function($qq) use ($request) {
+                $b = $request->get('buscar');
+                $qq->where(function($w) use ($b) {
+                    $w->where('nombre','like',"%{$b}%")
+                      ->orWhere('cedula','like',"%{$b}%")
+                      ->orWhere('correo','like',"%{$b}%");
+                });
+            })
+            ->when($request->filled('area_id'), fn($qq)=>$qq->where('area_id',$request->integer('area_id')))
+            ->withCount('asignaciones as proyectos_count')
+            ->orderBy('nombre');
 
-    if ($request->boolean('con_proyectos')) {
-        $q->with(['asignaciones' => function($w){
-            $w->with([
-                'proyecto:id,titulo,categoria_id',
-                'proyecto.categoria:id,nombre'
-            ])->orderBy('etapa_id');
-        }]);
-    }
-
-    $res = $q->paginate($request->integer('per_page', 15));
-
-    if ($request->boolean('con_proyectos')) {
-        $res->getCollection()->transform(function ($juez) {
-            $juez->proyectos = $juez->asignaciones->map(function ($a) {
-                return [
-                    'id'        => $a->proyecto_id,
-                    'titulo'    => $a->proyecto->titulo ?? '—',
-                    'categoria' => $a->proyecto->categoria->nombre ?? null,
-                    'etapa_id'  => (int)$a->etapa_id,
-                    'tipo_eval' => $a->tipo_eval,
-                    'asig_id'   => $a->id,
-                ];
-            })->values();
-            unset($juez->asignaciones);
-            return $juez;
+        if ($request->filled('exclude_juez_id')) {
+        $juezId = $request->integer('exclude_juez_id');
+        
+        $q->whereDoesntHave('asignacionesJuez', function($query) use ($juezId) {
+            $query->where('juez_id', $juezId);
         });
     }
 
-    return $res;
-}
+
+        if ($request->boolean('con_proyectos')) {
+            $q->with(['asignaciones' => function($w){
+                $w->with([
+                    'proyecto:id,titulo,categoria_id,institucion_id', 
+                    
+                    'proyecto.categoria:id,nombre',
+                    
+                    'proyecto.institucion:id,nombre', 
+                    
+                    'proyecto.estudiantes:id,nombre,apellidos,cedula,nivel,seccion' 
+                ])->orderBy('etapa_id');
+            }]);
+        }
+
+        $res = $q->paginate($request->integer('per_page', 10));
+
+        if ($request->boolean('con_proyectos')) {
+            $res->getCollection()->transform(function ($juez) {
+                $juez->proyectos = $juez->asignaciones->map(function ($a) {
+                    // Si el proyecto fue borrado pero la asignación existe (caso borde)
+                    if (!$a->proyecto) return null;
+
+                    return [
+                        'id'        => $a->proyecto_id,
+                        'titulo'    => $a->proyecto->titulo ?? '—',
+                        'categoria' => $a->proyecto->categoria->nombre ?? null,
+                        'etapa_id'  => (int)$a->etapa_id,
+                        'tipo_eval' => $a->tipo_eval,
+                        'asig_id'   => $a->id,
+                        
+                        // 4. MAPEAR LA INSTITUCIÓN
+                        'institucion' => $a->proyecto->institucion ? [
+                            'nombre' => $a->proyecto->institucion->nombre
+                        ] : null,
+
+                        // 5. MAPEAR LOS ESTUDIANTES
+                        'estudiantes' => $a->proyecto->estudiantes->map(function($e){
+                            return [
+                                'id'        => $e->id,
+                                'nombre'    => $e->nombre,
+                                'apellidos' => $e->apellidos,
+                                'cedula'    => $e->cedula,
+                                'nivel'     => $e->nivel,
+                                'seccion'   => $e->seccion,
+                            ];
+                        }),
+                    ];
+                })->filter()->values(); // Filter quita los nulos si hubo
+                unset($juez->asignaciones);
+                return $juez;
+            });
+        }
+
+        return $res;
+    }
 
     // POST /api/jueces
     public function store(Request $request)

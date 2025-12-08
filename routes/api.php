@@ -47,6 +47,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/catalogo/circuitos', [InstitucionController::class, 'catalogoCircuitos']);
     Route::get('/circuitos', [InstitucionController::class, 'getCircuitos']);
     Route::get('/instituciones/catalogos', [InstitucionController::class, 'getCatalogos']);
+    Route::get('/admin/modalidades', [\App\Http\Controllers\AdminController::class, 'listModalidades']);
 
     /*
     |--------------------------------------------------------------------------
