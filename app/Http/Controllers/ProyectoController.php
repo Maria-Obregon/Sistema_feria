@@ -203,7 +203,6 @@ class ProyectoController extends Controller
             'categoria_id'   => ['required', Rule::exists('categorias', 'id')],
             'institucion_id' => ['nullable', Rule::exists('instituciones', 'id')],
             'feria_id'       => ['required', Rule::exists('ferias', 'id')],
-            'aula'           => 'nullable|string|max:50',
             'estudiantes'    => 'nullable|array',
             'estudiantes.*'  => ['integer', Rule::exists('estudiantes', 'id')],
         ]);
@@ -219,7 +218,6 @@ class ProyectoController extends Controller
                 'categoria_id'   => $data['categoria_id'],
                 'institucion_id' => $data['institucion_id'] ?? $proyecto->institucion_id, // Mantiene la anterior si viene nula
                 'feria_id'       => $data['feria_id'],
-                'aula'           => $data['aula'] ?? null,
             ]);
 
             // 3. Sincronizamos estudiantes (si se enviaron)
