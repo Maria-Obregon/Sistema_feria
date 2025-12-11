@@ -195,9 +195,15 @@ export const feriasApi = {
 export const estudiantesApi = {
   listar:            (params = {})        => api.get('/estudiantes', { params }),
   crear:             (payload)            => api.post('/estudiantes', payload),
+  actualizar:         (id, datos)        => api.put(`/estudiantes/${id}`, datos),
+  eliminar:           (id)               => api.delete(`/estudiantes/${id}`),
   vincular:          (id, proyecto_id)    => api.post(`/estudiantes/${id}/vincular-proyecto`, { proyecto_id }),
   desvincular:       (id, proyecto_id)    => api.delete(`/estudiantes/${id}/desvincular-proyecto/${proyecto_id}`),
-  descargarCredencial:(id)                => api.get(`/estudiantes/${id}/credencial`, { responseType: 'blob' }),
+  descargarCredencial: (id, password = null) => 
+    api.get(`/estudiantes/${id}/credencial`, { 
+        responseType: 'blob',
+        params: password ? { password } : {} // <-- Aquí enviamos la pass si existe
+    }),
 }
 
 // =========================

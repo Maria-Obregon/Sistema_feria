@@ -47,6 +47,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/catalogo/circuitos', [InstitucionController::class, 'catalogoCircuitos']);
     Route::get('/circuitos', [InstitucionController::class, 'getCircuitos']);
     Route::get('/instituciones/catalogos', [InstitucionController::class, 'getCatalogos']);
+    Route::get('/admin/modalidades', [\App\Http\Controllers\AdminController::class, 'listModalidades']);
 
     /*
     |--------------------------------------------------------------------------
@@ -75,6 +76,12 @@ Route::middleware('auth:sanctum')->group(function () {
         ->middleware('permission:estudiantes.ver');
     Route::post('/estudiantes', [EstudianteController::class, 'store'])
         ->middleware('permission:estudiantes.crear');
+
+    Route::put('/estudiantes/{estudiante}', [EstudianteController::class, 'update'])
+        ->middleware('permission:estudiantes.editar')->whereNumber('estudiante');
+
+    Route::delete('/estudiantes/{estudiante}', [EstudianteController::class, 'destroy'])
+        ->middleware('permission:estudiantes.eliminar')->whereNumber('estudiante');
 
     // Credencial (descarga)
     Route::get('/estudiantes/{estudiante}/credencial', [EstudianteController::class, 'credencial'])

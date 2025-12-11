@@ -11,13 +11,22 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class EstudianteController extends Controller
 {
     // GET /api/estudiantes?institucion_id=&buscar=
+    // GET /api/estudiantes
     public function index(Request $request)
     {
-        $institucionId = $request->get('institucion_id') ?? optional($request->user())->institucion_id;
+        $user = $request->user();
+        
+        // 1. Iniciamos con el filtro que venga del frontend (el select de filtros si existiera)
+        $institucionId = $request->get('institucion_id');
+
+        if (! $user->hasRole('admin')) {
+             $institucionId = $user->institucion_id;
+        }
 
         $q = Estudiante::with(['institucion:id,nombre', 'proyectos:id,titulo'])
             ->when($institucionId, fn($qq) => $qq->where('institucion_id', $institucionId))
@@ -37,6 +46,12 @@ class EstudianteController extends Controller
     // POST /api/estudiantes  (solo creación; SIN ligarlo)
     public function store(Request $request)
     {
+        // 1. SEGURIDAD: Forzar institución si no es admin
+        if (! $request->user()->hasRole('admin')) {
+            $request->merge(['institucion_id' => $request->user()->institucion_id]);
+        }
+
+        // 2. Validaciones
         $data = $request->validate([
             'cedula'           => ['required','string','max:25','unique:estudiantes,cedula'],
             'nombre'           => ['required','string','max:100'],
@@ -119,6 +134,119 @@ class EstudianteController extends Controller
             DB::rollBack();
             return response()->json(['message'=>'Error al crear estudiante','error'=>$e->getMessage()], 500);
         }
+    }
+
+    // PUT /api/estudiantes/{estudiante}
+    public function update(Request $request, Estudiante $estudiante)
+    {
+        $data = $request->validate([
+            // Ignoramos el ID actual para que no diga "la cédula ya existe" si es la misma
+            'cedula'         => ['required','string','max:25', Rule::unique('estudiantes','cedula')->ignore($estudiante->id)],
+            'nombre'         => ['required','string','max:100'],
+            'apellidos'      => ['required','string','max:150'],
+            'institucion_id' => ['required', Rule::exists('instituciones','id')],
+            'fecha_nacimiento' => ['required','string'],
+            'genero'         => ['required','string'],
+            'telefono'       => ['nullable','string','max:20'],
+            'email'          => ['nullable','email','max:120'],
+            'nivel'          => ['required','string','max:50'],
+            'seccion'        => ['nullable','string','max:10'],
+        ]);
+
+        // 1. Normalizar género
+        $map = ['M'=>'M','Masculino'=>'M','F'=>'F','Femenino'=>'F','Otro'=>'Otro'];
+        if (isset($map[$data['genero']])) {
+            $data['genero'] = $map[$data['genero']];
+        }
+
+        // 2. Normalizar fecha
+        $fecha = $data['fecha_nacimiento'];
+        $carbon = null;
+        foreach (['Y-m-d','d/m/Y'] as $fmt) {
+            try { $carbon = Carbon::createFromFormat($fmt, $fecha); break; } catch (\Exception $e) {}
+        }
+        if (!$carbon) { try { $carbon = Carbon::parse($fecha); } catch (\Throwable $e) {} }
+        
+        if ($carbon) {
+            $data['fecha_nacimiento'] = $carbon->format('Y-m-d');
+        }
+
+        DB::beginTransaction();
+        try {
+            // Actualizar Estudiante
+            $estudiante->update($data);
+
+            // Actualizar Usuario asociado (importante para login y nombre)
+            if ($estudiante->usuario) {
+                $userData = [
+                    'nombre' => $data['nombre'].' '.$data['apellidos'],
+                    'identificacion' => $data['cedula']
+                ];
+                // Si cambió el email, actualizamos el usuario también
+                if (!empty($data['email'])) {
+                    $userData['email'] = $data['email'];
+                }
+                $estudiante->usuario->update($userData);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Estudiante actualizado correctamente',
+                'estudiante' => $estudiante
+            ]);
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json(['message'=>'Error al actualizar', 'error'=>$e->getMessage()], 500);
+        }
+    }
+
+    // DELETE /api/estudiantes/{estudiante}
+    public function destroy(Estudiante $estudiante)
+    {
+        DB::beginTransaction();
+        try {
+            // Borrar usuario asociado primero para limpiar la BD
+            if ($estudiante->usuario) {
+                $estudiante->usuario->delete();
+            }
+            
+            // Borrar estudiante
+            $estudiante->delete();
+
+            DB::commit();
+            return response()->json(['message' => 'Estudiante eliminado correctamente']);
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json(['message'=>'Error al eliminar', 'error'=>$e->getMessage()], 500);
+        }
+    }
+
+    // GET /api/estudiantes/{estudiante}/credencial
+    public function credencial(Request $request, Estudiante $estudiante)
+    {
+        $password = $request->query('password');
+
+        // --- LÓGICA PARA LA IMAGEN BASE64 (A prueba de errores) ---
+        $path = public_path('img/Logo.webp'); // <--- Verifica que esta ruta sea real
+        $logoBase64 = null;
+        
+        if (file_exists($path)) {
+            $type = pathinfo($path, PATHINFO_EXTENSION);
+            $data = file_get_contents($path);
+            $logoBase64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+        }
+        // -----------------------------------------------------------
+
+        $pdf = Pdf::loadView('pdf.credencial', compact('estudiante', 'password', 'logoBase64'));
+        
+        $nombreLimpio = str_replace(' ', '_', $estudiante->nombre . '_' . $estudiante->apellidos);
+        // Limpiar caracteres especiales del nombre de archivo
+        $nombreLimpio = preg_replace('/[^A-Za-z0-9_]/', '', $nombreLimpio);
+        
+        return $pdf->download("Credenciales_{$nombreLimpio}.pdf");
     }
 
     // POST /api/estudiantes/{estudiante}/vincular-proyecto

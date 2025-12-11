@@ -20,12 +20,14 @@ protected $fillable = [
     'institucion_id',
     'feria_id',
     'modalidad_id',
-    'etapa_id',          // ⬅️ AÑADIR ESTO
+    'etapa_id',        
     'estado',
     'palabras_clave',
     'archivo_proyecto',
     'archivo_presentacion',
+    'aula',
 ];
+
     protected function casts(): array
     {
         return ['palabras_clave' => 'array'];
