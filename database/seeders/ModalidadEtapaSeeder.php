@@ -1,13 +1,39 @@
 <?php
 // database/seeders/ModalidadEtapaSeeder.php
+
 namespace Database\Seeders;
+
 use Illuminate\Database\Seeder;
 use App\Models\Etapa;
 use App\Models\Modalidad;
 use App\Models\Nivel;
+use App\Models\TipoInstitucion; // 👈 AGREGADO
 
 class ModalidadEtapaSeeder extends Seeder {
   public function run(): void {
+
+    /* ============================
+       Tipos de institución básicos
+       ============================ */
+    TipoInstitucion::firstOrCreate(
+      ['nombre' => 'publica'],
+      ['activo' => true]
+    );
+
+    TipoInstitucion::firstOrCreate(
+      ['nombre' => 'privada'],
+      ['activo' => true]
+    );
+
+    TipoInstitucion::firstOrCreate(
+      ['nombre' => 'subvencionada'],
+      ['activo' => true]
+    );
+
+    /* ============================
+       Asociaciones Modalidad – Etapa
+       ============================ */
+
     // Resuelve etapas
     $inst = Etapa::firstOrCreate(['nombre'=>'institucional']);
     $circ = Etapa::firstOrCreate(['nombre'=>'circuital']);

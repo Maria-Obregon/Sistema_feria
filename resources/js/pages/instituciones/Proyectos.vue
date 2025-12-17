@@ -78,13 +78,15 @@
               <td class="px-6 py-4">
                 <div class="flex items-start gap-3">
                   <div class="h-10 w-10 rounded-lg bg-green-100 flex items-center justify-center text-green-700 shrink-0 mt-1">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
                   </div>
                   <div>
                     <div class="text-sm font-medium text-gray-900 line-clamp-2" :title="p.titulo">{{ p.titulo }}</div>
                     <div class="text-xs text-gray-500 mt-0.5 line-clamp-1" :title="p.resumen">{{ p.resumen || 'Sin resumen' }}</div>
                     <span v-if="p.modalidad" class="text-xs bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded mt-1 inline-block">
-                        {{ p.modalidad.nombre }}
+                      {{ p.modalidad.nombre }}
                     </span>
                   </div>
                 </div>
@@ -127,22 +129,27 @@
 
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <div class="flex justify-end gap-3 items-center">
-                  
                   <button @click="abrirDetalle(p)" class="text-blue-600 hover:text-blue-900 flex items-center gap-1" title="Ver detalles">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                  Detalles
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                    </svg>
+                    Detalles
                   </button>
 
                   <button @click="abrirEditar(p)" class="text-gray-600 hover:text-gray-900 flex items-center gap-1 font-medium hover:text-indigo-600" title="Editar">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                    </svg>
                     Editar
                   </button>
 
                   <button @click="eliminar(p)" class="text-red-600 hover:text-red-900 flex items-center gap-1 font-medium" title="Eliminar">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
                     Eliminar
                   </button>
-
                 </div>
               </td>
             </tr>
@@ -151,7 +158,11 @@
       </div>
     </div>
 
-    <div v-if="showDetalle" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-opacity">
+    <!-- Modal detalle -->
+    <div
+      v-if="showDetalle"
+      class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-opacity"
+    >
       <div class="bg-[#1e1e1e] w-full max-w-3xl rounded-xl shadow-2xl border border-gray-700 overflow-hidden flex flex-col max-h-[90vh] text-gray-200">
         <div class="px-6 py-4 border-b border-gray-700 flex justify-between items-center">
           <h2 class="text-lg font-semibold text-white">Detalles del Proyecto</h2>
@@ -159,18 +170,21 @@
         </div>
         
         <div class="p-6 overflow-y-auto space-y-6">
-          
           <div>
             <h3 class="text-2xl font-bold text-white mb-2">{{ proyectoDetalle?.titulo }}</h3>
             <div class="flex items-center gap-3 text-sm">
-               <span class="bg-indigo-600 text-white px-2 py-0.5 rounded text-xs font-mono tracking-wide">{{ proyectoDetalle?.codigo }}</span>
-               <span class="text-gray-400">{{ proyectoDetalle?.institucion?.nombre }}</span>
+              <span class="bg-indigo-600 text-white px-2 py-0.5 rounded text-xs font-mono tracking-wide">
+                {{ proyectoDetalle?.codigo }}
+              </span>
+              <span class="text-gray-400">{{ proyectoDetalle?.institucion?.nombre }}</span>
             </div>
           </div>
 
           <div class="bg-[#2a2a2a] p-4 rounded-lg border border-gray-700">
             <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Resumen</h4>
-            <p class="text-sm text-gray-300 leading-relaxed">{{ proyectoDetalle?.resumen || 'Sin resumen registrado.' }}</p>
+            <p class="text-sm text-gray-300 leading-relaxed">
+              {{ proyectoDetalle?.resumen || 'Sin resumen registrado.' }}
+            </p>
           </div>
 
           <div class="grid grid-cols-2 gap-y-6 gap-x-4">
@@ -188,7 +202,9 @@
             </div>
             <div>
               <span class="block text-xs text-gray-500 uppercase tracking-wide mb-1">Feria</span>
-              <span class="font-medium text-white">{{ proyectoDetalle?.feria?.nombre }}</span>
+              <span class="font-medium text-white">
+                {{ proyectoDetalle?.feria?.nombre || (proyectoDetalle?.feria?.anio + ' · ' + (proyectoDetalle?.feria?.lugar_realizacion || '')) }}
+              </span>
             </div>
           </div>
 
@@ -196,20 +212,24 @@
             <h4 class="text-lg font-semibold text-white mb-4">Estudiantes Asignados</h4>
             
             <div v-if="proyectoDetalle?.estudiantes?.length > 0" class="space-y-2">
-                <div v-for="est in proyectoDetalle.estudiantes" :key="est.id" class="flex items-center justify-between p-3 bg-[#2a2a2a] rounded-lg border border-gray-700 hover:border-gray-600 transition-colors">
-                    <div class="flex items-center gap-3">
-                        <div class="h-8 w-8 rounded-full bg-indigo-900/50 flex items-center justify-center text-indigo-400 font-bold text-sm">
-                            {{ est.nombre.charAt(0) }}
-                        </div>
-                        <div>
-                            <div class="text-sm font-medium text-white">{{ est.nombre }} {{ est.apellidos }}</div>
-                            <div class="text-xs text-gray-500">{{ est.cedula }}</div>
-                        </div>
-                    </div>
-                    <div class="text-xs text-gray-400 bg-gray-800 px-2 py-1 rounded">
-                        {{ est.nivel }} <span v-if="est.seccion">- {{ est.seccion }}</span>
-                    </div>
+              <div
+                v-for="est in proyectoDetalle.estudiantes"
+                :key="est.id"
+                class="flex items-center justify-between p-3 bg-[#2a2a2a] rounded-lg border border-gray-700 hover:border-gray-600 transition-colors"
+              >
+                <div class="flex items-center gap-3">
+                  <div class="h-8 w-8 rounded-full bg-indigo-900/50 flex items-center justify-center text-indigo-400 font-bold text-sm">
+                    {{ est.nombre.charAt(0) }}
+                  </div>
+                  <div>
+                    <div class="text-sm font-medium text-white">{{ est.nombre }} {{ est.apellidos }}</div>
+                    <div class="text-xs text-gray-500">{{ est.cedula }}</div>
+                  </div>
                 </div>
+                <div class="text-xs text-gray-400 bg-gray-800 px-2 py-1 rounded">
+                  {{ est.nivel }} <span v-if="est.seccion">- {{ est.seccion }}</span>
+                </div>
+              </div>
             </div>
             <div v-else class="text-center py-8 text-gray-500 italic border border-dashed border-gray-700 rounded-lg">
               No hay estudiantes vinculados a este proyecto.
@@ -217,24 +237,38 @@
           </div>
 
           <div class="pt-4 border-t border-gray-700">
-             <h4 class="text-lg font-semibold text-white mb-4">Jueces Evaluadores</h4>
-             <div v-if="proyectoDetalle?.asignaciones_juez?.length > 0" class="flex flex-wrap gap-2">
-                <span v-for="asig in proyectoDetalle.asignaciones_juez" :key="asig.id" class="px-3 py-1 rounded-full bg-purple-900/40 text-purple-300 border border-purple-700 text-sm">
-                   {{ asig.juez?.nombre }}
-                </span>
-             </div>
-             <div v-else class="text-sm text-gray-500 italic">Sin jueces asignados aún.</div>
+            <h4 class="text-lg font-semibold text-white mb-4">Jueces Evaluadores</h4>
+            <div v-if="proyectoDetalle?.asignaciones_juez?.length > 0" class="flex flex-wrap gap-2">
+              <span
+                v-for="asig in proyectoDetalle.asignaciones_juez"
+                :key="asig.id"
+                class="px-3 py-1 rounded-full bg-purple-900/40 text-purple-300 border border-purple-700 text-sm"
+              >
+                {{ asig.juez?.nombre }}
+              </span>
+            </div>
+            <div v-else class="text-sm text-gray-500 italic">
+              Sin jueces asignados aún.
+            </div>
           </div>
-
         </div>
 
         <div class="px-6 py-4 border-t border-gray-700 bg-[#252525] flex justify-end">
-          <button @click="cerrarDetalle" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium transition-colors shadow-lg shadow-indigo-900/20">Cerrar</button>
+          <button
+            @click="cerrarDetalle"
+            class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium transition-colors shadow-lg shadow-indigo-900/20"
+          >
+            Cerrar
+          </button>
         </div>
       </div>
     </div>
 
-    <div v-if="showNew" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+    <!-- Modal crear / editar -->
+    <div
+      v-if="showNew"
+      class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+    >
       <div class="bg-white w-full max-w-3xl rounded-xl shadow-2xl border overflow-hidden">
         <div class="px-6 py-4 border-b flex justify-between items-center bg-gray-50">
           <h2 class="text-lg font-semibold text-gray-800">{{ editando ? 'Editar Proyecto' : 'Nuevo Proyecto' }}</h2>
@@ -243,39 +277,65 @@
 
         <div class="p-6 max-h-[80vh] overflow-y-auto">
           <form @submit.prevent="save" class="space-y-5">
-            
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Título del Proyecto *</label>
-              <input v-model="f.titulo" class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Ej. Sistema de Monitoreo..." required>
+              <input
+                v-model="f.titulo"
+                class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 outline-none"
+                placeholder="Ej. Sistema de Monitoreo..."
+                required
+              >
             </div>
 
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Resumen</label>
-              <textarea v-model="f.resumen" class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 outline-none" rows="3" placeholder="Descripción breve (máx. 250 palabras)"></textarea>
-              <p class="text-xs text-gray-500 mt-1 text-right">{{ (f.resumen || '').length }}/250 palabras aprox.</p>
+              <textarea
+                v-model="f.resumen"
+                class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 outline-none"
+                rows="3"
+                placeholder="Descripción breve (máx. 250 palabras)"
+              ></textarea>
+              <p class="text-xs text-gray-500 mt-1 text-right">
+                {{ (f.resumen || '').length }}/250 palabras aprox.
+              </p>
             </div>
 
             <div class="grid md:grid-cols-2 gap-5">
-              
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Modalidad *</label>
-                <select v-model="f.modalidad_id" class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 outline-none" required>
+                <select
+                  v-model="f.modalidad_id"
+                  class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 outline-none"
+                  required
+                >
                   <option value="">— Seleccione —</option>
-                  <option v-for="m in form.modalidades" :key="m.id" :value="m.id">{{ m.nombre }}</option>
+                  <option v-for="m in form.modalidades" :key="m.id" :value="m.id">
+                    {{ m.nombre }}
+                  </option>
                 </select>
               </div>
 
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Área Temática *</label>
-                <select v-model="f.area_id" class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 outline-none" required>
+                <select
+                  v-model="f.area_id"
+                  class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 outline-none"
+                  required
+                >
                   <option value="">— Seleccione —</option>
-                  <option v-for="a in form.areas" :key="a.id" :value="a.id">{{ a.nombre }}</option>
+                  <option v-for="a in form.areas" :key="a.id" :value="a.id">
+                    {{ a.nombre }}
+                  </option>
                 </select>
               </div>
 
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Categoría *</label>
-                <select v-model="f.categoria_id" class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 outline-none" required>
+                <select
+                  v-model="f.categoria_id"
+                  class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 outline-none"
+                  required
+                >
                   <option value="">— Seleccione —</option>
                   <option v-for="c in form.categorias" :key="c.id" :value="c.id">
                     {{ c.nombre }} <span v-if="c.nivel">({{ c.nivel }})</span>
@@ -285,23 +345,62 @@
 
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Feria Científica *</label>
-                <select v-model="f.feria_id" class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 outline-none" required>
+                <select
+                  v-model="f.feria_id"
+                  class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 outline-none"
+                  required
+                >
                   <option value="">— Seleccione —</option>
-                  <option v-for="fe in form.ferias" :key="fe.id" :value="fe.id">
-                    {{ fe.nombre }} <span v-if="fe.tipo || fe.nivel"> — {{ fe.tipo || fe.nivel }}</span>
+                  <option
+                    v-for="fe in form.ferias"
+                    :key="fe.id"
+                    :value="fe.id"
+                  >
+                    {{ fe.anio }} · {{ fe.lugar_realizacion || 'Sin lugar definido' }} ({{ etiquetaTipoFeria(fe.tipo_feria) }})
                   </option>
                 </select>
               </div>
             </div>
 
-            <div v-if="errorMsg" class="p-4 bg-red-50 text-red-700 rounded-lg flex items-start gap-3 text-sm">
+            <div
+              v-if="errorMsg"
+              class="p-4 bg-red-50 text-red-700 rounded-lg flex items-start gap-3 text-sm"
+            >
               <span>{{ errorMsg }}</span>
             </div>
 
             <div class="flex justify-end gap-3 pt-4 border-t">
-              <button type="button" @click="closeNew" class="px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Cancelar</button>
-              <button :disabled="saving" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm transition-colors disabled:opacity-70 flex items-center gap-2">
-                <svg v-if="saving" class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+              <button
+                type="button"
+                @click="closeNew"
+                class="px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                :disabled="saving"
+                class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm transition-colors disabled:opacity-70 flex items-center gap-2"
+              >
+                <svg
+                  v-if="saving"
+                  class="animate-spin h-4 w-4 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
                 {{ saving ? 'Guardando...' : (editando ? 'Actualizar' : 'Guardar Proyecto') }}
               </button>
             </div>
@@ -313,7 +412,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, reactive } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { proyectosApi } from '@/services/api'
 
@@ -337,14 +436,39 @@ const proyectoDetalle = ref(null)
 
 // Form
 const f = ref({
-  titulo: '', resumen: '', area_id: '', categoria_id: '', 
-  feria_id: '', modalidad_id: '', institucion_id: '', estudiantes: []
+  titulo: '',
+  resumen: '',
+  area_id: '',
+  categoria_id: '',
+  feria_id: '',
+  modalidad_id: '',
+  institucion_id: '',
+  estudiantes: []
 })
-const form = ref({ areas: [], categorias: [], ferias: [], modalidades: [], instituciones: [], estudiantes: [] })
 
-// Actions
+const form = ref({
+  areas: [],
+  categorias: [],
+  ferias: [],
+  modalidades: [],
+  instituciones: [],
+  estudiantes: []
+})
+
+// Helper para tipo de feria
+const etiquetaTipoFeria = (t) => {
+  if (t === 'institucional') return 'Institucional'
+  if (t === 'circuital') return 'Circuital'
+  if (t === 'regional') return 'Regional'
+  return t || '—'
+}
+
+// Búsqueda con debounce
 let timeoutSearch = null
-const debouncedBuscar = () => { clearTimeout(timeoutSearch); timeoutSearch = setTimeout(load, 400) }
+const debouncedBuscar = () => {
+  clearTimeout(timeoutSearch)
+  timeoutSearch = setTimeout(load, 400)
+}
 
 const load = async () => {
   loading.value = true
@@ -352,17 +476,28 @@ const load = async () => {
     if (!auth.user) await auth.fetchMe()
     const { data } = await proyectosApi.list({ buscar: buscar.value })
     proyectos.value = data.data || data
-  } catch (e) { console.error(e) } 
-  finally { loading.value = false }
+  } catch (e) {
+    console.error(e)
+  } finally {
+    loading.value = false
+  }
 }
 
-const abrirDetalle = (p) => {
-    proyectoDetalle.value = p
+const abrirDetalle = async (p) => {
+  try {
+    // Traemos el proyecto completo desde el backend
+    const { data } = await proyectosApi.show(p.id)
+    proyectoDetalle.value = data
     showDetalle.value = true
+  } catch (e) {
+    console.error(e)
+    alert('No se pudieron cargar los detalles del proyecto')
+  }
 }
+
 const cerrarDetalle = () => {
-    showDetalle.value = false
-    proyectoDetalle.value = null
+  showDetalle.value = false
+  proyectoDetalle.value = null
 }
 
 const openNew = async () => {
@@ -371,7 +506,7 @@ const openNew = async () => {
   resetForm()
   // Asignamos automáticamente la institución del usuario
   if (auth.user?.institucion?.id || auth.user?.institucion_id) {
-      f.value.institucion_id = auth.user.institucion?.id || auth.user.institucion_id
+    f.value.institucion_id = auth.user.institucion?.id || auth.user.institucion_id
   }
   showNew.value = true
   await cargarCatalogos()
@@ -396,11 +531,22 @@ const abrirEditar = async (p) => {
 }
 
 const resetForm = () => {
-  f.value = { titulo:'', resumen:'', area_id:'', categoria_id:'', feria_id:'', modalidad_id:'', institucion_id:'', estudiantes:[] }
+  f.value = {
+    titulo: '',
+    resumen: '',
+    area_id: '',
+    categoria_id: '',
+    feria_id: '',
+    modalidad_id: '',
+    institucion_id: '',
+    estudiantes: []
+  }
   errorMsg.value = ''
 }
 
-const closeNew = () => showNew.value = false
+const closeNew = () => {
+  showNew.value = false
+}
 
 const cargarCatalogos = async () => {
   if (form.value.areas.length > 0) return
@@ -420,13 +566,16 @@ const save = async () => {
     
     // SEGURIDAD FRONTEND: Forzar la institución del usuario si es comité
     if (!f.value.institucion_id) {
-        f.value.institucion_id = auth.user?.institucion?.id || auth.user?.institucion_id
+      f.value.institucion_id = auth.user?.institucion?.id || auth.user?.institucion_id
     }
     
     const payload = { ...f.value }
 
-    if (editando.value) await proyectosApi.update(idEdicion.value, payload)
-    else await proyectosApi.create(payload)
+    if (editando.value) {
+      await proyectosApi.update(idEdicion.value, payload)
+    } else {
+      await proyectosApi.create(payload)
+    }
 
     closeNew()
     await load()

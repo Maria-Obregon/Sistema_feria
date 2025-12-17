@@ -131,7 +131,9 @@
           </div>
         </router-link>
 
-        <button class="p-4 bg-white rounded-lg shadow hover:shadow-lg transition-shadow text-left">
+          <router-link
+          :to="{ name: 'admin.ferias' }"
+        class="p-4 bg-white rounded-lg shadow hover:shadow-lg transition-shadow text-left">
           <div class="flex items-center">
             <div class="p-3 bg-purple-100 rounded-lg">
               <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -143,7 +145,7 @@
               <p class="text-lg font-semibold">Ferias</p>
             </div>
           </div>
-        </button>
+        </router-link>
 
          <router-link
           :to="{ name: 'admin.proyectos' }"
@@ -161,7 +163,9 @@
           </div>
                 </router-link>
 
-        <button class="p-4 bg-white rounded-lg shadow hover:shadow-lg transition-shadow text-left">
+                <RouterLink
+  :to="{ name: 'admin.reportes' }"
+    class="p-4 bg-white rounded-lg shadow hover:shadow-lg transition-shadow text-left">
           <div class="flex items-center">
             <div class="p-3 bg-red-100 rounded-lg">
               <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -173,7 +177,7 @@
               <p class="text-lg font-semibold">Reportes</p>
             </div>
           </div>
-        </button>
+     </RouterLink>
 
         <router-link
           :to="{ name: 'admin.config' }"

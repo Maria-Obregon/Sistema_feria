@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\NewUserCredentialsMail;
 use App\Models\Usuario;
+use App\Models\Juez;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
@@ -48,60 +49,96 @@ class UserController extends Controller
      * - asignación de 1 rol por name (role) o por id (rol_id)
      * - envío de correo con credenciales
      */
-    public function store(Request $request)
-    {
-        $data = $request->validate([
-            'nombre'         => ['required', 'string', 'max:255'],
-            'email'          => ['required', 'email', 'max:255', 'unique:usuarios,email'],
-            'password'       => ['nullable', 'string', 'min:8'], // OPCIONAL
-            'activo'         => ['boolean'],
-            'institucion_id' => ['nullable', 'exists:instituciones,id'],
-            'role'           => ['nullable', 'string'],
-            'rol_id'         => ['nullable', 'integer', 'exists:roles,id'],
+    /**
+ * Alta básica con:
+ * - password opcional -> si no viene, se genera
+ * - asignación de 1 rol por name (role) o por id (rol_id)
+ * - creación opcional de registro en jueces si el rol es "juez"
+ * - envío de correo con credenciales
+ */
+public function store(Request $request)
+{
+    $data = $request->validate([
+        'nombre'         => ['required', 'string', 'max:255'],
+        'email'          => ['required', 'email', 'max:255', 'unique:usuarios,email'],
+        'password'       => ['nullable', 'string', 'min:8'], // OPCIONAL
+        'activo'         => ['boolean'],
+        'institucion_id' => ['nullable', 'exists:instituciones,id'],
+        'role'           => ['nullable', 'string'],
+        'rol_id'         => ['nullable', 'integer', 'exists:roles,id'],
+
+        // Estos son OPCIONALES, solo se usan si el rol es juez
+        'cedula_juez'        => ['nullable', 'string', 'max:50'],
+        'sexo_juez'          => ['nullable', 'string', 'max:10'],
+        'telefono_juez'      => ['nullable', 'string', 'max:50'],
+        'grado_academico_juez' => ['nullable', 'string', 'max:255'],
+        'area_id_juez'       => ['nullable', 'integer', 'exists:areas,id'],
+    ]);
+
+    DB::beginTransaction();
+
+    try {
+        // 1) Crear usuario
+        $plainPassword = $data['password'] ?? str()->password(10);
+
+        $user = Usuario::create([
+            'nombre'         => $data['nombre'],
+            'email'          => $data['email'],
+            'password'       => Hash::make($plainPassword),
+            'activo'         => $data['activo'] ?? true,
+            'institucion_id' => $data['institucion_id'] ?? null,
         ]);
 
-        DB::beginTransaction();
-        try {
-            $plainPassword = $data['password'] ?? str()->password(10);
+        // 2) Asignar rol (por name o por id) y quedarnos con el nombre del rol
+        $roleName = null;
 
-            $user = Usuario::create([
-                'nombre'         => $data['nombre'],
-                'email'          => $data['email'],
-                'password'       => Hash::make($plainPassword),
-                'activo'         => $data['activo'] ?? true,
-                'institucion_id' => $data['institucion_id'] ?? null,
-            ]);
-
-            // Asignar 1 rol si vino
-            if (!empty($data['role'])) {
-                $user->assignRole($data['role']); // por name
-            } elseif (!empty($data['rol_id'])) {
-                $role = Role::find($data['rol_id']);
-                if ($role) {
-                    $user->assignRole($role->name);
-                }
+        if (!empty($data['role'])) {
+            $roleName = $data['role'];           // viene por nombre
+            $user->assignRole($roleName);
+        } elseif (!empty($data['rol_id'])) {
+            $role = Role::find($data['rol_id']); // viene por id
+            if ($role) {
+                $roleName = $role->name;
+                $user->assignRole($roleName);
             }
-
-            // Enviar correo con credenciales
-            Mail::to($user->email)->send(new NewUserCredentialsMail($user, $plainPassword));
-
-            DB::commit();
-
-            return response()->json([
-                'message' => 'Usuario creado y credenciales enviadas',
-                'mensaje' => 'Usuario creado y credenciales enviadas',
-                'usuario' => $user->load('roles', 'institucion'),
-            ], 201);
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            return response()->json([
-                'message' => 'Error al crear usuario',
-                'mensaje' => 'Error al crear usuario',
-                'error'   => $e->getMessage(),
-            ], 500);
         }
-    }
 
+        // 3) Si el rol del usuario es "juez", creamos también el registro en la tabla jueces
+        if ($roleName === 'juez') {
+            Juez::create([
+                'nombre'          => $user->nombre,
+                // Si no te mandan cédula, se genera una genérica pero única
+                'cedula'          => $data['cedula_juez'] ?? ('SIN-CED-' . $user->id),
+                'sexo'            => $data['sexo_juez'] ?? 'N/D',
+                'telefono'        => $data['telefono_juez'] ?? null,
+                'correo'          => $user->email,
+                'grado_academico' => $data['grado_academico_juez'] ?? null,
+                'area_id'         => $data['area_id_juez'] ?? null,
+                'usuario_id'      => $user->id,
+            ]);
+        }
+
+        // 4) Enviar correo con credenciales
+        Mail::to($user->email)->send(new NewUserCredentialsMail($user, $plainPassword));
+
+        DB::commit();
+
+        return response()->json([
+            'message' => 'Usuario creado y credenciales enviadas',
+            'mensaje' => 'Usuario creado y credenciales enviadas',
+            'usuario' => $user->load('roles', 'institucion'),
+        ], 201);
+
+    } catch (\Throwable $e) {
+        DB::rollBack();
+
+        return response()->json([
+            'message' => 'Error al crear usuario',
+            'mensaje' => 'Error al crear usuario',
+            'error'   => $e->getMessage(),
+        ], 500);
+    }
+}
     public function show($id)
     {
         $u = Usuario::with(['roles:id,name', 'institucion:id,nombre'])->findOrFail($id);

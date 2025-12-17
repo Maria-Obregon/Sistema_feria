@@ -10,7 +10,10 @@ use App\Http\Controllers\EstudianteController;
 use App\Http\Controllers\FeriaController;
 use App\Http\Controllers\InstitucionController;
 use App\Http\Controllers\JuezController;
+use App\Http\Controllers\ColaboradorController;
+use App\Http\Controllers\InvitadoController;
 use App\Http\Controllers\MisAsignacionesController;
+use App\Http\Controllers\ReportesController;
 use App\Http\Controllers\ProyectoController;
 use App\Http\Controllers\RubricaResolverController;
 use App\Http\Controllers\UserController;
@@ -47,7 +50,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/catalogo/circuitos', [InstitucionController::class, 'catalogoCircuitos']);
     Route::get('/circuitos', [InstitucionController::class, 'getCircuitos']);
     Route::get('/instituciones/catalogos', [InstitucionController::class, 'getCatalogos']);
-    Route::get('/admin/modalidades', [\App\Http\Controllers\AdminController::class, 'listModalidades']);
+    Route::get('/admin/modalidades', [AdminController::class, 'listModalidades']);
 
     /*
     |--------------------------------------------------------------------------
@@ -116,7 +119,6 @@ Route::middleware('auth:sanctum')->group(function () {
         ->whereNumber('proyecto');
 
     // Rúbrica por proyecto/etapa/tipo_eval (solo lectura)
-    // Cambio: permitir por rol juez o admin (evita 403 si el rol no trae el permiso exacto)
     Route::get('/proyectos/{proyecto}/rubrica', [RubricaResolverController::class, 'show'])
         ->middleware('role:juez|admin')
         ->whereNumber('proyecto');
@@ -138,10 +140,113 @@ Route::middleware('auth:sanctum')->group(function () {
     | FERIAS
     |--------------------------------------------------------------------------
     */
-    Route::get('/ferias', [FeriaController::class, 'index'])->middleware('permission:ferias.ver');
-    Route::post('/ferias', [FeriaController::class, 'store'])->middleware('permission:ferias.crear');
-    Route::put('/ferias/{feria}', [FeriaController::class, 'update'])->middleware('permission:ferias.editar')->whereNumber('feria');
-    Route::delete('/ferias/{feria}', [FeriaController::class, 'destroy'])->middleware('permission:ferias.eliminar')->whereNumber('feria');
+Route::get('/ferias/form-data', [FeriaController::class, 'formData'])
+    ->middleware('permission:ferias.ver');
+
+// listado paginado de ferias
+Route::get('/ferias', [FeriaController::class, 'index'])
+    ->middleware('permission:ferias.ver');
+
+// crear feria
+Route::post('/ferias', [FeriaController::class, 'store'])
+    ->middleware('permission:ferias.crear');
+
+// actualizar feria completa
+Route::put('/ferias/{feria}', [FeriaController::class, 'update'])
+    ->middleware('permission:ferias.editar')
+    ->whereNumber('feria');
+
+// cambiar solo el estado (borrador / activa / cerrada)
+Route::patch('/ferias/{feria}/estado', [FeriaController::class, 'cambiarEstado'])
+    ->middleware('permission:ferias.editar')
+    ->whereNumber('feria');
+
+// eliminar feria
+Route::delete('/ferias/{feria}', [FeriaController::class, 'destroy'])
+    ->middleware('permission:ferias.eliminar')
+    ->whereNumber('feria');
+
+     /*
+    |----------------------------------------------------------------------
+    | INVITADOS (ligados a la feria)
+    |----------------------------------------------------------------------
+    */
+
+    // Listar / crear invitados de una feria
+    Route::get('/ferias/{feria}/invitados', [InvitadoController::class, 'index'])
+        ->middleware('permission:ferias.ver')
+        ->whereNumber('feria');
+
+    Route::post('/ferias/{feria}/invitados', [InvitadoController::class, 'store'])
+        ->middleware('permission:ferias.editar')
+        ->whereNumber('feria');
+
+    // Editar / borrar invitado
+    Route::put('/invitados/{invitado}', [InvitadoController::class, 'update'])
+        ->middleware('permission:ferias.editar')
+        ->whereNumber('invitado');
+
+    Route::delete('/invitados/{invitado}', [InvitadoController::class, 'destroy'])
+        ->middleware('permission:ferias.editar')
+        ->whereNumber('invitado');
+
+    // Cartas y carnés
+    Route::get('/invitados/{invitado}/carta', [InvitadoController::class, 'carta'])
+        ->middleware('permission:ferias.ver')
+        ->whereNumber('invitado');
+
+    Route::get('/invitados/{invitado}/carnet', [InvitadoController::class, 'carnet'])
+        ->middleware('permission:ferias.ver')
+        ->whereNumber('invitado');
+
+// Colaboradores de ferias
+Route::get('/ferias/{feria}/colaboradores', [ColaboradorController::class, 'index'])
+    ->middleware('permission:ferias.ver');
+
+Route::post('/ferias/{feria}/colaboradores', [ColaboradorController::class, 'store'])
+    ->middleware('permission:ferias.editar');
+
+Route::put('/colaboradores/{colaborador}', [ColaboradorController::class, 'update'])
+    ->middleware('permission:ferias.editar');
+
+Route::delete('/colaboradores/{colaborador}', [ColaboradorController::class, 'destroy'])
+    ->middleware('permission:ferias.editar');
+
+Route::get('/colaboradores/{colaborador}/carta', [ColaboradorController::class, 'carta'])
+    ->middleware('permission:ferias.ver');
+
+Route::get('/colaboradores/{colaborador}/carnet', [ColaboradorController::class, 'carnet'])
+    ->middleware('permission:ferias.ver');
+
+
+     // =====================================================
+// RUTAS DE REPORTES
+// =====================================================
+Route::prefix('reportes')
+    ->controller(ReportesController::class)
+    ->group(function () {
+
+        // Resumen de estadísticas
+        Route::get('/resumen', 'resumen');
+
+        // Listas por feria
+        Route::get('/feria-estudiantes',   'feriaEstudiantes');
+        Route::get('/feria-jueces',        'feriaJueces');
+        Route::get('/feria-invitados',     'feriaInvitados');
+        Route::get('/feria-colaboradores', 'feriaColaboradores');
+
+        // Certificados individuales (uno por persona)
+        Route::get('/certificados/estudiantes/{estudiante}',    'certificadoEstudiante');
+        Route::get('/certificados/jueces/{juez}',               'certificadoJuez');
+        Route::get('/certificados/invitados/{invitado}',        'certificadoInvitado');
+        Route::get('/certificados/colaboradores/{colaborador}', 'certificadoColaborador');
+
+        // Listados de calificaciones
+        Route::get('/calificaciones/informe-escrito', 'califInformeEscrito');
+        Route::get('/calificaciones/general',         'califGeneral');
+        Route::get('/calificaciones/por-categoria',   'califPorCategoria');
+        Route::get('/calificaciones/por-modalidad',   'califPorModalidad');
+    });
 
     /*
     |--------------------------------------------------------------------------

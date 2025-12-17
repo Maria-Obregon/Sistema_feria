@@ -22,38 +22,40 @@ class ProyectoController extends Controller
      * Lista proyectos (filtra por institución del usuario si no mandan ID).
      */
     public function index(Request $request)
-    {
-        $institucionId = $request->get('institucion_id') ?? optional($request->user())->institucion_id;
+{
+    $institucionId = $request->get('institucion_id') ?? optional($request->user())->institucion_id;
 
-        // 2. LÓGICA CORREGIDA Y OPTIMIZADA
-        if (! $request->user()->hasAnyRole(['admin', 'comite_institucional'])) {
-             $institucionId = $institucionId ?? $request->user()->institucion_id;
-        }
-
-        $q = Proyecto::with([
-                'area', 
-                'categoria', 
-                'modalidad',
-                'institucion:id,nombre',
-                'estudiantes:id,cedula,nombre,apellidos,nivel,seccion',
-                'asignacionesJuez.juez:id,nombre' 
-            ])
-            ->when($institucionId, fn($qq) => $qq->where('institucion_id', $institucionId))
-            ->when($request->filled('buscar'), function ($qq) use ($request) {
-                $b = $request->buscar;
-                $qq->where(function ($w) use ($b) {
-                    $w->where('titulo', 'like', "%{$b}%")
-                      ->orWhere('resumen', 'like', "%{$b}%");
-                });
-            })
-            ->when($request->filled('exclude_juez_id'), function($qq) use ($request) {
-                 $juezId = $request->integer('exclude_juez_id');
-                 $qq->whereDoesntHave('asignacionesJuez', fn($q) => $q->where('juez_id', $juezId));
-            })
-            ->orderByDesc('id');
-
-        return $q->paginate($request->integer('per_page', 10));
+    if (! $request->user()->hasAnyRole(['admin', 'comite_institucional'])) {
+        $institucionId = $institucionId ?? $request->user()->institucion_id;
     }
+
+  $q = Proyecto::with([
+    'area',
+    'categoria',
+    'modalidad',
+    'institucion:id,nombre',
+    'feria', 
+    'estudiantes:id,cedula,nombre,apellidos,nivel,seccion',
+    'asignacionesJuez.juez:id,nombre',
+])
+
+        ->when($institucionId, fn($qq) => $qq->where('institucion_id', $institucionId))
+        ->when($request->filled('buscar'), function ($qq) use ($request) {
+            $b = $request->buscar;
+            $qq->where(function ($w) use ($b) {
+                $w->where('titulo', 'like', "%{$b}%")
+                  ->orWhere('resumen', 'like', "%{$b}%");
+            });
+        })
+        ->when($request->filled('exclude_juez_id'), function($qq) use ($request) {
+            $juezId = $request->integer('exclude_juez_id');
+            $qq->whereDoesntHave('asignacionesJuez', fn($q) => $q->where('juez_id', $juezId));
+        })
+        ->orderByDesc('id');
+
+    return $q->paginate($request->integer('per_page', 10));
+}
+
     /**
      * GET /api/proyectos/{proyecto}
      * Devuelve un proyecto con sus relaciones.
@@ -84,7 +86,6 @@ class ProyectoController extends Controller
             'categoria_id'   => ['required', Rule::exists('categorias', 'id')],
             'feria_id'       => ['required', Rule::exists('ferias', 'id')],
             'institucion_id' => ['required', Rule::exists('instituciones', 'id')],
-            'aula'           => 'nullable|string|max:50',
         ]);
 
         // 2. Asignar Institución
@@ -104,7 +105,6 @@ class ProyectoController extends Controller
                 'categoria_id'   => $data['categoria_id'],
                 'institucion_id' => $data['institucion_id'],
                 'feria_id'       => $data['feria_id'],
-                'aula'           => $data['aula'] ?? null,
                 'estado'         => 'inscrito',
                 // 'etapa_id' => 1, // Descomentar si usas etapas y tienes un valor default
             ];
@@ -139,7 +139,7 @@ class ProyectoController extends Controller
         $areas       = Area::orderBy('nombre')->get(['id', 'nombre']);
         $categorias  = Categoria::orderBy('nombre')->get(['id', 'nombre', 'nivel']);
         $modalidades = \App\Models\Modalidad::orderBy('nombre')->get(['id', 'nombre']);
-        $instituciones = \App\Models\Institucion::select('id', 'nombre')->orderBy('nombre')->get();
+        $instituciones = Institucion::select('id', 'nombre')->orderBy('nombre')->get();
 
         // 2. Ferias (Lógica simplificada para evitar errores)
         // Traemos las ferias que son institucionales de TU institución, O las regionales/circuitales
