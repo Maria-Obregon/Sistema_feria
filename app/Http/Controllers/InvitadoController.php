@@ -10,7 +10,6 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class InvitadoController extends Controller
 {
-    // GET /api/ferias/{feria}/invitados
     public function index(Request $r, Feria $feria)
     {
         $q = $feria->invitados()->orderBy('nombre');
@@ -28,11 +27,9 @@ class InvitadoController extends Controller
             });
         }
 
-        // puedes cambiar paginate(20) por lo que quieras
         return response()->json($q->paginate(20));
     }
 
-    // POST /api/ferias/{feria}/invitados
     public function store(Request $r, Feria $feria)
     {
         $data = $r->validate([
@@ -55,7 +52,6 @@ class InvitadoController extends Controller
         return response()->json($inv, 201);
     }
 
-    // PUT /api/invitados/{invitado}
     public function update(Request $r, Invitado $invitado)
     {
         $data = $r->validate([
@@ -76,14 +72,12 @@ class InvitadoController extends Controller
         return response()->json($invitado->fresh());
     }
 
-    // DELETE /api/invitados/{invitado}
     public function destroy(Invitado $invitado)
     {
         $invitado->delete();
         return response()->json(['ok' => true]);
     }
 
-    // GET /api/invitados/{invitado}/carta
     public function carta(Invitado $invitado)
     {
         $pdf = Pdf::loadView('invitados.carta', [

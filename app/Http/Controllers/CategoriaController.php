@@ -9,25 +9,21 @@ use Illuminate\Validation\Rule;
 
 class CategoriaController extends Controller
 {
-    // GET /api/categorias
     public function index()
     {
         return Categoria::with('modalidades:id,nombre')->orderBy('nombre')->get();
     }
 
-    // GET /api/categorias/{categoria}
     public function show(Categoria $categoria)
     {
         return $categoria->load('modalidades:id,nombre');
     }
 
-    // POST /api/categorias
-    // body: { nombre, nivel, modalidades_ids?: [1,2,3] }
     public function store(Request $request)
     {
         $data = $request->validate([
             'nombre'          => ['required','string','max:100','unique:categorias,nombre'],
-            'nivel'           => ['required','string','max:120'], // según tu esquema actual
+            'nivel'           => ['required','string','max:120'],
             'modalidades_ids' => ['nullable','array'],
             'modalidades_ids.*' => ['integer', Rule::exists('modalidades','id')],
         ]);
@@ -46,8 +42,6 @@ class CategoriaController extends Controller
 
     public function porModalidad(Modalidad $modalidad)
 {
-    // Requiere que tengas la relación belongsToMany en Categoria:
-    // public function modalidades() { return $this->belongsToMany(Modalidad::class, 'categoria_modalidad'); }
     $cats = Categoria::query()
         ->whereHas('modalidades', fn($q) => $q->where('modalidad_id', $modalidad->id))
         ->orderBy('nombre')
@@ -56,9 +50,6 @@ class CategoriaController extends Controller
     return response()->json($cats);
 }
 
-
-    // PUT /api/categorias/{categoria}
-    // body: { nombre, nivel, modalidades_ids?: [1,2,3] }
     public function update(Request $request, Categoria $categoria)
     {
         $data = $request->validate([
@@ -80,7 +71,6 @@ class CategoriaController extends Controller
         return response()->json($categoria->load('modalidades:id,nombre'));
     }
 
-    // DELETE /api/categorias/{categoria}
     public function destroy(Categoria $categoria)
     {
         $categoria->modalidades()->detach();
@@ -88,8 +78,6 @@ class CategoriaController extends Controller
         return response()->json(['mensaje' => 'Categoría eliminada']);
     }
 
-    // (Opcional) PUT /api/categorias/{categoria}/modalidades
-    // body: { modalidades_ids: [1,2,3] }
     public function syncModalidades(Request $request, Categoria $categoria)
     {
         $data = $request->validate([

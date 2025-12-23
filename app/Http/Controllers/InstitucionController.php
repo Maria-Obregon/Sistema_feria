@@ -15,7 +15,6 @@ use Illuminate\Support\Str;
 
 class InstitucionController extends Controller
 {
-    /** ========== Helpers ========== */
     private function normaliza(?string $v): ?string
     {
         if ($v === null) return null;
@@ -54,8 +53,6 @@ class InstitucionController extends Controller
         $data['direccionreg_id'] = $circuito->regional_id;
     }
 
-    /** ========== Listado ========== */
-    // GET /api/instituciones
     public function index(Request $request)
     {
         $user = $request->user();
@@ -75,7 +72,6 @@ class InstitucionController extends Controller
             })
             ->orderBy('nombre');
 
-        // Restricción para comite_institucional: solo ve su propia institución
         if ($user && method_exists($user, 'hasRole') && $user->hasRole('comite_institucional')) {
             $q->where('id', $user->institucion_id);
         }
@@ -83,11 +79,8 @@ class InstitucionController extends Controller
         return response()->json($q->paginate($request->integer('per_page', 15)));
     }
 
-    /** ========== Crear ========== */
-    // POST /api/instituciones
     public function store(Request $request)
     {
-        // El comité institucional NO puede crear instituciones
         if ($request->user() && $request->user()->hasRole('comite_institucional')) {
             return response()->json(['message' => 'No tienes permisos para crear instituciones.'], 403);
         }
@@ -185,7 +178,6 @@ class InstitucionController extends Controller
         }
     }
 
-    /** ========== Mostrar ========== */
     public function show(Institucion $institucion)
     {
         $institucion->load(['circuito.regional', 'regional', 'usuarios', 'proyectos', 'estudiantes']);
@@ -210,7 +202,6 @@ class InstitucionController extends Controller
         ]);
     }
 
-    /** ========== Actualizar ========== */
     public function update(Request $request, Institucion $institucion)
     {
         $user = $request->user();
@@ -267,8 +258,6 @@ class InstitucionController extends Controller
             'institucion' => $institucion->fresh()->load(['circuito.regional','regional']),
         ]);
     }
-
-    /** ========== Eliminar ========== */
     public function destroy(Request $request, Institucion $institucion)
     {
         if ($request->user() && $request->user()->hasRole('comite_institucional')) {
@@ -283,7 +272,6 @@ class InstitucionController extends Controller
         return response()->json(['mensaje' => 'Institución eliminada exitosamente']);
     }
 
-    /** ========== Activar/Desactivar ========== */
     public function toggleActivo(Institucion $institucion)
     {
         $institucion->update(['activo' => !$institucion->activo]);
@@ -294,7 +282,6 @@ class InstitucionController extends Controller
         ]);
     }
 
-    /** ========== Catálogos para formularios ========== */
     public function getCatalogos()
     {
         return response()->json([

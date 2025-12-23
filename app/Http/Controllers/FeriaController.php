@@ -11,7 +11,6 @@ use Illuminate\Http\Request;
 
 class FeriaController extends Controller
 {
-    // GET /api/ferias
     public function index(Request $r)
     {
         $q = Feria::with(['institucion', 'circuito', 'regional']);
@@ -40,7 +39,6 @@ class FeriaController extends Controller
         );
     }
 
-    // POST /api/ferias
     public function store(Request $r)
     {
         $data = $r->validate([
@@ -59,7 +57,6 @@ class FeriaController extends Controller
             'estado'             => 'required|in:borrador,activa,finalizada',
         ]);
 
-        // Reglas de dueño según tipo de feria (tu lógica)
         if ($data['tipo_feria'] === 'institucional' && empty($data['institucion_id'])) {
             abort(422, 'institucion_id requerido para ferias institucionales');
         }
@@ -75,7 +72,6 @@ class FeriaController extends Controller
         return response()->json($feria->load(['institucion','circuito','regional']), 201);
     }
 
-    // PUT /api/ferias/{feria}
     public function update(Request $r, Feria $feria)
     {
         $data = $r->validate([
@@ -94,7 +90,6 @@ class FeriaController extends Controller
             'estado'             => 'sometimes|in:borrador,activa,finalizada',
         ]);
 
-        // si se cambia tipo_feria, volvemos a aplicar reglas
         $tipo = $data['tipo_feria'] ?? $feria->tipo_feria;
         $inst = $data['institucion_id'] ?? $feria->institucion_id;
         $circ = $data['circuito_id'] ?? $feria->circuito_id;
@@ -115,7 +110,6 @@ class FeriaController extends Controller
         return response()->json($feria->fresh()->load(['institucion','circuito','regional']));
     }
 
-    // DELETE /api/ferias/{feria}
     public function destroy(Feria $feria)
     {
         if ($feria->proyectos()->exists()) {
@@ -142,14 +136,12 @@ class FeriaController extends Controller
                 ['value' => 'activa',   'label' => 'Activa'],
                 ['value' => 'finalizada',  'label' => 'Finalizada'],
             ],
-            // por ejemplo: año anterior, actual y siguiente
             'anios' => [
                 $anioActual - 1,
                 $anioActual,
                 $anioActual + 1,
             ],
 
-            // Catálogos básicos
             'regionales' => Regional::select('id', 'nombre')
                 ->orderBy('nombre')
                 ->get(),

@@ -23,13 +23,12 @@ class AuthController extends Controller
         $user = Usuario::create([
             'nombre'         => $data['nombre'],
             'email'          => $data['email'],
-            'password'       => $data['password'], // <-- columna 'password', cast hashed
+            'password'       => $data['password'],
             'institucion_id' => $data['institucion_id'] ?? null,
             'telefono'       => $data['telefono'] ?? null,
             'activo'         => true,
         ]);
 
-        // Asignar rol con Spatie
         $user->assignRole($data['rol']);
 
         $token = $user->createToken('api-token')->plainTextToken;
@@ -41,7 +40,7 @@ class AuthController extends Controller
                 'id'     => $user->id,
                 'nombre' => $user->nombre,
                 'email'  => $user->email,
-                'roles'  => $user->getRoleNames(), // <-- array de roles
+                'roles'  => $user->getRoleNames(),
             ],
         ], 201);
     }
@@ -55,7 +54,6 @@ class AuthController extends Controller
 
         $user = Usuario::where('email', $data['email'])->first();
 
-        // Solo 'password' (no mezclar con password_hash)
         if (!$user || !Hash::check($data['password'], $user->password)) {
             return response()->json(['message' => 'Credenciales inválidas'], 401);
         }
@@ -72,7 +70,7 @@ class AuthController extends Controller
                 'id'          => $user->id,
                 'nombre'      => $user->nombre,
                 'email'       => $user->email,
-                'roles'       => $user->getRoleNames(), // <-- aquí
+                'roles'       => $user->getRoleNames(),
                 'institucion' => $user->institucion,
             ],
         ], 200);
@@ -88,7 +86,7 @@ class AuthController extends Controller
                 'nombre'      => $user->nombre,
                 'email'       => $user->email,
                 'telefono'    => $user->telefono,
-                'roles'       => $user->getRoleNames(), // <-- aquí también
+                'roles'       => $user->getRoleNames(),
                 'institucion' => $user->institucion,
                 'circuito'    => $user->circuito,
                 'regional'    => $user->regional,

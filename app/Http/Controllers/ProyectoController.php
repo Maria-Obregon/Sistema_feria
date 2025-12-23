@@ -17,10 +17,6 @@ use Illuminate\Support\Facades\Log;
 
 class ProyectoController extends Controller
 {
-    /**
-     * GET /api/proyectos?institucion_id=...
-     * Lista proyectos (filtra por institución del usuario si no mandan ID).
-     */
     public function index(Request $request)
 {
     $institucionId = $request->get('institucion_id') ?? optional($request->user())->institucion_id;
@@ -56,28 +52,18 @@ class ProyectoController extends Controller
     return $q->paginate($request->integer('per_page', 10));
 }
 
-    /**
-     * GET /api/proyectos/{proyecto}
-     * Devuelve un proyecto con sus relaciones.
-     */
     public function show(Proyecto $proyecto)
     {
         $proyecto->load(['area','categoria','feria','estudiantes:id,cedula,nombre,apellidos']);
         return response()->json($proyecto);
     }
 
-    /**
-     * POST /api/proyectos
-     * Crea proyecto y liga estudiantes (opcional).
-     */
     public function store(Request $request)
     {
-        // 1. FORZAR INSTITUCIÓN DEL USUARIO (Si no es admin)
         if (!$request->user()->hasRole('admin')) {
              $request->merge(['institucion_id' => $request->user()->institucion_id]);
         }
 
-        // 2. Validación (ahora institucion_id es required porque ya lo inyectamos)
         $data = $request->validate([
             'titulo'         => 'required|string|max:255',
             'resumen'        => 'nullable|string',
@@ -88,7 +74,6 @@ class ProyectoController extends Controller
             'institucion_id' => ['required', Rule::exists('instituciones', 'id')],
         ]);
 
-        // 2. Asignar Institución
         $data['institucion_id'] = $data['institucion_id'] ?? optional($request->user())->institucion_id;
         
         if (!$data['institucion_id']) {
@@ -106,7 +91,6 @@ class ProyectoController extends Controller
                 'institucion_id' => $data['institucion_id'],
                 'feria_id'       => $data['feria_id'],
                 'estado'         => 'inscrito',
-                // 'etapa_id' => 1, // Descomentar si usas etapas y tienes un valor default
             ];
 
             $proyecto = Proyecto::create($attrs);
@@ -126,23 +110,14 @@ class ProyectoController extends Controller
         }
     }
 
-
-    /**
-     * GET /api/proyectos/form-data?institucion_id=...
-     * Devuelve catálogos y estudiantes para poblar el formulario.
-     */
     public function formData(Request $request)
     {
         $institucionId = $request->get('institucion_id') ?? optional($request->user())->institucion_id;
 
-        // 1. Catálogos básicos
         $areas       = Area::orderBy('nombre')->get(['id', 'nombre']);
         $categorias  = Categoria::orderBy('nombre')->get(['id', 'nombre', 'nivel']);
         $modalidades = \App\Models\Modalidad::orderBy('nombre')->get(['id', 'nombre']);
         $instituciones = Institucion::select('id', 'nombre')->orderBy('nombre')->get();
-
-        // 2. Ferias (Lógica simplificada para evitar errores)
-        // Traemos las ferias que son institucionales de TU institución, O las regionales/circuitales
         $ferias = Feria::query()
             ->where(function($q) use ($institucionId) {
                 $q->where('institucion_id', $institucionId)
@@ -150,9 +125,6 @@ class ProyectoController extends Controller
             })
             ->orderByDesc('id')
             ->get(); 
-            // Si quieres optimizar columnas: ->get(['id', 'nombre', 'tipo']) pero asegúrate que existan
-
-        // 3. Estudiantes
         $est = Estudiante::query()
             ->when($institucionId, fn($q)=>$q->where('institucion_id',$institucionId))
             ->select(['id','cedula','nombre','apellidos'])
@@ -162,15 +134,12 @@ class ProyectoController extends Controller
         return response()->json([
             'areas'         => $areas,
             'categorias'    => $categorias,
-            'ferias'        => $ferias, // <--- Ahora es seguro
+            'ferias'        => $ferias, 
             'estudiantes'   => $est,
             'modalidades'   => $modalidades,
             'instituciones' => $instituciones,
         ]);
     }
-    /**
-     * Utilidad: formatea/loguea excepciones con detalles SQL cuando aplica.
-     */
     private function formatAndLogException(\Throwable $e, array $context = []): array
     {
         $base = [
@@ -186,15 +155,11 @@ class ProyectoController extends Controller
         }
 
         Log::error('[PROYECTOS][STORE] Excepción', array_merge($base, $context));
-
-        // Respuesta detallada SOLO para depuración
         return array_merge(['message' => 'Error al crear proyecto'], $base);
     }
 
-    // PUT /api/proyectos/{proyecto}
     public function update(Request $request, Proyecto $proyecto)
     {
-        // 1. Validamos los mismos campos que en store
         $data = $request->validate([
             'titulo'         => 'required|string|max:255',
             'resumen'        => 'nullable|string',
@@ -209,19 +174,16 @@ class ProyectoController extends Controller
 
         DB::beginTransaction();
         try {
-            // 2. Actualizamos el proyecto
             $proyecto->update([
                 'titulo'         => $data['titulo'],
                 'resumen'        => $data['resumen'] ?? null,
                 'area_id'        => $data['area_id'],
                 'modalidad_id'   => $data['modalidad_id'],
                 'categoria_id'   => $data['categoria_id'],
-                'institucion_id' => $data['institucion_id'] ?? $proyecto->institucion_id, // Mantiene la anterior si viene nula
+                'institucion_id' => $data['institucion_id'] ?? $proyecto->institucion_id, 
                 'feria_id'       => $data['feria_id'],
             ]);
 
-            // 3. Sincronizamos estudiantes (si se enviaron)
-            // Si quieres que al editar vacío se borren los estudiantes, usa sync($data['estudiantes'] ?? [])
             if (isset($data['estudiantes'])) {
                 $proyecto->estudiantes()->sync($data['estudiantes']);
             }
@@ -237,20 +199,13 @@ class ProyectoController extends Controller
         }
     }
 
-    // DELETE /api/proyectos/{proyecto}
     public function destroy(Proyecto $proyecto)
     {
         try {
-            // Desvincular relaciones para evitar error de FK
             $proyecto->estudiantes()->detach(); 
-            $proyecto->tutores()->detach(); // Si usas tutores
+            $proyecto->tutores()->detach(); 
             
-            // Si tienes asignaciones de jueces, verificar primero o borrarlas:
             if ($proyecto->asignacionesJuez()->exists()) {
-                 // Opción A: Impedir borrar si ya tiene jueces
-                 // return response()->json(['message' => 'No se puede eliminar, ya tiene jueces asignados.'], 422);
-                 
-                 // Opción B: Borrar asignaciones (Cuidado con esto)
                  $proyecto->asignacionesJuez()->delete(); 
             }
 
@@ -263,10 +218,6 @@ class ProyectoController extends Controller
         }
     }
 
-    /**
-     * GET /api/proyectos/debug-schema
-     * Inspección rápida de columnas.
-     */
     public function debugSchema()
     {
         return response()->json([

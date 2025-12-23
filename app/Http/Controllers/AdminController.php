@@ -25,8 +25,6 @@ class AdminController extends Controller
     $usuarios      = class_exists(Usuario::class)     ? Usuario::count()     : 0;
     $instituciones = class_exists(Institucion::class) ? Institucion::count() : 0;
     $proyectos     = class_exists(Proyecto::class)     ? Proyecto::count()     : 0;
-
-    // por ahora, total de ferias (no “activas”)
     $feriasActivas = class_exists(Feria::class) ? Feria::count() : 0;
 
     return response()->json([
@@ -39,10 +37,8 @@ class AdminController extends Controller
 
     /** ====== Catálogos ====== */
 
-    // ---- Modalidades
     public function listModalidades(Request $request)
 {
-    // opcional: filtrar por nivel_id
     $q = Modalidad::query()
         ->with('nivel:id,nombre')
         ->when($request->filled('nivel_id'), fn($qq)=>$qq->where('nivel_id', $request->integer('nivel_id')))
@@ -125,7 +121,7 @@ public function updateModalidad(Request $request, Modalidad $modalidad)
         return response()->json(['mensaje' => 'Área eliminada']);
     }
 
-    // ---- Categorías (nivel viene de la tabla niveles.nombre)
+    // ---- Categorías
     public function listCategorias()
     {
         return response()->json(Categoria::orderBy('nombre')->get());
@@ -253,7 +249,6 @@ public function destroyRegional(Regional $regional)
 // ===== CIRCUITOS =====
 public function listCircuitos(Request $request)
 {
-    // opcional: filtrar por regional_id
     $q = Circuito::query()
         ->when($request->filled('regional_id'), fn($qq)=>$qq->where('regional_id',$request->integer('regional_id')))
         ->with('regional:id,nombre')
