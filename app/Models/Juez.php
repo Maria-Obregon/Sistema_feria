@@ -36,7 +36,7 @@ class Juez extends Model
 
     public function proyectos()
     {
-        return $this->belongsToMany(Proyecto::class, 'asignaciones_jueces', 'juez_id', 'proyecto_id')
+        return $this->belongsToMany(Proyecto::class, 'asignacion_juez', 'juez_id', 'proyecto_id')
             ->withPivot(['etapa_id', 'tipo_eval'])
             ->withTimestamps();
     }

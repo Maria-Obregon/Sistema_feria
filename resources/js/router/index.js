@@ -7,13 +7,12 @@ import Login from '../pages/Login.vue'
 import Dashboard from '../pages/Dashboard.vue'
 import NotFound from '../pages/NotFound.vue'
 
-// Carga perezosa de dashboards
 // Carga perezosa de dashboards específicos
 const AdminDashboard        = () => import('../pages/admin/AdminDashboard.vue')
 const InstitucionDashboard  = () => import('../pages/instituciones/InstitucionesDashboard.vue')
 const JuezDashboard         = () => import('../pages/juez/JuezDashboard.vue')
 const EstudianteDashboard   = () => import('../pages/estudiantes/EstudiantesDashboard.vue')
-const AdminConfig = () => import('../pages/admin/AdminConfig.vue')
+const AdminConfig           = () => import('../pages/admin/AdminConfig.vue')
 
 // Helper: ruta por rol
 const roleRoute = (role) => {
@@ -52,46 +51,50 @@ const routes = [
   // =========================
   // Admin
   // =========================
-  
-  { path: '/admin', name: 'admin.dashboard', component: AdminDashboard, meta: { requiresAuth: true, role: 'admin' } },
-  { path: '/admin/users', name: 'admin.users', component: () => import('../pages/admin/Users.vue'), meta: { requiresAuth: true, role: 'admin' } },
-  { path: '/admin/instituciones', name: 'admin.instituciones', component: () => import('../pages/admin/instituciones/InstitucionesIndex.vue'), meta: { requiresAuth: true, role: 'admin' } },
+  { path: '/admin',              name: 'admin.dashboard',  component: AdminDashboard, meta: { requiresAuth: true, role: 'admin' } },
+  { path: '/admin/users',        name: 'admin.users',      component: () => import('../pages/admin/Users.vue'), meta: { requiresAuth: true, role: 'admin' } },
+  { path: '/admin/instituciones',name: 'admin.instituciones', component: () => import('../pages/admin/instituciones/InstitucionesIndex.vue'), meta: { requiresAuth: true, role: 'admin' } },
+  { path: '/admin/ferias',       name: 'admin.ferias',     component: () => import('../pages/admin/ferias/AdminFerias.vue'), meta: { requiresAuth: true, role: 'admin' } },
+  { path: '/admin/ferias/:feriaId/invitados', name: 'admin.ferias.invitados', component: () => import('../pages/admin/ferias/FeriaInvitados.vue'), meta: { requiresAuth: true, role: 'admin' } },
+  { path: '/admin/ferias/:feriaId/colaboradores', name: 'admin.ferias.colaboradores', component: () => import('../pages/admin/ferias/FeriaColaboradores.vue'), meta: { requiresAuth: true, role: 'admin' } },
+  {path: '/admin/reportes', name: 'admin.reportes',component: () => import('../pages/admin/reportes/AdminReportes.vue'),meta: { requiresAuth: true, role: 'admin' }},
+  {path: '/admin/reportes/listado',name: 'admin.reportes.listado',component: () => import('../pages/admin/reportes/AdminReportesListado.vue'),meta: { requiresAuth: true, role: 'admin' }},
+  {path: '/admin/reportes/estadisticas',name: 'admin.reportes.estadisticas',component: () => import('../pages/admin/reportes/AdminReportesEstadisticas.vue'),meta: { requiresAuth: true, role: 'admin' }},
   { path: '/admin/proyectos', name: 'admin.proyectos', component: () => import('../pages/admin/AdminProyectos.vue'), meta: { requiresAuth: true, role: 'admin' } },
-{ path: '/admin/config', name: 'admin.config', component: AdminConfig, meta: { requiresAuth: true, role: 'admin' } },
+  { path: '/admin/config',    name: 'admin.config',    component: AdminConfig, meta: { requiresAuth: true, role: 'admin' } },
 
   // =========================
   // Comité Institucional → Instituciones
-  // (mismo componente, distinta ruta/permiso)
   // =========================
   { path: '/comite/instituciones', name: 'comite.instituciones', component: () => import('../pages/admin/instituciones/InstitucionesIndex.vue'), meta: { requiresAuth: true, roles: ['comite_institucional','coordinador_circuito','coordinador_regional','admin'] } },
 
   // =========================
   // Panel de Institución (responsable)
   // =========================
-  { path: '/institucion',               name: 'inst.dashboard',  component: () => import('../pages/instituciones/InstitucionesDashboard.vue'), meta: { requiresAuth: true, roles: ['comite_institucional'] } },
-  { path: '/institucion/instituciones', name: 'inst.instituciones',  component: () => import('../pages/instituciones/Instituciones.vue'), meta: { requiresAuth: true, roles: ['comite_institucional'] } },
-  { path: '/institucion/proyectos',     name: 'inst.proyectos',   component: () => import('../pages/instituciones/Proyectos.vue'),         meta: { requiresAuth: true, roles: ['comite_institucional'] } },
-  { path: '/institucion/estudiantes',   name: 'inst.estudiantes', component: () => import('../pages/instituciones/Estudiantes.vue'),       meta: { requiresAuth: true, roles: ['comite_institucional'] } },
-  { path: '/institucion/jueces',        name: 'inst.jueces',      component: () => import('../pages/instituciones/Jueces.vue'),            meta: { requiresAuth: true, roles: ['comite_institucional'] } },
-  { path: '/institucion/reportes',      name: 'inst.reportes',    component: () => import('../pages/instituciones/Reportes.vue'),          meta: { requiresAuth: true, roles: ['comite_institucional'] } },
-  { path: '/institucion/perfil',        name: 'inst.perfil',      component: () => import('../pages/instituciones/Perfil.vue'),            meta: { requiresAuth: true, roles: ['comite_institucional'] } },
+  { path: '/institucion',               name: 'inst.dashboard',    component: InstitucionDashboard, meta: { requiresAuth: true, roles: ['comite_institucional'] } },
+  { path: '/institucion/instituciones', name: 'inst.instituciones',component: () => import('../pages/instituciones/Instituciones.vue'), meta: { requiresAuth: true, roles: ['comite_institucional'] } },
+  { path: '/institucion/proyectos',     name: 'inst.proyectos',    component: () => import('../pages/instituciones/Proyectos.vue'), meta: { requiresAuth: true, roles: ['comite_institucional'] } },
+  { path: '/institucion/estudiantes',   name: 'inst.estudiantes',  component: () => import('../pages/instituciones/Estudiantes.vue'), meta: { requiresAuth: true, roles: ['comite_institucional'] } },
+  { path: '/institucion/jueces',        name: 'inst.jueces',       component: () => import('../pages/instituciones/Jueces.vue'), meta: { requiresAuth: true, roles: ['comite_institucional'] } },
+  { path: '/institucion/reportes',      name: 'inst.reportes',     component: () => import('../pages/instituciones/Reportes.vue'), meta: { requiresAuth: true, roles: ['comite_institucional'] } },
+  { path: '/institucion/perfil',        name: 'inst.perfil',       component: () => import('../pages/instituciones/Perfil.vue'), meta: { requiresAuth: true, roles: ['comite_institucional'] } },
 
   // =========================
   // Estudiante
   // =========================
-  { path: '/estudiante',                name: 'est.dashboard',     component: EstudianteDashboard, meta: { requiresAuth: true, roles: ['estudiante'] } },
-  { path: '/estudiante/mis-proyectos',  name: 'est.mis-proyectos', component: () => import('../pages/estudiantes/MisProyectos.vue'), meta: { requiresAuth: true, roles: ['estudiante'] } },
-  { path: '/estudiante/entregas',       name: 'est.entregas',      component: () => import('../pages/estudiantes/Entregas.vue'),     meta: { requiresAuth: true, roles: ['estudiante'] } },
-  { path: '/estudiante/certificados',   name: 'est.certificados',  component: () => import('../pages/estudiantes/Certificados.vue'), meta: { requiresAuth: true, roles: ['estudiante'] } },
-  { path: '/estudiante/perfil',         name: 'est.perfil',        component: () => import('../pages/estudiantes/Perfil.vue'),       meta: { requiresAuth: true, roles: ['estudiante'] } },
+  { path: '/estudiante',               name: 'est.dashboard',     component: EstudianteDashboard, meta: { requiresAuth: true, roles: ['estudiante'] } },
+  { path: '/estudiante/mis-proyectos', name: 'est.mis-proyectos', component: () => import('../pages/estudiantes/MisProyectos.vue'), meta: { requiresAuth: true, roles: ['estudiante'] } },
+  { path: '/estudiante/entregas',      name: 'est.entregas',      component: () => import('../pages/estudiantes/Entregas.vue'),     meta: { requiresAuth: true, roles: ['estudiante'] } },
+  { path: '/estudiante/certificados',  name: 'est.certificados',  component: () => import('../pages/estudiantes/Certificados.vue'), meta: { requiresAuth: true, roles: ['estudiante'] } },
+  { path: '/estudiante/perfil',        name: 'est.perfil',        component: () => import('../pages/estudiantes/Perfil.vue'),       meta: { requiresAuth: true, roles: ['estudiante'] } },
 
   // =========================
   // Juez
   // =========================
-  { path: '/juez',                      name: 'juez.dashboard',          component: JuezDashboard, meta: { requiresAuth: true, roles: ['juez'] } },
-  { path: '/juez/asignaciones',         name: 'juez.asignaciones',       component: () => import('../pages/juez/Asignaciones.vue'),       meta: { requiresAuth: true, roles: ['juez'] } },
-  { path: '/juez/mis-calificaciones',   name: 'juez.mis-calificaciones', component: () => import('../pages/juez/MisCalificaciones.vue'),  meta: { requiresAuth: true, roles: ['juez'] } },
-  { path: '/juez/calificaciones',       name: 'juez.calificaciones',     component: () => import('../pages/juez/Calificaciones.vue'),     meta: { requiresAuth: true, roles: ['juez'] } },
+  { path: '/juez',                    name: 'juez.dashboard',          component: JuezDashboard, meta: { requiresAuth: true, roles: ['juez'] } },
+  { path: '/juez/asignaciones',       name: 'juez.asignaciones',       component: () => import('../pages/juez/Asignaciones.vue'),      meta: { requiresAuth: true, roles: ['juez'] } },
+  { path: '/juez/mis-calificaciones', name: 'juez.mis-calificaciones', component: () => import('../pages/juez/MisCalificaciones.vue'), meta: { requiresAuth: true, roles: ['juez'] } },
+  { path: '/juez/calificaciones',     name: 'juez.calificaciones',     component: () => import('../pages/juez/Calificaciones.vue'),    meta: { requiresAuth: true, roles: ['juez'] } },
 
   // Genérico
   { path: '/dashboard', name: 'dashboard', component: Dashboard, meta: { requiresAuth: true } },

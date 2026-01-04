@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\NewUserCredentialsMail;
 use App\Models\Usuario;
+use App\Models\Juez;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
@@ -42,66 +43,83 @@ class UserController extends Controller
         return response()->json($q->paginate($perPage));
     }
 
-    /**
-     * Alta básica con:
-     * - password opcional -> si no viene, se genera
-     * - asignación de 1 rol por name (role) o por id (rol_id)
-     * - envío de correo con credenciales
-     */
-    public function store(Request $request)
-    {
-        $data = $request->validate([
-            'nombre'         => ['required', 'string', 'max:255'],
-            'email'          => ['required', 'email', 'max:255', 'unique:usuarios,email'],
-            'password'       => ['nullable', 'string', 'min:8'], // OPCIONAL
-            'activo'         => ['boolean'],
-            'institucion_id' => ['nullable', 'exists:instituciones,id'],
-            'role'           => ['nullable', 'string'],
-            'rol_id'         => ['nullable', 'integer', 'exists:roles,id'],
+  
+public function store(Request $request)
+{
+    $data = $request->validate([
+        'nombre'         => ['required', 'string', 'max:255'],
+        'email'          => ['required', 'email', 'max:255', 'unique:usuarios,email'],
+        'password'       => ['nullable', 'string', 'min:8'], 
+        'activo'         => ['boolean'],
+        'institucion_id' => ['nullable', 'exists:instituciones,id'],
+        'role'           => ['nullable', 'string'],
+        'rol_id'         => ['nullable', 'integer', 'exists:roles,id'],
+        'cedula_juez'        => ['nullable', 'string', 'max:50'],
+        'sexo_juez'          => ['nullable', 'string', 'max:10'],
+        'telefono_juez'      => ['nullable', 'string', 'max:50'],
+        'grado_academico_juez' => ['nullable', 'string', 'max:255'],
+        'area_id_juez'       => ['nullable', 'integer', 'exists:areas,id'],
+    ]);
+
+    DB::beginTransaction();
+
+    try {
+        $plainPassword = $data['password'] ?? str()->password(10);
+
+        $user = Usuario::create([
+            'nombre'         => $data['nombre'],
+            'email'          => $data['email'],
+            'password'       => Hash::make($plainPassword),
+            'activo'         => $data['activo'] ?? true,
+            'institucion_id' => $data['institucion_id'] ?? null,
         ]);
 
-        DB::beginTransaction();
-        try {
-            $plainPassword = $data['password'] ?? str()->password(10);
+        $roleName = null;
 
-            $user = Usuario::create([
-                'nombre'         => $data['nombre'],
-                'email'          => $data['email'],
-                'password'       => Hash::make($plainPassword),
-                'activo'         => $data['activo'] ?? true,
-                'institucion_id' => $data['institucion_id'] ?? null,
-            ]);
-
-            // Asignar 1 rol si vino
-            if (!empty($data['role'])) {
-                $user->assignRole($data['role']); // por name
-            } elseif (!empty($data['rol_id'])) {
-                $role = Role::find($data['rol_id']);
-                if ($role) {
-                    $user->assignRole($role->name);
-                }
+        if (!empty($data['role'])) {
+            $roleName = $data['role'];          
+            $user->assignRole($roleName);
+        } elseif (!empty($data['rol_id'])) {
+            $role = Role::find($data['rol_id']); 
+            if ($role) {
+                $roleName = $role->name;
+                $user->assignRole($roleName);
             }
-
-            // Enviar correo con credenciales
-            Mail::to($user->email)->send(new NewUserCredentialsMail($user, $plainPassword));
-
-            DB::commit();
-
-            return response()->json([
-                'message' => 'Usuario creado y credenciales enviadas',
-                'mensaje' => 'Usuario creado y credenciales enviadas',
-                'usuario' => $user->load('roles', 'institucion'),
-            ], 201);
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            return response()->json([
-                'message' => 'Error al crear usuario',
-                'mensaje' => 'Error al crear usuario',
-                'error'   => $e->getMessage(),
-            ], 500);
         }
-    }
 
+        if ($roleName === 'juez') {
+            Juez::create([
+                'nombre'          => $user->nombre,
+                'cedula'          => $data['cedula_juez'] ?? ('SIN-CED-' . $user->id),
+                'sexo'            => $data['sexo_juez'] ?? 'N/D',
+                'telefono'        => $data['telefono_juez'] ?? null,
+                'correo'          => $user->email,
+                'grado_academico' => $data['grado_academico_juez'] ?? null,
+                'area_id'         => $data['area_id_juez'] ?? null,
+                'usuario_id'      => $user->id,
+            ]);
+        }
+
+        Mail::to($user->email)->send(new NewUserCredentialsMail($user, $plainPassword));
+
+        DB::commit();
+
+        return response()->json([
+            'message' => 'Usuario creado y credenciales enviadas',
+            'mensaje' => 'Usuario creado y credenciales enviadas',
+            'usuario' => $user->load('roles', 'institucion'),
+        ], 201);
+
+    } catch (\Throwable $e) {
+        DB::rollBack();
+
+        return response()->json([
+            'message' => 'Error al crear usuario',
+            'mensaje' => 'Error al crear usuario',
+            'error'   => $e->getMessage(),
+        ], 500);
+    }
+}
     public function show($id)
     {
         $u = Usuario::with(['roles:id,name', 'institucion:id,nombre'])->findOrFail($id);
@@ -115,7 +133,7 @@ class UserController extends Controller
         $data = $request->validate([
             'nombre'         => ['sometimes', 'string', 'max:255'],
             'email'          => ['sometimes', 'email', 'max:255', Rule::unique('usuarios', 'email')->ignore($user->id)],
-            'password'       => ['nullable', 'string', 'min:8'], // opcional
+            'password'       => ['nullable', 'string', 'min:8'], 
             'activo'         => ['boolean'],
             'institucion_id' => ['nullable', 'exists:instituciones,id'],
             'role'           => ['nullable', 'string'],
@@ -129,10 +147,8 @@ class UserController extends Controller
             } else {
                 unset($data['password']);
             }
-
             $user->update($data);
 
-            // Si vino role/rol_id por aquí, permite también sincronizar desde update
             if (!empty($data['role'])) {
                 $user->syncRoles([$data['role']]);
             } elseif (!empty($data['rol_id'])) {
@@ -185,19 +201,11 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * Lista de roles disponibles (por guard sanctum)
-     */
     public function rolesDisponibles()
     {
         return response()->json(Role::where('guard_name', 'sanctum')->pluck('name'));
     }
 
-    /**
-     * Actualiza (sincroniza) los roles del usuario.
-     * Ruta esperada: POST /api/admin/usuarios/{usuario}/roles
-     * Body: { "roles": ["admin"] }
-     */
     public function actualizarRoles(Request $request, Usuario $usuario)
     {
         $defaultGuard = Config::get('auth.defaults.guard', 'sanctum');
@@ -219,31 +227,14 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * Reset de contraseña (opcionalmente con password dado; si no, se genera).
-     * Ruta: PUT /api/admin/usuarios/{usuario}/password
-     * Body opcional: { "password": "NuevaSegura123" }
-     */
    public function resetPassword(Request $request, Usuario $usuario)
 {
-    // 1) Exigir contraseña explícita desde el front
     $data = $request->validate([
         'password' => ['required', 'string', 'min:8'],
     ]);
-
-    // 2) Guardar la contraseña ingresada (hasheada en BD)
     $usuario->forceFill([
         'password' => Hash::make($data['password']),
     ])->save();
-
-    // 3) (Opcional) enviar correo de aviso sin incluir el password en claro
-    // try {
-    //     Mail::to($usuario->email)->send(new PasswordChangedMail($usuario));
-    // } catch (\Throwable $e) {
-    //     Log::warning('Fallo enviando notificación: '.$e->getMessage());
-    // }
-
-    // 4) Respuesta limpia (no exponer contraseña)
     return response()->json([
         'message' => 'Contraseña actualizada',
         'mensaje' => 'Contraseña actualizada',

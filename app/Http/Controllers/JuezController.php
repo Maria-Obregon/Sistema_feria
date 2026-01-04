@@ -53,7 +53,6 @@ class JuezController extends Controller
         if ($request->boolean('con_proyectos')) {
             $res->getCollection()->transform(function ($juez) {
                 $juez->proyectos = $juez->asignaciones->map(function ($a) {
-                    // Si el proyecto fue borrado pero la asignación existe (caso borde)
                     if (!$a->proyecto) return null;
 
                     return [
@@ -64,12 +63,10 @@ class JuezController extends Controller
                         'tipo_eval' => $a->tipo_eval,
                         'asig_id'   => $a->id,
                         
-                        // 4. MAPEAR LA INSTITUCIÓN
                         'institucion' => $a->proyecto->institucion ? [
                             'nombre' => $a->proyecto->institucion->nombre
                         ] : null,
 
-                        // 5. MAPEAR LOS ESTUDIANTES
                         'estudiantes' => $a->proyecto->estudiantes->map(function($e){
                             return [
                                 'id'        => $e->id,
@@ -81,7 +78,7 @@ class JuezController extends Controller
                             ];
                         }),
                     ];
-                })->filter()->values(); // Filter quita los nulos si hubo
+                })->filter()->values(); 
                 unset($juez->asignaciones);
                 return $juez;
             });
@@ -90,7 +87,6 @@ class JuezController extends Controller
         return $res;
     }
 
-    // POST /api/jueces
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -108,7 +104,6 @@ class JuezController extends Controller
         return response()->json($juez, 201);
     }
 
-    // PUT /api/jueces/{juez}
     public function update(Request $request, Juez $juez)
     {
         $data = $request->validate([
@@ -126,7 +121,6 @@ class JuezController extends Controller
         return response()->json($juez);
     }
 
-    // DELETE /api/jueces/{juez}
     public function destroy(Juez $juez)
     {
         if ($juez->asignaciones()->exists()) {

@@ -1,34 +1,34 @@
 <template>
   <div class="p-6">
-<!-- Header -->
-<div class="flex justify-between items-center mb-6">
-  <div class="flex items-center gap-3">
-    <RouterLink
-      :to="{ name: 'admin.dashboard' }"
-      class="inline-flex items-center gap-2 px-3 py-2 border rounded-lg text-gray-700 hover:bg-gray-50"
-    >
-      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-      </svg>
-      Volver
-    </RouterLink>
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+      <div class="flex items-center gap-3">
+        <RouterLink
+          :to="{ name: 'admin.dashboard' }"
+          class="inline-flex items-center gap-2 px-3 py-2 border rounded-lg text-gray-700 hover:bg-gray-50"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+          Volver
+        </RouterLink>
 
-    <div>
-      <h1 class="text-2xl font-bold text-gray-900">Gestión de Instituciones</h1>
-      <p class="text-gray-600">Administra las instituciones del sistema</p>
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">Gestión de Instituciones</h1>
+          <p class="text-gray-600">Administra las instituciones del sistema</p>
+        </div>
+      </div>
+
+      <button
+        @click="abrirModal"
+        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        Nueva Institución
+      </button>
     </div>
-  </div>
-
-  <button
-    @click="abrirModal"
-    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
-  >
-    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-    </svg>
-    Nueva Institución
-  </button>
-</div>
 
     <!-- Filtros -->
     <div class="bg-white rounded-lg shadow-sm border p-4 mb-6">
@@ -112,7 +112,11 @@
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
-            <tr v-for="institucion in instituciones.data" :key="institucion.id" class="hover:bg-gray-50">
+            <tr
+              v-for="institucion in instituciones.data"
+              :key="institucion.id"
+              class="hover:bg-gray-50"
+            >
               <td class="px-6 py-4 whitespace-nowrap">
                 <div>
                   <div class="text-sm font-medium text-gray-900">{{ institucion.nombre }}</div>
@@ -123,12 +127,14 @@
                 {{ institucion.codigo_presupuestario }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
-                      :class="{
-                        'bg-blue-100 text-blue-800': institucion.tipo === 'publica',
-                        'bg-green-100 text-green-800': institucion.tipo === 'privada',
-                        'bg-purple-100 text-purple-800': institucion.tipo === 'subvencionada'
-                      }">
+                <span
+                  class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
+                  :class="{
+                    'bg-blue-100 text-blue-800': institucion.tipo === 'publica',
+                    'bg-green-100 text-green-800': institucion.tipo === 'privada',
+                    'bg-purple-100 text-purple-800': institucion.tipo === 'subvencionada'
+                  }"
+                >
                   {{ institucion.tipo.charAt(0).toUpperCase() + institucion.tipo.slice(1) }}
                 </span>
               </td>
@@ -153,18 +159,30 @@
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <div class="flex justify-end gap-2">
-                  <button @click="verDetalles(institucion)" class="text-blue-600 hover:text-blue-900" title="Ver detalles">
+                  <button
+                    @click="verDetalles(institucion)"
+                    class="text-blue-600 hover:text-blue-900"
+                    title="Ver detalles"
+                  >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                     </svg>
                   </button>
-                  <button @click="editarInstitucion(institucion)" class="text-indigo-600 hover:text-indigo-900" title="Editar">
+                  <button
+                    @click="editarInstitucion(institucion)"
+                    class="text-indigo-600 hover:text-indigo-900"
+                    title="Editar"
+                  >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                     </svg>
                   </button>
-                  <button @click="confirmarEliminar(institucion)" class="text-red-600 hover:text-red-900" title="Eliminar">
+                  <button
+                    @click="confirmarEliminar(institucion)"
+                    class="text-red-600 hover:text-red-900"
+                    title="Eliminar"
+                  >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1 1v3M4 7h16"></path>
                     </svg>
@@ -176,7 +194,10 @@
         </table>
 
         <!-- Paginación -->
-        <div v-if="instituciones.last_page > 1" class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+        <div
+          v-if="instituciones.last_page > 1"
+          class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6"
+        >
           <div class="flex items-center justify-between">
             <div class="flex-1 flex justify-between sm:hidden">
               <button
@@ -245,220 +266,232 @@
       </div>
     </div>
 
-    <!-- Modal Crear/Editar -->
-    <div v-if="mostrarModal" class="mt-6 bg-white rounded-lg shadow-lg border">
-      <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
-        <h3 class="text-lg font-medium text-gray-900">
-          {{ institucionSeleccionada ? 'Editar Institución' : 'Nueva Institución' }}
-        </h3>
-        <button @click="cerrarModal" class="text-gray-400 hover:text-gray-600">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
-        </button>
-      </div>
-
-      <div class="p-6">
-        <form @submit.prevent="guardarInstitucion" class="space-y-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-            <!-- Nombre -->
-            <div class="md:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Nombre de la Institución *</label>
-              <input
-                v-model="formulario.nombre"
-                type="text"
-                required
-                maxlength="200"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                :class="{ 'border-red-500': errores.nombre }"
-              />
-              <p v-if="errores.nombre" class="mt-1 text-sm text-red-600">{{ errores.nombre[0] }}</p>
-            </div>
-
-            <!-- Código Presupuestario -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Código Presupuestario *</label>
-              <input
-                v-model="formulario.codigo_presupuestario"
-                type="text"
-                required
-                maxlength="20"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                :class="{ 'border-red-500': errores.codigo_presupuestario }"
-              />
-              <p v-if="errores.codigo_presupuestario" class="mt-1 text-sm text-red-600">{{ errores.codigo_presupuestario[0] }}</p>
-            </div>
-
-            <!-- Modalidad (NUEVO) -->
-            <div>
-  <label class="block text-sm font-medium text-gray-700 mb-1">Modalidad *</label>
-  <select
-    v-model="formulario.modalidad"
-    required
-    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-    :class="{ 'border-red-500': errores.modalidad }"
-    :disabled="cargandoCatalogos"
-  >
-    <option value="">Seleccionar modalidad</option>
-    <option
-      v-for="m in modalidadesDB"
-      :key="'db-mod-' + m.id"
-      :value="m.nombre"
+    <!-- Modal Crear/Editar (overlay flotante) -->
+    <div
+      v-if="mostrarModal"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
     >
-      {{ m.nombre }}
-    </option>
-  </select>
-  <p v-if="errores.modalidad" class="mt-1 text-sm text-red-600">{{ errores.modalidad[0] }}</p>
-</div>
+      <!-- click afuera -->
+      <div class="absolute inset-0" @click="cerrarModal"></div>
 
+      <div
+        class="relative bg-white rounded-lg shadow-lg border w-full max-w-4xl max-h-[90vh] overflow-y-auto"
+      >
+        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+          <h3 class="text-lg font-medium text-gray-900">
+            {{ institucionSeleccionada ? 'Editar Institución' : 'Nueva Institución' }}
+          </h3>
+          <button @click="cerrarModal" class="text-gray-400 hover:text-gray-600">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
 
-            <!-- Tipo -->
-            <div>
-  <label class="block text-sm font-medium text-gray-700 mb-1">Tipo *</label>
-  <select
-    v-model="formulario.tipo"
-    required
-    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-    :class="{ 'border-red-500': errores.tipo }"
-    :disabled="cargandoCatalogos"
-  >
-    <option value="">Seleccionar tipo</option>
-    <option
-      v-for="t in tiposInstitucionDB"
-      :key="'db-tipo-' + t.id"
-      :value="t.nombre"
-    >
-      {{ t.nombre }}
-    </option>
-  </select>
-  <p v-if="errores.tipo" class="mt-1 text-sm text-red-600">{{ errores.tipo[0] }}</p>
-</div>
-
-
-            <!-- Circuito -->
-            <div class="md:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Circuito *</label>
-              <select
-                v-model="formulario.circuito_id"
-                required
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                :class="{ 'border-red-500': errores.circuito_id }"
-              >
-                <option value="">Seleccionar circuito</option>
-                <option v-for="circuito in circuitos" :key="circuito.id" :value="circuito.id">
-                  {{ circuito.nombre }} - {{ circuito.regional?.nombre }}
-                </option>
-              </select>
-              <p v-if="errores.circuito_id" class="mt-1 text-sm text-red-600">{{ errores.circuito_id[0] }}</p>
-            </div>
-
-            <!-- Teléfono -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-              <input
-                v-model="formulario.telefono"
-                type="tel"
-                maxlength="20"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                :class="{ 'border-red-500': errores.telefono }"
-              />
-              <p v-if="errores.telefono" class="mt-1 text-sm text-red-600">{{ errores.telefono[0] }}</p>
-            </div>
-
-            <!-- Email -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input
-                v-model="formulario.email"
-                type="email"
-                maxlength="100"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                :class="{ 'border-red-500': errores.email }"
-              />
-              <p v-if="errores.email" class="mt-1 text-sm text-red-600">{{ errores.email[0] }}</p>
-            </div>
-
-            <!-- Dirección -->
-            <div class="md:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
-              <textarea
-                v-model="formulario.direccion"
-                rows="3"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                :class="{ 'border-red-500': errores.direccion }"
-              ></textarea>
-              <p v-if="errores.direccion" class="mt-1 text-sm text-red-600">{{ errores.direccion[0] }}</p>
-            </div>
-
-            <!-- Límites -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Límite de Proyectos</label>
-              <input
-                v-model.number="formulario.limite_proyectos"
-                type="number"
-                min="1" max="50"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                :class="{ 'border-red-500': errores.limite_proyectos }"
-              />
-              <p class="mt-1 text-xs text-gray-500">Máximo 50 proyectos</p>
-              <p v-if="errores.limite_proyectos" class="mt-1 text-sm text-red-600">{{ errores.limite_proyectos[0] }}</p>
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Límite de Estudiantes</label>
-              <input
-                v-model.number="formulario.limite_estudiantes"
-                type="number"
-                min="1" max="200"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                :class="{ 'border-red-500': errores.limite_estudiantes }"
-              />
-              <p class="mt-1 text-xs text-gray-500">Máximo 200 estudiantes</p>
-              <p v-if="errores.limite_estudiantes" class="mt-1 text-sm text-red-600">{{ errores.limite_estudiantes[0] }}</p>
-            </div>
-
-            <!-- Estado -->
-            <div class="md:col-span-2">
-              <label class="flex items-center">
+        <div class="p-6">
+          <form @submit.prevent="guardarInstitucion" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Nombre -->
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nombre de la Institución *</label>
                 <input
-                  v-model="formulario.activo"
-                  type="checkbox"
-                  class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                  v-model="formulario.nombre"
+                  type="text"
+                  required
+                  maxlength="200"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  :class="{ 'border-red-500': errores.nombre }"
                 />
-                <span class="ml-2 text-sm text-gray-700">Institución activa</span>
-              </label>
-            </div>
+                <p v-if="errores.nombre" class="mt-1 text-sm text-red-600">{{ errores.nombre[0] }}</p>
+              </div>
 
-            <!-- Botones -->
-            <div class="md:col-span-2 flex justify-end gap-3 pt-6 border-t mt-8">
-              <button
-                type="button"
-                @click="cerrarModal"
-                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                :disabled="guardando"
-                class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <span v-if="guardando" class="flex items-center">
-                  <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Guardando...
-                </span>
-                <span v-else>
-                  {{ institucionSeleccionada ? 'Actualizar' : 'Crear' }} Institución
-                </span>
-              </button>
-            </div>
+              <!-- Código Presupuestario -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Código Presupuestario *</label>
+                <input
+                  v-model="formulario.codigo_presupuestario"
+                  type="text"
+                  required
+                  maxlength="20"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  :class="{ 'border-red-500': errores.codigo_presupuestario }"
+                />
+                <p v-if="errores.codigo_presupuestario" class="mt-1 text-sm text-red-600">
+                  {{ errores.codigo_presupuestario[0] }}
+                </p>
+              </div>
 
-          </div>
-        </form>
+              <!-- Modalidad -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Modalidad *</label>
+                <select
+                  v-model="formulario.modalidad"
+                  required
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  :class="{ 'border-red-500': errores.modalidad }"
+                  :disabled="cargandoCatalogos"
+                >
+                  <option value="">Seleccionar modalidad</option>
+                  <option
+                    v-for="m in modalidadesDB"
+                    :key="'db-mod-' + m.id"
+                    :value="m.nombre"
+                  >
+                    {{ m.nombre }}
+                  </option>
+                </select>
+                <p v-if="errores.modalidad" class="mt-1 text-sm text-red-600">{{ errores.modalidad[0] }}</p>
+              </div>
+
+              <!-- Tipo -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Tipo *</label>
+                <select
+                  v-model="formulario.tipo"
+                  required
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  :class="{ 'border-red-500': errores.tipo }"
+                  :disabled="cargandoCatalogos"
+                >
+                  <option value="">Seleccionar tipo</option>
+                  <option
+                    v-for="t in tiposInstitucionDB"
+                    :key="'db-tipo-' + t.id"
+                    :value="t.nombre"
+                  >
+                    {{ t.nombre }}
+                  </option>
+                </select>
+                <p v-if="errores.tipo" class="mt-1 text-sm text-red-600">{{ errores.tipo[0] }}</p>
+              </div>
+
+              <!-- Circuito -->
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Circuito *</label>
+                <select
+                  v-model="formulario.circuito_id"
+                  required
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  :class="{ 'border-red-500': errores.circuito_id }"
+                >
+                  <option value="">Seleccionar circuito</option>
+                  <option v-for="circuito in circuitos" :key="circuito.id" :value="circuito.id">
+                    {{ circuito.nombre }} - {{ circuito.regional?.nombre }}
+                  </option>
+                </select>
+                <p v-if="errores.circuito_id" class="mt-1 text-sm text-red-600">{{ errores.circuito_id[0] }}</p>
+              </div>
+
+              <!-- Teléfono -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                <input
+                  v-model="formulario.telefono"
+                  type="tel"
+                  maxlength="20"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  :class="{ 'border-red-500': errores.telefono }"
+                />
+                <p v-if="errores.telefono" class="mt-1 text-sm text-red-600">{{ errores.telefono[0] }}</p>
+              </div>
+
+              <!-- Email -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input
+                  v-model="formulario.email"
+                  type="email"
+                  maxlength="100"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  :class="{ 'border-red-500': errores.email }"
+                />
+                <p v-if="errores.email" class="mt-1 text-sm text-red-600">{{ errores.email[0] }}</p>
+              </div>
+
+              <!-- Dirección -->
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
+                <textarea
+                  v-model="formulario.direccion"
+                  rows="3"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  :class="{ 'border-red-500': errores.direccion }"
+                ></textarea>
+                <p v-if="errores.direccion" class="mt-1 text-sm text-red-600">{{ errores.direccion[0] }}</p>
+              </div>
+
+              <!-- Límites -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Límite de Proyectos</label>
+                <input
+                  v-model.number="formulario.limite_proyectos"
+                  type="number"
+                  min="1" max="50"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  :class="{ 'border-red-500': errores.limite_proyectos }"
+                />
+                <p class="mt-1 text-xs text-gray-500">Máximo 50 proyectos</p>
+                <p v-if="errores.limite_proyectos" class="mt-1 text-sm text-red-600">
+                  {{ errores.limite_proyectos[0] }}
+                </p>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Límite de Estudiantes</label>
+                <input
+                  v-model.number="formulario.limite_estudiantes"
+                  type="number"
+                  min="1" max="200"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  :class="{ 'border-red-500': errores.limite_estudiantes }"
+                />
+                <p class="mt-1 text-xs text-gray-500">Máximo 200 estudiantes</p>
+                <p v-if="errores.limite_estudiantes" class="mt-1 text-sm text-red-600">
+                  {{ errores.limite_estudiantes[0] }}
+                </p>
+              </div>
+
+              <!-- Estado -->
+              <div class="md:col-span-2">
+                <label class="flex items-center">
+                  <input
+                    v-model="formulario.activo"
+                    type="checkbox"
+                    class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                  />
+                  <span class="ml-2 text-sm text-gray-700">Institución activa</span>
+                </label>
+              </div>
+
+              <!-- Botones -->
+              <div class="md:col-span-2 flex justify-end gap-3 pt-6 border-t mt-8">
+                <button
+                  type="button"
+                  @click="cerrarModal"
+                  class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  :disabled="guardando"
+                  class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span v-if="guardando" class="flex items-center">
+                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Guardando...
+                  </span>
+                  <span v-else>
+                    {{ institucionSeleccionada ? 'Actualizar' : 'Crear' }} Institución
+                  </span>
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
 
@@ -482,7 +515,6 @@
   </div>
 </template>
 
-
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useToast } from '@/composables/useToast'
@@ -492,7 +524,7 @@ import ConfirmarEliminar from '@/components/ConfirmarEliminar.vue'
 
 const { mostrarToast } = useToast()
 
-// Estado
+// Estado tabla
 const cargando = ref(false)
 const instituciones = ref({
   data: [],
@@ -523,7 +555,7 @@ const guardando = ref(false)
 const errores = ref({})
 const formulario = ref({
   nombre: '',
-  modalidad: '',              // <-- NUEVO (se mantiene como texto)
+  modalidad: '',
   codigo_presupuestario: '',
   circuito_id: '',
   tipo: '',
@@ -544,23 +576,22 @@ const buscarInstituciones = () => {
   }, 500)
 }
 
-// Computed
+// Paginación visible
 const paginasVisibles = computed(() => {
   const paginas = []
   const actual = instituciones.value.current_page || 1
   const total = instituciones.value.last_page || 1
-  
+
   let inicio = Math.max(1, actual - 2)
   let fin = Math.min(total, actual + 2)
-  
+
   for (let i = inicio; i <= fin; i++) {
     paginas.push(i)
   }
-  
   return paginas
 })
 
-// Métodos
+// Cargar instituciones
 const cargarInstituciones = async (pagina = 1) => {
   try {
     cargando.value = true
@@ -575,7 +606,6 @@ const cargarInstituciones = async (pagina = 1) => {
 
     const { data } = await institucionesApi.listar(params)
 
-    // Normalización robusta (soporta arreglo plano o paginador Laravel)
     if (Array.isArray(data)) {
       instituciones.value = {
         data,
@@ -602,10 +632,10 @@ const cargarInstituciones = async (pagina = 1) => {
 }
 
 /* =========================
-   Catálogos desde BD (AGREGADO)
+   Catálogos desde BD
    ========================= */
-const modalidadesDB = ref([])        // [{ id, nombre }]
-const tiposInstitucionDB = ref([])   // [{ id, nombre }]
+const modalidadesDB = ref([])
+const tiposInstitucionDB = ref([])
 const cargandoCatalogos = ref(false)
 
 const cargarCatalogos = async () => {
@@ -615,7 +645,7 @@ const cargarCatalogos = async () => {
     modalidadesDB.value      = data?.modalidades ?? []
     tiposInstitucionDB.value = data?.tipos_institucion ?? []
   } catch (e) {
-    // opcional: console.warn(e)
+    // opcional
   } finally {
     cargandoCatalogos.value = false
   }
@@ -644,14 +674,14 @@ const cambiarPagina = (pagina) => {
 const abrirModal = () => {
   resetearFormulario()
   institucionSeleccionada.value = null
-  cargarCatalogos() // <-- AGREGADO
+  cargarCatalogos()
   mostrarModal.value = true
 }
 
 const editarInstitucion = (institucion) => {
   institucionSeleccionada.value = { ...institucion }
   cargarDatosFormulario(institucion)
-  cargarCatalogos() // <-- AGREGADO
+  cargarCatalogos()
   mostrarModal.value = true
 }
 
@@ -664,7 +694,7 @@ const cerrarModal = () => {
 const resetearFormulario = () => {
   formulario.value = {
     nombre: '',
-    modalidad: '',                // <-- AGREGADO: resetea modalidad también
+    modalidad: '',
     codigo_presupuestario: '',
     circuito_id: '',
     tipo: '',
@@ -699,33 +729,27 @@ const guardarInstitucion = async () => {
     guardando.value = true
     errores.value = {}
 
-    console.log('Guardando institución con datos:', formulario.value)
-
     let response
     if (institucionSeleccionada.value) {
-      console.log('Actualizando institución ID:', institucionSeleccionada.value.id)
-      response = await institucionesApi.actualizar(institucionSeleccionada.value.id, formulario.value)
+      response = await institucionesApi.actualizar(
+        institucionSeleccionada.value.id,
+        formulario.value
+      )
     } else {
-      console.log('Creando nueva institución')
       response = await institucionesApi.crear(formulario.value)
     }
 
-    console.log('Respuesta del servidor:', response.data)
-    
     const mensaje = response.data.mensaje || 'Institución guardada exitosamente'
     mostrarToast(mensaje, 'success')
-    
+
     cerrarModal()
     await cargarInstituciones()
-    
-    console.log('Institución guardada y lista actualizada')
   } catch (error) {
     console.error('Error completo al guardar institución:', error)
     console.error('Respuesta del error:', error.response?.data)
-    
+
     if (error.response?.status === 422) {
       errores.value = error.response.data.errors || {}
-      console.log('Errores de validación:', errores.value)
       mostrarToast('Por favor corrige los errores en el formulario', 'error')
     } else {
       const mensaje = error.response?.data?.mensaje || 'Error al guardar la institución'
@@ -772,21 +796,10 @@ const toggleActivo = async (institucion) => {
   }
 }
 
-const cerrarModales = () => {
-  mostrarModalCrear.value = false
-  mostrarModalEditar.value = false
-  institucionSeleccionada.value = null
-}
-
-const manejarGuardado = () => {
-  cerrarModales()
-  cargarInstituciones()
-}
-
 // Lifecycle
 onMounted(() => {
   cargarInstituciones()
   cargarCircuitos()
-  cargarCatalogos() // <-- AGREGADO
+  cargarCatalogos()
 })
 </script>

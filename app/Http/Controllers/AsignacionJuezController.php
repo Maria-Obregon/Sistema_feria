@@ -12,47 +12,58 @@ use Illuminate\Validation\Rule;
 
 class AsignacionJuezController extends Controller
 {
-    /**
-     * POST /api/proyectos/{proyecto}/asignar-jueces
-     */
-    public function assign(Request $request, Proyecto $proyecto)
-    {
-        $data = $request->validate([
-            'etapa_id' => ['required', 'integer', 'between:1,9'], // ajusta rango a tu catálogo
-            'tipo_eval' => ['required', Rule::in(['escrito', 'exposicion', 'integral'])],
-            'jueces' => ['required', 'array', 'min:1'],
-            'jueces.*.id' => ['required', 'integer', 'exists:jueces,id'],
-        ]);
+     public function assign(Request $request, Proyecto $proyecto)
+{
+    $data = $request->validate([
+        'etapa_id'   => ['required', 'integer', 'between:1,9'],
+        'tipo_eval'  => ['required', Rule::in(['escrito', 'exposicion', 'integral'])],
+        'jueces'     => ['required', 'array', 'min:1'],
+        'jueces.*.id'=> ['required', 'integer', 'exists:jueces,id'],
+    ]);
 
-        DB::transaction(function () use ($proyecto, $data) {
-            foreach ($data['jueces'] as $j) {
+    DB::transaction(function () use ($proyecto, $data) {
+        foreach ($data['jueces'] as $j) {
+
+            $juezId  = (int) $j['id'];
+            $etapaId = (int) $data['etapa_id'];
+            $tipo    = (string) $data['tipo_eval'];
+
+            // ✅ Si es integral: crear 2 asignaciones (escrito + exposicion)
+            // ✅ Si no: crear solo la asignación del tipo recibido
+            $tiposAGuardar = ($tipo === 'integral')
+                ? ['escrito', 'exposicion']
+                : [$tipo];
+
+            foreach ($tiposAGuardar as $t) {
+
+                // ✅ CLAVE ÚNICA incluye tipo_eval (y coincide con tu UNIQUE)
                 AsignacionJuez::updateOrCreate(
                     [
-                        'proyecto_id' => $proyecto->id,
-                        'juez_id' => (int) $j['id'],
-                        'etapa_id' => (int) $data['etapa_id'],
+                        'proyecto_id' => (int) $proyecto->id,
+                        'juez_id'     => $juezId,
+                        'etapa_id'    => $etapaId,
+                        'tipo_eval'   => $t,
                     ],
                     [
-                        'tipo_eval' => $data['tipo_eval'],
+                        'asignado_en' => now(),
                     ]
                 );
             }
-        });
+        }
+    });
 
-        $asigs = $proyecto->asignacionesJuez()
-            ->with(['juez:id,nombre,cedula,correo,telefono'])
-            ->orderBy('etapa_id')
-            ->get();
+    $asigs = $proyecto->asignacionesJuez()
+        ->with(['juez:id,nombre,cedula,correo,telefono'])
+        ->orderBy('etapa_id')
+        ->orderBy('tipo_eval')
+        ->get();
 
-        return response()->json([
-            'message' => 'Jueces asignados correctamente',
-            'asignaciones' => $asigs,
-        ]);
-    }
+    return response()->json([
+        'message'     => 'Jueces asignados correctamente',
+        'asignaciones'=> $asigs,
+    ]);
+}
 
-    /**
-     * GET /api/proyectos/{proyecto}/asignaciones
-     */
     public function listByProyecto(Proyecto $proyecto)
     {
         return $proyecto->asignacionesJuez()
@@ -62,9 +73,6 @@ class AsignacionJuezController extends Controller
 
     }
 
-    /**
-     * DELETE /api/asignaciones-jueces/{id}
-     */
     public function unassign($id)
     {
         $asig = AsignacionJuez::findOrFail($id);
@@ -73,9 +81,6 @@ class AsignacionJuezController extends Controller
         return response()->json(['message' => 'Asignación eliminada']);
     }
 
-    /**
-     * POST /api/asignaciones-jueces/{id}/finalizar
-     */
     public function finalizar(Request $request, $id)
     {
         $user = Auth::user();
@@ -113,10 +118,6 @@ class AsignacionJuezController extends Controller
             'finalizada_at' => $asig->finalizada_at,
         ]);
     }
-
-    /**
-     * POST /api/asignaciones-jueces/{id}/reabrir
-     */
     public function reabrir(Request $request, $id)
     {
         $user = Auth::user();

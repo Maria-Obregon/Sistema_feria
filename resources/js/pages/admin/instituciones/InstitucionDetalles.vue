@@ -1,142 +1,161 @@
 <template>
-  <div class="max-w-3xl mx-auto">
-    <h1 class="text-2xl font-bold mb-6">
-      {{ isEdit ? 'Editar institución' : 'Nueva institución' }}
-    </h1>
+  <div
+    v-if="visible && institucion"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+  >
+    <!-- Cerrar al hacer clic afuera -->
+    <div class="absolute inset-0" @click="cerrar"></div>
 
-    <div class="bg-white rounded-lg shadow-sm border p-6">
-      <form class="space-y-4" @submit.prevent="guardar">
-        <!-- Nombre -->
+    <!-- Cuadro de detalles -->
+    <div
+      class="relative bg-white rounded-lg shadow-lg border w-full max-w-3xl max-h-[90vh] overflow-y-auto"
+    >
+      <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+        <h3 class="text-lg font-medium text-gray-900">
+          Detalles de la institución
+        </h3>
+        <button @click="cerrar" class="text-gray-400 hover:text-gray-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-6">
+        <!-- Información general -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
-          <input v-model="form.nombre" class="w-full px-3 py-2 border rounded-md" />
+          <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+            Información general
+          </h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div>
+              <p class="text-gray-500">Nombre</p>
+              <p class="font-medium text-gray-900">{{ institucion.nombre }}</p>
+            </div>
+            <div>
+              <p class="text-gray-500">Código presupuestario</p>
+              <p class="font-medium text-gray-900">{{ institucion.codigo_presupuestario }}</p>
+            </div>
+            <div>
+              <p class="text-gray-500">Modalidad</p>
+              <p class="font-medium text-gray-900">{{ institucion.modalidad }}</p>
+            </div>
+            <div>
+              <p class="text-gray-500">Tipo</p>
+              <p class="font-medium text-gray-900">
+                {{ institucion.tipo
+                    ? institucion.tipo.charAt(0).toUpperCase() + institucion.tipo.slice(1)
+                    : '-' }}
+              </p>
+            </div>
+          </div>
         </div>
 
-        <!-- Tipo de institución -->
+        <!-- Ubicación -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Tipo *</label>
-          <select v-model="form.tipo_institucion_id"
-                  class="w-full px-3 py-2 border rounded-md"
-                  :disabled="cargandoCatalogos">
-            <option :value="null">Seleccionar tipo</option>
-            <option v-for="t in tiposInstitucion" :key="t.id" :value="t.id">
-              {{ t.nombre }}
-            </option>
-          </select>
+          <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+            Ubicación académica
+          </h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div>
+              <p class="text-gray-500">Circuito</p>
+              <p class="font-medium text-gray-900">
+                {{ institucion.circuito?.nombre || '-' }}
+              </p>
+            </div>
+            <div>
+              <p class="text-gray-500">Dirección Regional</p>
+              <p class="font-medium text-gray-900">
+                {{ institucion.circuito?.regional?.nombre || '-' }}
+              </p>
+            </div>
+          </div>
         </div>
 
-        <!-- Modalidad -->
+        <!-- Contacto -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Modalidad *</label>
-          <select v-model="form.modalidad_id"
-                  class="w-full px-3 py-2 border rounded-md"
-                  :disabled="cargandoCatalogos">
-            <option :value="null">Seleccionar modalidad</option>
-            <option v-for="m in modalidades" :key="m.id" :value="m.id">
-              {{ m.nombre }}
-            </option>
-          </select>
+          <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+            Contacto
+          </h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div>
+              <p class="text-gray-500">Teléfono</p>
+              <p class="font-medium text-gray-900">{{ institucion.telefono || '-' }}</p>
+            </div>
+            <div>
+              <p class="text-gray-500">Correo electrónico</p>
+              <p class="font-medium text-gray-900">{{ institucion.email || '-' }}</p>
+            </div>
+            <div class="md:col-span-2">
+              <p class="text-gray-500">Dirección</p>
+              <p class="font-medium text-gray-900 whitespace-pre-line">
+                {{ institucion.direccion || '-' }}
+              </p>
+            </div>
+          </div>
         </div>
 
-        <!-- Estado de error (opcional) -->
-        <p v-if="errorMsg" class="text-sm text-red-600">{{ errorMsg }}</p>
+        <!-- Límites y estado -->
+        <div>
+          <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+            Configuración
+          </h4>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm items-center">
+            <div>
+              <p class="text-gray-500">Límite de proyectos</p>
+              <p class="font-medium text-gray-900">
+                {{ institucion.limite_proyectos }} proyectos
+              </p>
+            </div>
+            <div>
+              <p class="text-gray-500">Límite de estudiantes</p>
+              <p class="font-medium text-gray-900">
+                {{ institucion.limite_estudiantes }} estudiantes
+              </p>
+            </div>
+            <div class="flex md:justify-end">
+              <span
+                class="inline-flex px-3 py-1 text-xs font-semibold rounded-full"
+                :class="institucion.activo
+                  ? 'bg-green-100 text-green-800'
+                  : 'bg-red-100 text-red-800'"
+              >
+                {{ institucion.activo ? 'Activa' : 'Inactiva' }}
+              </span>
+            </div>
+          </div>
+        </div>
 
-        <!-- Botones -->
-        <div class="pt-4 flex gap-2 justify-end">
-          <button type="button" @click="volver" class="px-3 py-2 border rounded-md hover:bg-gray-50" :disabled="guardando">
-            Cancelar
+        <!-- Botón cerrar -->
+        <div class="flex justify-end pt-4 border-t border-gray-200">
+          <button
+            type="button"
+            @click="cerrar"
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            Cerrar
           </button>
-          <button type="submit" class="px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-60" :disabled="guardando">
-            {{ guardando ? 'Guardando…' : (isEdit ? 'Actualizar' : 'Guardar') }}
-          </button>
         </div>
-      </form>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { institucionesApi } from '@/services/api'
-
-const route = useRoute()
-const router = useRouter()
-const isEdit = computed(() => !!route.params.id)
-
-const form = ref({
-  nombre: '',
-  tipo_institucion_id: null, // enviamos IDs
-  modalidad_id: null,        // enviamos IDs
+const props = defineProps({
+  visible: {
+    type: Boolean,
+    default: false
+  },
+  institucion: {
+    type: Object,
+    default: null
+  }
 })
 
-const modalidades = ref([])        // [{id,nombre}]
-const tiposInstitucion = ref([])   // [{id,nombre}]
-const cargandoCatalogos = ref(false)
-const cargandoInst = ref(false)
-const guardando = ref(false)
-const errorMsg = ref('')
+const emit = defineEmits(['cerrar'])
 
-const cargarCatalogos = async () => {
-  cargandoCatalogos.value = true
-  errorMsg.value = ''
-  try {
-    const { data } = await institucionesApi.obtenerCatalogos()
-    // vienen (idealmente) filtradas por activo desde el backend
-    modalidades.value      = data?.modalidades ?? []
-    tiposInstitucion.value = data?.tipos_institucion ?? []
-  } catch (e) {
-    errorMsg.value = e?.response?.data?.message || e?.message || 'Error cargando catálogos'
-  } finally {
-    cargandoCatalogos.value = false
-  }
+const cerrar = () => {
+  emit('cerrar')
 }
-
-const cargarInstitucion = async (id) => {
-  cargandoInst.value = true
-  errorMsg.value = ''
-  try {
-    const { data } = await institucionesApi.obtener(id)
-    form.value = {
-      nombre: data?.nombre ?? '',
-      // tomamos id directo si existe; si no, intentamos desde relaciones eager-loaded
-      tipo_institucion_id: data?.tipo_institucion_id ?? data?.tipo_institucion?.id ?? null,
-      modalidad_id: data?.modalidad_id ?? data?.modalidad?.id ?? null,
-    }
-  } catch (e) {
-    errorMsg.value = e?.response?.data?.message || e?.message || 'Error cargando la institución'
-  } finally {
-    cargandoInst.value = false
-  }
-}
-
-const guardar = async () => {
-  errorMsg.value = ''
-  if (!form.value.nombre) return (errorMsg.value = 'Ingresá el nombre')
-  if (!form.value.tipo_institucion_id) return (errorMsg.value = 'Seleccioná el tipo')
-  if (!form.value.modalidad_id) return (errorMsg.value = 'Seleccioná la modalidad')
-
-  guardando.value = true
-  try {
-    if (isEdit.value) {
-      await institucionesApi.actualizar(route.params.id, form.value)
-      alert('Institución actualizada')
-    } else {
-      await institucionesApi.crear(form.value)
-      alert('Institución creada')
-    }
-    volver()
-  } catch (e) {
-    errorMsg.value = e?.response?.data?.message || e?.message || 'Error al guardar'
-  } finally {
-    guardando.value = false
-  }
-}
-
-const volver = () => router.push({ name: 'instituciones.index' }) // ajusta a tu ruta
-
-onMounted(async () => {
-  await cargarCatalogos() // primero catálogos para tener opciones listas
-  if (isEdit.value) await cargarInstitucion(route.params.id)
-})
 </script>

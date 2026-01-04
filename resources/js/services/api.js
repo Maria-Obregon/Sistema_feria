@@ -183,11 +183,190 @@ export const proyectosApi = {
 // Ferias
 // =========================
 export const feriasApi = {
-  listar:     (params = {}) => api.get('/ferias', { params }),
-  crear:      (datos)       => api.post('/ferias', datos),
-  actualizar: (id, datos)   => api.put(`/ferias/${id}`, datos),
-  eliminar:   (id)          => api.delete(`/ferias/${id}`),
+  // Listado (usado en AdminFerias.vue como "list")
+  list:   (params = {}) => api.get('/ferias', { params }),
+  // Alias en español por si lo usas en otros lados
+  listar(params = {}) { 
+    return this.list(params)
+  },
+
+  // Catálogos para el formulario de ferias
+  formData() {
+    return api.get('/ferias/form-data')
+  },
+
+  // Crear feria
+  crear(datos) {
+    return api.post('/ferias', datos)
+  },
+  // Alias en inglés
+  create(datos) {
+    return this.crear(datos)
+  },
+
+  // Actualizar feria
+  actualizar(id, datos) {
+    return api.put(`/ferias/${id}`, datos)
+  },
+  update(id, datos) {
+    return this.actualizar(id, datos)
+  },
+
+  // Cambiar solo el estado (borrador/activa/cerrada)
+  cambiarEstado(id, estado) {
+    return api.patch(`/ferias/${id}/estado`, { estado })
+  },
+
+  // Eliminar feria
+  eliminar(id) {
+    return api.delete(`/ferias/${id}`)
+  },
+  destroy(id) {
+    return this.eliminar(id)
+  },
 }
+
+// =========================
+// Invitados de ferias
+// =========================
+export const invitadosApi = {
+  listar (feriaId, params = {}) {
+    return api.get(`/ferias/${feriaId}/invitados`, { params })
+  },
+
+  crear (feriaId, datos) {
+    return api.post(`/ferias/${feriaId}/invitados`, datos)
+  },
+
+  actualizar (id, datos) {
+    return api.put(`/invitados/${id}`, datos)
+  },
+
+  eliminar (id) {
+    return api.delete(`/invitados/${id}`)
+  },
+
+  // ↓↓↓ descarga de PDF
+  async generarCarta (id, nombre = 'Carta.pdf') {
+    const { data } = await api.get(`/invitados/${id}/carta`, {
+      responseType: 'blob'
+    })
+    downloadBlob(new Blob([data]), nombre)
+  },
+
+  async generarCarnet (id, nombre = 'Carnet.pdf') {
+    const { data } = await api.get(`/invitados/${id}/carnet`, {
+      responseType: 'blob'
+    })
+    downloadBlob(new Blob([data]), nombre)
+  }
+}
+
+// =========================
+// Colaboradores de ferias
+// =========================
+export const colaboradoresApi = {
+  // Listado de colaboradores de una feria
+  list(feriaId, params = {}) {
+    return api.get(`/ferias/${feriaId}/colaboradores`, { params })
+  },
+
+  listar(feriaId, params = {}) {
+    return this.list(feriaId, params)
+  },
+
+  // Crear colaborador
+  crear(feriaId, datos) {
+    return api.post(`/ferias/${feriaId}/colaboradores`, datos)
+  },
+  create(feriaId, datos) {
+    return this.crear(feriaId, datos)
+  },
+
+  // Actualizar colaborador
+  actualizar(id, datos) {
+    return api.put(`/colaboradores/${id}`, datos)
+  },
+  update(id, datos) {
+    return this.actualizar(id, datos)
+  },
+
+  // Eliminar colaborador
+  eliminar(id) {
+    return api.delete(`/colaboradores/${id}`)
+  },
+  destroy(id) {
+    return this.eliminar(id)
+  },
+
+  // Descargar carta
+  carta(id) {
+    return api.get(`/colaboradores/${id}/carta`, { responseType: 'blob' })
+  },
+
+  // Descargar carnet
+  carnet(id) {
+    return api.get(`/colaboradores/${id}/carnet`, { responseType: 'blob' })
+  },
+}
+
+// services/api.js
+export const reportesApi = {
+  // ===== Resumen de estadísticas =====
+  resumen: (params) => api.get('/reportes/resumen', { params }),
+
+  // ===== Listas por feria (para AdminReportesListado.vue) =====
+  listaEstudiantes: (params) =>
+    api.get('/reportes/feria-estudiantes', { params }),
+
+  listaJueces: (params) =>
+    api.get('/reportes/feria-jueces', { params }),
+
+  listaInvitados: (params) =>
+    api.get('/reportes/feria-invitados', { params }),
+
+  listaColaboradores: (params) =>
+    api.get('/reportes/feria-colaboradores', { params }),
+
+  // ===== Certificados individuales (uno por persona) =====
+  certificadoEstudiante: (id, extraConfig = {}) =>
+    api.get(`/reportes/certificados/estudiantes/${id}`, {
+      ...extraConfig,
+      responseType: 'blob',
+    }),
+
+  certificadoJuez: (id, extraConfig = {}) =>
+    api.get(`/reportes/certificados/jueces/${id}`, {
+      ...extraConfig,
+      responseType: 'blob',
+    }),
+
+  certificadoInvitado: (id, extraConfig = {}) =>
+    api.get(`/reportes/certificados/invitados/${id}`, {
+      ...extraConfig,
+      responseType: 'blob',
+    }),
+
+  certificadoColaborador: (id, extraConfig = {}) =>
+    api.get(`/reportes/certificados/colaboradores/${id}`, {
+      ...extraConfig,
+      responseType: 'blob',
+    }),
+  // ===== Listas de calificaciones (como ya las tenías) =====
+  califInformeEscrito: (params) =>
+    api.get('/reportes/calificaciones/informe-escrito', { params, responseType: 'blob' }),
+
+  califGeneral: (params) =>
+    api.get('/reportes/calificaciones/general', { params, responseType: 'blob' }),
+
+  califPorCategoria: (params) =>
+    api.get('/reportes/calificaciones/por-categoria', { params, responseType: 'blob' }),
+
+  califPorModalidad: (params) =>
+    api.get('/reportes/calificaciones/por-modalidad', { params, responseType: 'blob' }),
+}
+
+
 
 // =========================
 // Estudiantes

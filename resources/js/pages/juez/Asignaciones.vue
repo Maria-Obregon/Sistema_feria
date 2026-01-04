@@ -122,7 +122,6 @@
     </div>
   </div>
 </template>
-
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
@@ -152,93 +151,121 @@ const cargar = async () => {
   }
 }
 
+const normTipo = (t) => (t ?? '').toString().trim().toLowerCase()
 
 const proyectosAgrupados = computed(() => {
-    const grupos = {}
+  const grupos = {}
 
-    asignaciones.value.forEach(a => {
-        if (!grupos[a.proyecto_id]) {
-            grupos[a.proyecto_id] = {
-                proyecto_id: a.proyecto_id,
-                titulo: a.proyecto?.titulo || 'Sin Título',
-                categoria: a.proyecto?.categoria || 'Sin Categoría',
-                etapa_id: a.etapa_id,
-                escrito: null,
-                exposicion: null,
-                total_asignadas: 0,
-                total_finalizadas: 0
-            }
-        }
-        
+  asignaciones.value.forEach((a) => {
+    if (!grupos[a.proyecto_id]) {
+      grupos[a.proyecto_id] = {
+        proyecto_id: a.proyecto_id,
+        titulo: a.proyecto?.titulo || 'Sin Título',
+        categoria: a.proyecto?.categoria || 'Sin Categoría',
+        etapa_id: a.etapa_id,
 
-        if (a.tipo_eval === 'escrito') {
-            grupos[a.proyecto_id].escrito = a
-        } else if (a.tipo_eval === 'exposicion') {
-            grupos[a.proyecto_id].exposicion = a
-        }
+        // botones
+        escrito: null,
+        exposicion: null,
 
-        grupos[a.proyecto_id].total_asignadas++
-        if (a.finalizada) {
-            grupos[a.proyecto_id].total_finalizadas++
-        }
-    })
+        // conteos (para badge de estado del proyecto)
+        total_asignadas: 0,
+        total_finalizadas: 0
+      }
+    }
 
-    return Object.values(grupos).map(p => {
+    const tipo = normTipo(a.tipo_eval)
 
-        let estado = 'Pendiente'
-        if (p.total_finalizadas === p.total_asignadas && p.total_asignadas > 0) {
-            estado = 'Completado ✅'
-        } else if (p.total_finalizadas > 0) {
-            estado = 'En Progreso'
-        }
-        return { ...p, estado }
-    })
+    // ✅ Caso normal: viene una fila por tipo
+    if (tipo === 'escrito') {
+      grupos[a.proyecto_id].escrito = a
+    } else if (tipo === 'exposicion') {
+      grupos[a.proyecto_id].exposicion = a
+    }
+
+    // ✅ Caso integral/general: 1 sola asignación => mostramos ambos botones
+    else if (tipo === 'integral' || tipo === 'general') {
+      // Si el backend manda escrito_finalizada / exposicion_finalizada, se respetan.
+      // Si no, usamos a.finalizada como fallback.
+      const escritoFinal = !!(a.escrito_finalizada ?? a.finalizada)
+      const expoFinal = !!(a.exposicion_finalizada ?? a.finalizada)
+
+      grupos[a.proyecto_id].escrito = {
+        ...a,
+        tipo_eval: 'escrito',
+        finalizada: escritoFinal
+      }
+
+      grupos[a.proyecto_id].exposicion = {
+        ...a,
+        tipo_eval: 'exposicion',
+        finalizada: expoFinal
+      }
+    }
+
+    // fallback: si llega algo raro, al menos lo tratamos como escrito
+    else {
+      grupos[a.proyecto_id].escrito = { ...a, tipo_eval: 'escrito' }
+    }
+
+    grupos[a.proyecto_id].total_asignadas++
+    if (a.finalizada) {
+      grupos[a.proyecto_id].total_finalizadas++
+    }
+  })
+
+  return Object.values(grupos).map((p) => {
+    let estado = 'Pendiente'
+    if (p.total_finalizadas === p.total_asignadas && p.total_asignadas > 0) {
+      estado = 'Completado ✅'
+    } else if (p.total_finalizadas > 0) {
+      estado = 'En Progreso'
+    }
+    return { ...p, estado }
+  })
 })
-
 
 const proyectosFiltrados = computed(() => {
-    return proyectosAgrupados.value.filter(p => {
+  return proyectosAgrupados.value.filter((p) => {
+    if (p.estado === 'Completado ✅') return false
 
-        if (p.estado === 'Completado ✅') return false
+    const matchTexto =
+      p.titulo.toLowerCase().includes(busqueda.value.toLowerCase()) ||
+      p.proyecto_id.toString().includes(busqueda.value)
 
-        const matchTexto = 
-            p.titulo.toLowerCase().includes(busqueda.value.toLowerCase()) ||
-            p.proyecto_id.toString().includes(busqueda.value)
-        
-        const matchEtapa = filtroEtapa.value ? p.etapa_id.toString() === filtroEtapa.value : true
+    const matchEtapa = filtroEtapa.value
+      ? p.etapa_id.toString() === filtroEtapa.value
+      : true
 
-        return matchTexto && matchEtapa
-    })
+    return matchTexto && matchEtapa
+  })
 })
 
-
 const getStatusClass = (estado) => {
-    if (estado === 'Completado ✅') return 'bg-green-100 text-green-800'
-    if (estado === 'En Progreso') return 'bg-yellow-100 text-yellow-800'
-    return 'bg-gray-100 text-gray-600'
+  if (estado === 'Completado ✅') return 'bg-green-100 text-green-800'
+  if (estado === 'En Progreso') return 'bg-yellow-100 text-yellow-800'
+  return 'bg-gray-100 text-gray-600'
 }
 
 const getButtonClass = (finalizada) => {
-    if (finalizada) {
-        return 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-75'
-    }
-    return 'bg-white text-blue-600 border-blue-200 hover:bg-blue-50 hover:border-blue-300 shadow-sm'
+  if (finalizada) {
+    return 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-75'
+  }
+  return 'bg-white text-blue-600 border-blue-200 hover:bg-blue-50 hover:border-blue-300 shadow-sm'
 }
 
 const irACalificar = (asignacion) => {
+  if (asignacion.finalizada) return
 
-  if (asignacion.finalizada) {
-      return
-  }
-  
-  router.push({ 
-    name: 'juez.calificaciones', 
-    query: { 
-      proyectoId: asignacion.proyecto_id, 
+  router.push({
+    name: 'juez.calificaciones',
+    query: {
+       proyectoId: asignacion.proyecto_id,
       etapaId: asignacion.etapa_id,
       tipo_eval: asignacion.tipo_eval,
-      from: 'asignaciones' // Origen
-    } 
+      asignacionId: asignacion.id,     // 👈 clave
+      from: 'asignaciones',
+    }
   })
 }
 
@@ -254,5 +281,3 @@ const getEtapaNombre = (id) => {
 
 onMounted(cargar)
 </script>
-
-
