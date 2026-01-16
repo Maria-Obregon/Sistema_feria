@@ -48,21 +48,6 @@ class CoreCatalogSeeder extends Seeder
             'activo' => true,
         ]);
 
-        // Crear Instituciones de ejemplo
-         Institucion::create([
-            'nombre'               => 'Liceo de San José de Upala',
-            'modalidad'            => 'Académica',             
-            'codigo_presupuestario'=> 'LCR-001',
-            'regional_id'          => $regional1->id,           // FK a regionales
-            'circuito_id'          => $circuito3->id,            // FK a circuitos
-            'tipo'                 => 'publica',
-            'telefono'             => '2200-5177',
-            'email'                => 'lic.sanjosedeupala@mep.go.cr', 
-            'direccion'            => '75metros Noreste de la entrada Las Camelias, Barrio La Unión, San Jose de Upala',
-            'activo'               => true,
-            'limite_proyectos'     => 50,
-            'limite_estudiantes'   => 200,
-        ]);
 
         // Crear Áreas científicas
         Area::create(['nombre' => 'Biología']);

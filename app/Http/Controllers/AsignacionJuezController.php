@@ -12,7 +12,7 @@ use Illuminate\Validation\Rule;
 
 class AsignacionJuezController extends Controller
 {
-     public function assign(Request $request, Proyecto $proyecto)
+   public function assign(Request $request, Proyecto $proyecto)
 {
     $data = $request->validate([
         'etapa_id'   => ['required', 'integer', 'between:1,9'],
@@ -21,22 +21,47 @@ class AsignacionJuezController extends Controller
         'jueces.*.id'=> ['required', 'integer', 'exists:jueces,id'],
     ]);
 
-    DB::transaction(function () use ($proyecto, $data) {
+    $etapaId = (int) $data['etapa_id'];
+
+    $permitidos = DB::table('rubrica_asignacion')
+        ->where('categoria_id', (int) $proyecto->categoria_id)
+        ->where('etapa_id', $etapaId)
+        ->pluck('tipo_eval')
+        ->map(fn($t) => (string) $t)
+        ->unique()
+        ->values()
+        ->all();
+
+    if (empty($permitidos)) {
+        return response()->json([
+            'message' => 'Este proyecto no tiene rúbricas configuradas para esta etapa.'
+        ], 422);
+    }
+
+    $tipo = (string) $data['tipo_eval'];
+
+    if ($tipo === 'integral') {
+        $tiposAGuardar = array_values(array_intersect(['escrito', 'exposicion'], $permitidos));
+        if (empty($tiposAGuardar)) {
+            return response()->json([
+                'message' => 'Este proyecto no admite evaluación integral en esta etapa.'
+            ], 422);
+        }
+    } else {
+        if (!in_array($tipo, $permitidos, true)) {
+            return response()->json([
+                'message' => "Este proyecto no admite evaluación tipo '{$tipo}' en esta etapa."
+            ], 422);
+        }
+        $tiposAGuardar = [$tipo];
+    }
+
+    DB::transaction(function () use ($proyecto, $data, $tiposAGuardar, $etapaId) {
+
         foreach ($data['jueces'] as $j) {
-
-            $juezId  = (int) $j['id'];
-            $etapaId = (int) $data['etapa_id'];
-            $tipo    = (string) $data['tipo_eval'];
-
-            // ✅ Si es integral: crear 2 asignaciones (escrito + exposicion)
-            // ✅ Si no: crear solo la asignación del tipo recibido
-            $tiposAGuardar = ($tipo === 'integral')
-                ? ['escrito', 'exposicion']
-                : [$tipo];
+            $juezId = (int) $j['id'];
 
             foreach ($tiposAGuardar as $t) {
-
-                // ✅ CLAVE ÚNICA incluye tipo_eval (y coincide con tu UNIQUE)
                 AsignacionJuez::updateOrCreate(
                     [
                         'proyecto_id' => (int) $proyecto->id,
@@ -59,10 +84,11 @@ class AsignacionJuezController extends Controller
         ->get();
 
     return response()->json([
-        'message'     => 'Jueces asignados correctamente',
-        'asignaciones'=> $asigs,
+        'message'      => 'Jueces asignados correctamente',
+        'asignaciones' => $asigs,
     ]);
 }
+
 
     public function listByProyecto(Proyecto $proyecto)
     {

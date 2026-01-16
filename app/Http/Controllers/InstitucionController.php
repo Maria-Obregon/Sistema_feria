@@ -258,19 +258,22 @@ class InstitucionController extends Controller
             'institucion' => $institucion->fresh()->load(['circuito.regional','regional']),
         ]);
     }
-    public function destroy(Request $request, Institucion $institucion)
-    {
-        if ($request->user() && $request->user()->hasRole('comite_institucional')) {
-            return response()->json(['message' => 'No tienes permisos para eliminar instituciones.'], 403);
-        }
-
-        if ($institucion->proyectos()->exists() || $institucion->usuarios()->exists()) {
-            return response()->json(['message' => 'No se puede eliminar la institución porque tiene proyectos o usuarios asociados.'], 422);
-        }
-
-        $institucion->delete();
-        return response()->json(['mensaje' => 'Institución eliminada exitosamente']);
+   public function destroy(Request $request, Institucion $institucion)
+{
+    if ($request->user() && $request->user()->hasRole('comite_institucional')) {
+        return response()->json(['message' => 'No tienes permisos para eliminar instituciones.'], 403);
     }
+
+    DB::transaction(function () use ($institucion) {
+        $institucion->proyectos()->delete();
+        $institucion->usuarios()->delete();
+        $institucion->estudiantes()->delete(); 
+        $institucion->delete();
+    });
+
+    return response()->json(['mensaje' => 'Institución, proyectos y usuarios eliminados exitosamente']);
+}
+
 
     public function toggleActivo(Institucion $institucion)
     {

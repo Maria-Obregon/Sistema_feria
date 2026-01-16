@@ -16,9 +16,6 @@ class DatabaseSeeder extends Seeder
             CategoriasSeeder::class,
             ModalidadEtapaSeeder::class,
             PronafecytRubricasSeeder::class,
-            DemoJuezLoginSeeder::class,
-            DemoJuezAsignacionSeeder::class,
-            TestProyectosVariadosSeeder::class,
         ]);
     }
 }

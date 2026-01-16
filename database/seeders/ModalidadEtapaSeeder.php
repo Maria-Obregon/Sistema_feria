@@ -7,14 +7,11 @@ use Illuminate\Database\Seeder;
 use App\Models\Etapa;
 use App\Models\Modalidad;
 use App\Models\Nivel;
-use App\Models\TipoInstitucion; // 👈 AGREGADO
+use App\Models\TipoInstitucion;
 
 class ModalidadEtapaSeeder extends Seeder {
   public function run(): void {
 
-    /* ============================
-       Tipos de institución básicos
-       ============================ */
     TipoInstitucion::firstOrCreate(
       ['nombre' => 'publica'],
       ['activo' => true]
@@ -30,11 +27,6 @@ class ModalidadEtapaSeeder extends Seeder {
       ['activo' => true]
     );
 
-    /* ============================
-       Asociaciones Modalidad – Etapa
-       ============================ */
-
-    // Resuelve etapas
     $inst = Etapa::firstOrCreate(['nombre'=>'institucional']);
     $circ = Etapa::firstOrCreate(['nombre'=>'circuital']);
     $reg  = Etapa::firstOrCreate(['nombre'=>'regional']);
@@ -47,14 +39,11 @@ class ModalidadEtapaSeeder extends Seeder {
         if ($mod) $mod->etapas()->syncWithoutDetaching(collect($etapas)->pluck('id'));
       }
     };
-
-    // Preescolar: solo institucional
     $sync('Preescolar', [
       'Preescolar regular',
       'Preescolar Centros de educación especial',
     ], [$inst]);
 
-    // Primaria I/II (EGB/EPJA): institucional y (si tu regla lo permite) circuital
     $sync('Primaria I Ciclo de la Educación General Básica', [
       'Primaria académica regular','Primaria académica indígena','Primaria académica unidocente',
       'Primaria Educación Especial (Centros de Educación Especial y Aulas Integradas)',
@@ -73,19 +62,15 @@ class ModalidadEtapaSeeder extends Seeder {
       'Primaria académica nocturna',
     ], [$inst, $circ]);
 
-    // Secundaria III Ciclo (académica reg/ind): institucional, circuital, regional
     $sync('Secundaria III Ciclo de la Educación General', [
       'Secundaria académica regular','Secundaria académica indígena',
     ], [$inst, $circ, $reg]);
-
-    // Básica y Educación Diversificada
     $sync('Básica y Educación Diversificada', [
       'Secundaria científica y colegios humanísticos',
       'Secundaria técnica',
       'Secundaria Educación Especial (III y IV Ciclos Centros de Educación Especial y Plan Nacional)',
     ], [$inst, $circ, $reg]);
 
-    // Secundaria III Ciclo y Educación Diversificada EPJA
     $sync('Secundaria III Ciclo y Educación Diversificada de la Educación de Personas Jóvenes y Adultas (EPJA)', [
       'Secundaria académica nocturna',
       'II Nivel del Plan de Estudios de Educación de Adultos (CINDEA e IPEC)',

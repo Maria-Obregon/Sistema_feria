@@ -10,23 +10,15 @@ use App\Models\Modalidad;
 
 class CategoriasSeeder extends Seeder
 {
-    /**
-     * Normaliza cadenas: quita tildes, trim, colapsa espacios, pasa a minúsculas.
-     */
     private function norm(?string $s): string
     {
         $s = (string) $s;
-        $s = Str::of($s)->ascii();                 // quita tildes
+        $s = Str::of($s)->ascii();               
         $s = preg_replace('/\s+/', ' ', trim($s)); // colapsa espacios
-        return Str::lower($s);                     // minúsculas
+        return Str::lower($s);                     
     }
 
-    /**
-     * Mapa CATEGORÍA => lista de modalidades permitidas.
-     * Cada item puede ser:
-     *  - string: nombre de modalidad (se vinculan todas las que tengan ese nombre, en todos los niveles)
-     *  - ['nivel' => '...', 'modalidad' => '...']: vincula solo esa modalidad dentro de ese nivel
-     */
+  
     private array $cats = [
         'DEMOSTRACIONES CIENTÍFICAS Y TECNOLÓGICAS' => [
             ['nivel' => 'Secundaria III Ciclo de la Educación General', 'modalidad' => 'Secundaria académica regular'],
@@ -90,7 +82,6 @@ class CategoriasSeeder extends Seeder
         ],
     ];
 
-    // Si tu columna categorias.nivel es nullable, mantenelo en null
     private array $nivelesPorCategoria = [
         'DEMOSTRACIONES CIENTÍFICAS Y TECNOLÓGICAS' => null,
         'INVESTIGACIÓN CIENTÍFICA'                  => null,
@@ -102,7 +93,6 @@ class CategoriasSeeder extends Seeder
 
     public function run(): void
     {
-        // Cache de modalidades por NIVEL (normalizado) -> (mapa nombreModalidadNormalizado => id)
         $cachePorNivel = [];
         $niveles = Nivel::all(['id','nombre']);
         foreach ($niveles as $nivel) {
@@ -129,7 +119,6 @@ class CategoriasSeeder extends Seeder
 
             foreach ($items as $item) {
                 if (is_string($item)) {
-                    // Vincula TODAS las modalidades con ese nombre (en cualquier nivel)
                     $targetNorm = $this->norm($item);
                     foreach ($cachePorNivel as $nivelKey => $mapa) {
                         if (isset($mapa[$targetNorm])) {
@@ -141,7 +130,6 @@ class CategoriasSeeder extends Seeder
                     $modKey   = $this->norm($item['modalidad']);
 
                     if (!isset($cachePorNivel[$nivelKey])) {
-                        // Levanta listado disponible para ayudar a depurar
                         $disponibles = isset($cachePorNivel[$nivelKey]) ? implode(', ', array_keys($cachePorNivel[$nivelKey])) : '(sin modalidades para ese nivel)';
                         throw new \RuntimeException("Nivel no encontrado (o sin modalidades): {$item['nivel']} (cat: {$catNombre}). Disponibles: {$disponibles}");
                     }

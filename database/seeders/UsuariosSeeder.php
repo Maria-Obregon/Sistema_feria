@@ -13,7 +13,6 @@ class UsuariosSeeder extends Seeder
      */
     public function run(): void
     {
-        // Admin
         $admin = Usuario::create([
             'nombre' => 'Administrador General',
             'email' => 'admin@feria.test',
@@ -22,33 +21,5 @@ class UsuariosSeeder extends Seeder
         ]);
         $admin->assignRole('admin');
 
-        // Comité Institucional
-        $comite = Usuario::create([
-            'nombre' => 'Comité Institucional',
-            'email' => 'comite@feria.test',
-            'password' => Hash::make('Comite123!'),
-            'institucion_id' => 1, // cambia al ID real de la institución
-            'activo' => true,
-        ]);
-        $comite->assignRole('comite_institucional');
-
-        // Juez
-        $juez = Usuario::create([
-            'nombre' => 'Juez de Feria',
-            'email' => 'juez@feria.test',
-            'password' => Hash::make('Juez123!'),
-            'activo' => true,
-        ]);
-        $juez->assignRole('juez');
-
-        // Estudiante
-        $estudiante = Usuario::create([
-            'nombre' => 'Estudiante Feria',
-            'email' => 'estudiante@feria.test',
-            'password' => Hash::make('Estudiante123!'),
-            'institucion_id' => 1, // cambia al ID real de la institución
-            'activo' => true,
-        ]);
-        $estudiante->assignRole('estudiante');
     }
 }
